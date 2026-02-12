@@ -57,11 +57,10 @@ export default function Step06_ExistingCoverage({ formData, updateField }) {
                                             updateField('life_policy_name_custom', "");
                                         }
                                     }}
-                                    className={`py-3 md:py-4 rounded-xl md:rounded-2xl border transition-all duration-200 font-bold text-sm ${
-                                        formData.has_life_insurance === val 
-                                            ? 'bg-pink-500/20 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.3)]' 
-                                            : 'hover:bg-opacity-10'
-                                    }`}
+                                    className={`py-3 md:py-4 rounded-xl md:rounded-2xl border transition-all duration-200 font-bold text-sm ${formData.has_life_insurance === val
+                                        ? 'bg-pink-500/20 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.3)]'
+                                        : 'hover:bg-opacity-10'
+                                        }`}
                                     style={formData.has_life_insurance !== val ? {
                                         backgroundColor: 'var(--bg-auth-input)',
                                         borderColor: 'var(--border-auth-card)',
@@ -85,7 +84,14 @@ export default function Step06_ExistingCoverage({ formData, updateField }) {
                                 >
                                     <div className="flex justify-between items-end">
                                         <span className="text-[10px] md:text-xs font-bold uppercase" style={{ color: 'var(--text-auth-placeholder)' }}>Coverage Amount</span>
-                                        <span className="text-lg md:text-xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{formatCurrency((formData.existing_life_cover_val || 0) / 100000)}</span>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-lg md:text-xl font-black" style={{ color: formData.existing_life_cover_val > 0 ? 'var(--text-auth-primary)' : '#ef4444' }}>
+                                                {formatCurrency((formData.existing_life_cover_val || 0) / 100000)}
+                                            </span>
+                                            {formData.existing_life_cover_val === 0 && (
+                                                <span className="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Please select an amount</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <input
                                         type="range"
@@ -148,11 +154,10 @@ export default function Step06_ExistingCoverage({ formData, updateField }) {
                                             updateField('health_policy_name_custom', "");
                                         }
                                     }}
-                                    className={`py-3 md:py-4 rounded-xl md:rounded-2xl border transition-all duration-200 font-bold text-sm ${
-                                        formData.has_health_insurance === val 
-                                            ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' 
-                                            : 'hover:bg-opacity-10'
-                                    }`}
+                                    className={`py-3 md:py-4 rounded-xl md:rounded-2xl border transition-all duration-200 font-bold text-sm ${formData.has_health_insurance === val
+                                        ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                                        : 'hover:bg-opacity-10'
+                                        }`}
                                     style={formData.has_health_insurance !== val ? {
                                         backgroundColor: 'var(--bg-auth-input)',
                                         borderColor: 'var(--border-auth-card)',
@@ -184,11 +189,10 @@ export default function Step06_ExistingCoverage({ formData, updateField }) {
                                                 <button
                                                     key={src}
                                                     onClick={() => updateField('health_source', src)}
-                                                    className={`py-2 rounded-xl border text-[9px] md:text-[11px] font-black uppercase tracking-tighter transition-all ${
-                                                        formData.health_source === src 
-                                                            ? 'bg-blue-500/20 border-blue-500' 
-                                                            : 'hover:bg-opacity-10'
-                                                    }`}
+                                                    className={`py-2 rounded-xl border text-[9px] md:text-[11px] font-black uppercase tracking-tighter transition-all ${formData.health_source === src
+                                                        ? 'bg-blue-500/20 border-blue-500'
+                                                        : 'hover:bg-opacity-10'
+                                                        }`}
                                                     style={formData.health_source !== src ? {
                                                         backgroundColor: 'var(--bg-auth-input)',
                                                         borderColor: 'var(--border-auth-card)',
@@ -209,7 +213,14 @@ export default function Step06_ExistingCoverage({ formData, updateField }) {
                                             <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2" style={{ color: 'var(--text-auth-placeholder)' }}>
                                                 <Shield className="w-3 h-3" /> Cover Amount
                                             </span>
-                                            <span className="text-xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{formatCurrency((formData.existing_health_cover_val || 0) / 100000)}</span>
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-xl font-black" style={{ color: formData.existing_health_cover_val > 0 ? 'var(--text-auth-primary)' : '#ef4444' }}>
+                                                    {formatCurrency((formData.existing_health_cover_val || 0) / 100000)}
+                                                </span>
+                                                {formData.existing_health_cover_val === 0 && (
+                                                    <span className="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Please select an amount</span>
+                                                )}
+                                            </div>
                                         </div>
                                         <input
                                             type="range"
@@ -255,11 +266,10 @@ export default function Step06_ExistingCoverage({ formData, updateField }) {
                                                             updateField('parents_health_cover_val', 0);
                                                         }
                                                     }}
-                                                    className={`py-3 rounded-xl border font-bold transition-all ${
-                                                        formData.parents_covered === val 
-                                                            ? 'bg-emerald-500/20 border-emerald-500' 
-                                                            : 'hover:bg-opacity-10'
-                                                    }`}
+                                                    className={`py-3 rounded-xl border font-bold transition-all ${formData.parents_covered === val
+                                                        ? 'bg-emerald-500/20 border-emerald-500'
+                                                        : 'hover:bg-opacity-10'
+                                                        }`}
                                                     style={formData.parents_covered !== val ? {
                                                         backgroundColor: 'var(--bg-auth-input)',
                                                         borderColor: 'var(--border-auth-card)',
@@ -283,7 +293,14 @@ export default function Step06_ExistingCoverage({ formData, updateField }) {
                                                 >
                                                     <div className="flex justify-between items-end">
                                                         <span className="text-xs font-bold uppercase" style={{ color: 'var(--text-auth-placeholder)' }}>Parents' Cover Amount</span>
-                                                        <span className="text-xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{formatCurrency((formData.parents_health_cover_val || 0) / 100000)}</span>
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="text-xl font-black" style={{ color: formData.parents_health_cover_val > 0 ? 'var(--text-auth-primary)' : '#ef4444' }}>
+                                                                {formatCurrency((formData.parents_health_cover_val || 0) / 100000)}
+                                                            </span>
+                                                            {formData.parents_health_cover_val === 0 && (
+                                                                <span className="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Please select an amount</span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <input
                                                         type="range"

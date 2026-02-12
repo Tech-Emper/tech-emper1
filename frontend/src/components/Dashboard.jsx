@@ -70,7 +70,7 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                     style={view !== 'gaps' ? { color: 'var(--text-auth-muted)' } : {}}
                                     title="Gap Analysis View"
                                 >
-                                    <LayoutGrid className="w-4 h-4" />
+                                    <List className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => setView('products')}
@@ -78,7 +78,7 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                     style={view !== 'products' ? { color: 'var(--text-auth-muted)' } : {}}
                                     title="Product Selection View"
                                 >
-                                    <List className="w-4 h-4" />
+                                    <LayoutGrid className="w-4 h-4" />
                                 </button>
                             </div>
                         )}
@@ -433,8 +433,8 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                 <button
                     onClick={onUpdatePlan}
                     className={`flex-1 px-4 py-3 md:px-6 md:py-3 rounded-xl font-bold text-sm md:text-base flex items-center justify-center transition-all group active:scale-95 ${isPhase2Incomplete
-                            ? 'border'
-                            : 'bg-white text-brand-dark shadow-xl hover:shadow-white/10'
+                        ? 'border'
+                        : 'bg-white text-brand-dark shadow-xl hover:shadow-white/10'
                         }`}
                     style={isPhase2Incomplete ? {
                         backgroundColor: 'var(--bg-auth-input)',

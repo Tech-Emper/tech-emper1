@@ -158,19 +158,63 @@ export default function Wizard() {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const isStepValid = () => {
-        if (step === 1) {
+    const isStepValid = (stepToCheck = step) => {
+        if (stepToCheck === 1) {
             return (
-                formData.first_name.trim() !== "" &&
+                formData.first_name?.trim() !== "" &&
                 formData.city !== "" &&
-                formData.mobile.length === 10 &&
+                formData.mobile?.length === 10 &&
                 formData.gender !== ""
             );
         }
-        if (step === 2) {
+        if (stepToCheck === 2) {
             return formData.dob !== "";
         }
+        if (stepToCheck === 3) {
+            return formData.career_stage !== "";
+        }
+        if (stepToCheck === 4) {
+            return (
+                formData.income_level !== "" &&
+                formData.company_name?.trim() !== "" &&
+                formData.industry_type !== ""
+            );
+        }
+        if (stepToCheck === 5) {
+            return (
+                formData.smoking_status !== "" &&
+                formData.lifestyle !== ""
+            );
+        }
+        if (stepToCheck === 7) {
+            const lifeValid = !formData.has_life_insurance || (formData.existing_life_cover_val > 0);
+            const healthValid = !formData.has_health_insurance || (formData.existing_health_cover_val > 0);
+            const parentsValid = !formData.parents_covered || (formData.parents_health_cover_val > 0);
+            return lifeValid && healthValid && parentsValid;
+        }
+        if (stepToCheck === 8) {
+            const lifeValid = !formData.has_life_insurance || (
+                (formData.life_provider === 'Other' ? formData.life_provider_custom?.trim() : formData.life_provider) &&
+                (formData.life_policy_name === 'Other' ? formData.life_policy_name_custom?.trim() : formData.life_policy_name)
+            );
+            const healthValid = !formData.has_health_insurance || (
+                (formData.health_provider === 'Other' ? formData.health_provider_custom?.trim() : formData.health_provider) &&
+                (formData.health_policy_name === 'Other' ? formData.health_policy_name_custom?.trim() : formData.health_policy_name)
+            );
+            return lifeValid && healthValid;
+        }
         return true;
+    };
+
+    const canGoToStep = (targetStep) => {
+        // Can always go back
+        if (targetStep <= step) return true;
+
+        // Cannot jump forward more than one step
+        if (targetStep > step + 1) return false;
+
+        // Can only go to the next step if the current one is valid
+        return isStepValid(step);
     };
 
     const fetchRecommendation = async () => {
@@ -305,9 +349,9 @@ export default function Wizard() {
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
                             className="bg-brand-dark border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center"
-                            style={{ 
-                                backgroundColor: 'var(--bg-auth-card)', 
-                                borderColor: 'var(--border-auth-card)' 
+                            style={{
+                                backgroundColor: 'var(--bg-auth-card)',
+                                borderColor: 'var(--border-auth-card)'
                             }}
                         >
                             <div className="w-16 h-16 bg-brand-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -327,7 +371,7 @@ export default function Wizard() {
                                 <button
                                     onClick={handleStartOver}
                                     className="w-full py-4 border rounded-2xl font-bold transition-colors"
-                                    style={{ 
+                                    style={{
                                         backgroundColor: 'var(--bg-auth-input)',
                                         borderColor: 'var(--border-auth-card)',
                                         color: 'var(--text-auth-muted)'
@@ -342,56 +386,67 @@ export default function Wizard() {
             </AnimatePresence>
 
             {/* Progress Header */}
-            <div className="mb-6 md:mb-10">
-                {/* Desktop Stepper (Icon-based) */}
-                <div className="hidden md:flex justify-between items-center relative pb-4">
-                    <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10 -translate-y-1/2 rounded-full"></div>
-                    {steps.map((s) => (
-                        <button
-                            key={s.id}
-                            onClick={() => !loading && setStep(s.id)}
-                            disabled={loading}
-                            className="flex flex-col items-center gap-2 relative z-10 group cursor-pointer disabled:cursor-not-allowed"
-                        >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 group-hover:scale-110 ${step >= s.id
-                                ? 'bg-brand-accent border-brand-accent text-brand-dark shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                                : `border-2 ${themeStyles.cardBorder.replace('border-', 'border-')} ${themeStyles.textMuted} group-hover:border-opacity-40`
-                                }`} 
-                                style={step < s.id ? { 
-                                    backgroundColor: 'var(--bg-auth-main)',
-                                    borderColor: 'var(--border-auth-card)',
-                                    color: 'var(--text-auth-placeholder)'
-                                } : {}}
+            {view !== 'dashboard' && (
+                <div className="mb-6 md:mb-10">
+                    {/* Desktop Stepper (Icon-based) */}
+                    <div className="hidden md:flex justify-between items-center relative pb-4">
+                        <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10 -translate-y-1/2 rounded-full"></div>
+                        {steps.map((s) => (
+                            <button
+                                key={s.id}
+                                onClick={() => {
+                                    if (!loading) {
+                                        if (canGoToStep(s.id)) {
+                                            setStep(s.id);
+                                            saveProgress(s.id);
+                                        } else {
+                                            alert(`Please complete the current step before moving to ${s.title}.`);
+                                        }
+                                    }
+                                }}
+                                disabled={loading}
+                                className={`flex flex-col items-center gap-2 relative z-10 group cursor-pointer disabled:cursor-not-allowed ${!canGoToStep(s.id) ? 'opacity-50' : ''}`}
                             >
-                                {step > s.id ? <Check className="w-5 h-5" /> : s.icon}
-                            </div>
-                            <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${step >= s.id ? 'text-brand-accent' : ''}`}
-                                style={step < s.id ? { color: 'var(--text-auth-placeholder)' } : {}}
-                            >
-                                {s.title}
-                            </span>
-                        </button>
-                    ))}
-                </div>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${canGoToStep(s.id) ? 'group-hover:scale-110' : ''} ${step >= s.id
+                                    ? 'bg-brand-accent border-brand-accent text-brand-dark shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                                    : `border-2 ${themeStyles.cardBorder.replace('border-', 'border-')} ${themeStyles.textMuted} group-hover:border-opacity-40`
+                                    }`}
+                                    style={step < s.id ? {
+                                        backgroundColor: 'var(--bg-auth-main)',
+                                        borderColor: 'var(--border-auth-card)',
+                                        color: 'var(--text-auth-placeholder)'
+                                    } : {}}
+                                >
+                                    {step > s.id ? <Check className="w-5 h-5" /> : s.icon}
+                                </div>
+                                <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${step >= s.id ? 'text-brand-accent' : ''}`}
+                                    style={step < s.id ? { color: 'var(--text-auth-placeholder)' } : {}}
+                                >
+                                    {s.title}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
 
-                {/* Mobile Stepper (Compact Progress Bar) */}
-                <div className="md:hidden space-y-3">
-                    <div className="flex justify-between items-end mb-1">
-                        <span className="text-[10px] font-black text-brand-accent uppercase tracking-[0.2em]">
-                            Progress: Step {step} of {steps.length}
-                        </span>
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
-                            {steps[step - 1].title}
-                        </span>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-auth-input)' }}>
-                        <div
-                            className="h-full bg-brand-accent transition-all duration-500 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]"
-                            style={{ width: `${(step / steps.length) * 100}%` }}
-                        />
+                    {/* Mobile Stepper (Compact Progress Bar) */}
+                    <div className="md:hidden space-y-3">
+                        <div className="flex justify-between items-end mb-1">
+                            <span className="text-[10px] font-black text-brand-accent uppercase tracking-[0.2em]">
+                                Progress: Step {step} of {steps.length}
+                            </span>
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
+                                {steps[step - 1].title}
+                            </span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-auth-input)' }}>
+                            <div
+                                className="h-full bg-brand-accent transition-all duration-500 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                style={{ width: `${(step / steps.length) * 100}%` }}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Dashboard View */}
             {view === 'dashboard' ? (
@@ -406,12 +461,12 @@ export default function Wizard() {
                 </div>
             ) : (
                 /* Wizard Card */
-                <div className="backdrop-blur-xl rounded-3xl p-5 md:p-10 shadow-2xl overflow-hidden relative" 
-                     style={{ 
-                         backgroundColor: 'var(--bg-auth-card)', 
-                         borderColor: 'var(--border-auth-card)',
-                         border: '1px solid'
-                     }}>
+                <div className="backdrop-blur-xl rounded-3xl p-5 md:p-10 shadow-2xl overflow-hidden relative"
+                    style={{
+                        backgroundColor: 'var(--bg-auth-card)',
+                        borderColor: 'var(--border-auth-card)',
+                        border: '1px solid'
+                    }}>
 
                     {/* Decorative glow inside card */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-[80px] -z-10 pointer-events-none" />
@@ -430,8 +485,8 @@ export default function Wizard() {
 
                     {/* Navigation Buttons */}
                     {step < 9 && (
-                        <div className="flex justify-between items-center pt-6 md:pt-8 mt-6 md:mt-8" 
-                             style={{ borderTopColor: 'var(--border-auth-card)', borderTopWidth: '1px' }}>
+                        <div className="flex justify-between items-center pt-6 md:pt-8 mt-6 md:mt-8"
+                            style={{ borderTopColor: 'var(--border-auth-card)', borderTopWidth: '1px' }}>
                             <button
                                 onClick={handleBack}
                                 disabled={step === 1}

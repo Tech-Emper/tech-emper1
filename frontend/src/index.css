@@ -185,3 +185,16 @@ body {
   background-color: var(--bg-auth-main);
   color: var(--text-auth-primary);
 }
+
+/* Global Pointer Cursor for all interactive elements */
+button,
+select,
+input[type="date"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+option,
+.cursor-pointer,
+[role="button"] {
+  cursor: pointer !important;
+}

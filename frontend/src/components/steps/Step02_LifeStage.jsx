@@ -45,11 +45,10 @@ export default function Step02_LifeStage({ formData, updateField }) {
                             <button
                                 key={status}
                                 onClick={() => handleMaritalStatus(status)}
-                                className={`p-2.5 md:p-4 rounded-xl border transition-all duration-200 ${
-                                    formData.marital_status === status 
-                                        ? 'bg-brand-accent/20 border-brand-accent' 
+                                className={`p-2.5 md:p-4 rounded-xl border transition-all duration-200 ${formData.marital_status === status
+                                        ? 'bg-brand-accent/20 border-brand-accent'
                                         : 'hover:bg-opacity-10'
-                                }`}
+                                    }`}
                                 style={formData.marital_status === status ? {
                                     color: 'var(--text-auth-primary)'
                                 } : {
@@ -93,6 +92,7 @@ export default function Step02_LifeStage({ formData, updateField }) {
                     <input
                         type="date"
                         value={formData.dob || ""}
+                        max={new Date().toISOString().split('T')[0]}
                         onChange={(e) => updateField('dob', e.target.value)}
                         className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-brand-accent outline-none transition-all"
                         style={{
@@ -106,7 +106,7 @@ export default function Step02_LifeStage({ formData, updateField }) {
                     {age !== null && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-500 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-center">
                             <p className="text-sm font-medium" style={{ color: 'var(--text-success)' }}>
-                                At {age}, you've got <span className="font-black underline">{Math.max(0, 65 - age)} years</span> of earning potential to protect! 💰
+                                At {age}, you've got <span className="font-black underline">{Math.min(47, Math.max(0, 65 - age))} years</span> of earning potential to protect! 💰
                             </p>
                         </div>
                     )}

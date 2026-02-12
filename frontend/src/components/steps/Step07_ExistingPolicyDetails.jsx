@@ -87,10 +87,11 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                         <select
                                             value={formData.life_provider || ""}
                                             onChange={handleLifeProviderChange}
-                                            className="w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none focus:border-brand-accent transition-colors"
+                                            className={`w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none transition-colors ${formData.has_life_insurance && !formData.life_provider ? 'border-red-500' : 'focus:border-brand-accent'
+                                                }`}
                                             style={{
                                                 backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
+                                                borderColor: formData.has_life_insurance && !formData.life_provider ? '#ef4444' : 'var(--border-auth-card)',
                                                 color: 'var(--text-auth-primary)'
                                             }}
                                         >
@@ -101,18 +102,22 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-auth-placeholder)' }} />
                                     </div>
                                     {formData.life_provider === 'Other' && (
-                                        <input
-                                            type="text"
-                                            placeholder="Type Provider Name"
-                                            value={formData.life_provider_custom || ""}
-                                            onChange={(e) => updateField('life_provider_custom', e.target.value)}
-                                            className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-brand-accent transition-colors mt-2"
-                                            style={{
-                                                backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
-                                                color: 'var(--text-auth-primary)'
-                                            }}
-                                        />
+                                        <div className="space-y-1">
+                                            <input
+                                                type="text"
+                                                placeholder="Type Provider Name"
+                                                value={formData.life_provider_custom || ""}
+                                                onChange={(e) => updateField('life_provider_custom', e.target.value)}
+                                                className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition-colors mt-2 ${!formData.life_provider_custom?.trim() ? 'border-red-500' : 'focus:border-brand-accent'
+                                                    }`}
+                                                style={{
+                                                    backgroundColor: 'var(--bg-auth-input)',
+                                                    borderColor: !formData.life_provider_custom?.trim() ? '#ef4444' : 'var(--border-auth-card)',
+                                                    color: 'var(--text-auth-primary)'
+                                                }}
+                                            />
+                                            {!formData.life_provider_custom?.trim() && <p className="text-[10px] text-red-500 font-bold uppercase px-1">Provider name is required</p>}
+                                        </div>
                                     )}
                                 </div>
 
@@ -123,10 +128,11 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                             value={formData.life_policy_name || ""}
                                             onChange={(e) => updateField('life_policy_name', e.target.value)}
                                             disabled={formData.life_provider === 'Other'}
-                                            className="w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none focus:border-brand-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className={`w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${formData.has_life_insurance && formData.life_provider && !formData.life_policy_name ? 'border-red-500' : 'focus:border-brand-accent'
+                                                }`}
                                             style={{
                                                 backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
+                                                borderColor: (formData.has_life_insurance && formData.life_provider && !formData.life_policy_name) ? '#ef4444' : 'var(--border-auth-card)',
                                                 color: 'var(--text-auth-primary)'
                                             }}
                                         >
@@ -139,18 +145,22 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-auth-placeholder)' }} />
                                     </div>
                                     {formData.life_policy_name === 'Other' && (
-                                        <input
-                                            type="text"
-                                            placeholder="Type Policy Name"
-                                            value={formData.life_policy_name_custom || ""}
-                                            onChange={(e) => updateField('life_policy_name_custom', e.target.value)}
-                                            className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-brand-accent transition-colors mt-2"
-                                            style={{
-                                                backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
-                                                color: 'var(--text-auth-primary)'
-                                            }}
-                                        />
+                                        <div className="space-y-1">
+                                            <input
+                                                type="text"
+                                                placeholder="Type Policy Name"
+                                                value={formData.life_policy_name_custom || ""}
+                                                onChange={(e) => updateField('life_policy_name_custom', e.target.value)}
+                                                className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition-colors mt-2 ${!formData.life_policy_name_custom?.trim() ? 'border-red-500' : 'focus:border-brand-accent'
+                                                    }`}
+                                                style={{
+                                                    backgroundColor: 'var(--bg-auth-input)',
+                                                    borderColor: !formData.life_policy_name_custom?.trim() ? '#ef4444' : 'var(--border-auth-card)',
+                                                    color: 'var(--text-auth-primary)'
+                                                }}
+                                            />
+                                            {!formData.life_policy_name_custom?.trim() && <p className="text-[10px] text-red-500 font-bold uppercase px-1">Policy name is required</p>}
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -180,10 +190,11 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                         <select
                                             value={formData.health_provider || ""}
                                             onChange={handleHealthProviderChange}
-                                            className="w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none focus:border-brand-accent transition-colors"
+                                            className={`w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none transition-colors ${formData.has_health_insurance && !formData.health_provider ? 'border-red-500' : 'focus:border-brand-accent'
+                                                }`}
                                             style={{
                                                 backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
+                                                borderColor: formData.has_health_insurance && !formData.health_provider ? '#ef4444' : 'var(--border-auth-card)',
                                                 color: 'var(--text-auth-primary)'
                                             }}
                                         >
@@ -194,18 +205,22 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-auth-placeholder)' }} />
                                     </div>
                                     {formData.health_provider === 'Other' && (
-                                        <input
-                                            type="text"
-                                            placeholder="Type Provider Name"
-                                            value={formData.health_provider_custom || ""}
-                                            onChange={(e) => updateField('health_provider_custom', e.target.value)}
-                                            className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-brand-accent transition-colors mt-2"
-                                            style={{
-                                                backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
-                                                color: 'var(--text-auth-primary)'
-                                            }}
-                                        />
+                                        <div className="space-y-1">
+                                            <input
+                                                type="text"
+                                                placeholder="Type Provider Name"
+                                                value={formData.health_provider_custom || ""}
+                                                onChange={(e) => updateField('health_provider_custom', e.target.value)}
+                                                className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition-colors mt-2 ${!formData.health_provider_custom?.trim() ? 'border-red-500' : 'focus:border-brand-accent'
+                                                    }`}
+                                                style={{
+                                                    backgroundColor: 'var(--bg-auth-input)',
+                                                    borderColor: !formData.health_provider_custom?.trim() ? '#ef4444' : 'var(--border-auth-card)',
+                                                    color: 'var(--text-auth-primary)'
+                                                }}
+                                            />
+                                            {!formData.health_provider_custom?.trim() && <p className="text-[10px] text-red-500 font-bold uppercase px-1">Provider name is required</p>}
+                                        </div>
                                     )}
                                 </div>
 
@@ -216,10 +231,11 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                             value={formData.health_policy_name || ""}
                                             onChange={(e) => updateField('health_policy_name', e.target.value)}
                                             disabled={formData.health_provider === 'Other'}
-                                            className="w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none focus:border-brand-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className={`w-full border rounded-xl px-4 py-3 appearance-none focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${formData.has_health_insurance && formData.health_provider && !formData.health_policy_name ? 'border-red-500' : 'focus:border-brand-accent'
+                                                }`}
                                             style={{
                                                 backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
+                                                borderColor: (formData.has_health_insurance && formData.health_provider && !formData.health_policy_name) ? '#ef4444' : 'var(--border-auth-card)',
                                                 color: 'var(--text-auth-primary)'
                                             }}
                                         >
@@ -232,18 +248,22 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-auth-placeholder)' }} />
                                     </div>
                                     {formData.health_policy_name === 'Other' && (
-                                        <input
-                                            type="text"
-                                            placeholder="Type Policy Name"
-                                            value={formData.health_policy_name_custom || ""}
-                                            onChange={(e) => updateField('health_policy_name_custom', e.target.value)}
-                                            className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-brand-accent transition-colors mt-2"
-                                            style={{
-                                                backgroundColor: 'var(--bg-auth-input)',
-                                                borderColor: 'var(--border-auth-card)',
-                                                color: 'var(--text-auth-primary)'
-                                            }}
-                                        />
+                                        <div className="space-y-1">
+                                            <input
+                                                type="text"
+                                                placeholder="Type Policy Name"
+                                                value={formData.health_policy_name_custom || ""}
+                                                onChange={(e) => updateField('health_policy_name_custom', e.target.value)}
+                                                className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition-colors mt-2 ${!formData.health_policy_name_custom?.trim() ? 'border-red-500' : 'focus:border-brand-accent'
+                                                    }`}
+                                                style={{
+                                                    backgroundColor: 'var(--bg-auth-input)',
+                                                    borderColor: !formData.health_policy_name_custom?.trim() ? '#ef4444' : 'var(--border-auth-card)',
+                                                    color: 'var(--text-auth-primary)'
+                                                }}
+                                            />
+                                            {!formData.health_policy_name_custom?.trim() && <p className="text-[10px] text-red-500 font-bold uppercase px-1">Policy name is required</p>}
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -252,9 +272,9 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                 </AnimatePresence>
 
                 {!formData.has_life_insurance && !formData.has_health_insurance && (
-                    <div className="text-center py-10 rounded-2xl border border-dashed" style={{ 
-                        backgroundColor: 'var(--bg-auth-input)', 
-                        borderColor: 'var(--border-auth-card)' 
+                    <div className="text-center py-10 rounded-2xl border border-dashed" style={{
+                        backgroundColor: 'var(--bg-auth-input)',
+                        borderColor: 'var(--border-auth-card)'
                     }}>
                         <p style={{ color: 'var(--text-auth-placeholder)' }}>No existing insurance declared.</p>
                         <p className="text-xs mt-1" style={{ color: 'var(--text-auth-placeholder)' }}>You can go back to declare insurance or proceed to complete.</p>
@@ -262,7 +282,7 @@ export default function Step07_ExistingPolicyDetails({ formData, updateField }) 
                 )}
             </div>
 
-           
+
         </StepWrapper>
     );
 }
