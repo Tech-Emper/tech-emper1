@@ -5,18 +5,25 @@ from datetime import datetime
 import os
 
 # Database Configuration
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Ensure a 'data' directory exists within the backend folder
-DATA_DIR = os.path.join(BASE_DIR, "data")
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR, exist_ok=True)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
-DB_PATH = os.path.join(DATA_DIR, "insurance_wizard.db")
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+if SQLALCHEMY_DATABASE_URL:
+    # Render provides postgres://, but SQLAlchemy requires postgresql://
+    if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.path.join(BASE_DIR, "data")
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR, exist_ok=True)
+    DB_PATH = os.path.join(DATA_DIR, "insurance_wizard.db")
+    SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

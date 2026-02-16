@@ -26,8 +26,8 @@ export default function PolicyReviewSession({ onBack }) {
         });
 
         const token = localStorage.getItem('auth_token');
-        const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-        const API_BASE_URL = rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`;
+        const rawBaseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:8000';
+        const API_BASE_URL = (rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`).replace(/\/$/, '');
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/policy/extract-multiple`, {

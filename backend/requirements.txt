@@ -12,3 +12,4 @@ pydantic-settings
 python-dotenv
 uvicorn
 pikepdf
+psycopg2-binary

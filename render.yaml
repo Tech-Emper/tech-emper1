@@ -1,0 +1,40 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: insurance-wizard-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: insurance-wizard-db
+          property: connectionString
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: insurance-wizard-frontend
+          property: host
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: RECOMMENDATION_MODE
+        value: AI
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Frontend Static Site
+  - type: web
+    name: insurance-wizard-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishDir: frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: insurance-wizard-backend
+          property: host
+
+databases:
+  - name: insurance-wizard-db
+    plan: free
