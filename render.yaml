@@ -2,7 +2,7 @@ services:
   # Backend Web Service
   - type: web
     name: insurance-wizard-backend
-    env: python
+    runtime: python
     buildCommand: pip install -r backend/requirements.txt
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -27,9 +27,9 @@ services:
         value: onboarding@resend.dev
 
   # Frontend Static Site
-  - type: static_site
+  - type: web
     name: insurance-wizard-frontend
-    env: static
+    runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
     envVars:
