@@ -145,13 +145,13 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                 <div className="flex justify-between items-start mb-6">
                                     <div>
                                         <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
-                                            <Heart className="w-5 h-5 text-pink-500" /> Life Insurance Gap
+                                            <Heart className="w-5 h-5 text-orange-500" /> Life Insurance Gap
                                         </h4>
                                         <p className="text-xs mt-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-muted)' }}>Additional protection Suggested</p>
                                     </div>
                                     {!isPhase2Incomplete && (
                                         <div className="text-right">
-                                            <span className={`text-2xl font-black ${lifeGap > 0 ? 'text-pink-500' : 'text-emerald-500'}`}>
+                                            <span className={`text-2xl font-black ${lifeGap > 0 ? 'text-orange-500' : 'text-emerald-500'}`}>
                                                 {lifeGap > 0 ? `+${formatLakhs(lifeGap)}` : 'Fully Protected'}
                                             </span>
                                             <div className="text-[10px] font-bold uppercase" style={{ color: 'var(--text-auth-placeholder)' }}>Gap Amount</div>
@@ -165,12 +165,12 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                         borderColor: 'var(--border-auth-card)'
                                     }}>
                                         <div
-                                            className="h-full bg-pink-500/20 border-r border-pink-500/50 transition-all duration-1000"
+                                            className="h-full bg-orange-500 border-r border-orange-500/50 transition-all duration-1000"
                                             style={{ width: `${Math.min(100, (existingLife / Math.max(1, idealLife)) * 100)}%` }}
                                         />
                                         {lifeGap > 0 && (
                                             <div
-                                                className="h-full bg-pink-500 animate-pulse transition-all duration-1000"
+                                                className="h-full bg-orange-500/20 animate-pulse transition-all duration-1000"
                                                 style={{ width: `${Math.min(100, (lifeGap / idealLife) * 100)}%` }}
                                             />
                                         )}
@@ -210,12 +210,12 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                         borderColor: 'var(--border-auth-card)'
                                     }}>
                                         <div
-                                            className="h-full bg-blue-500/20 border-r border-blue-500/50 transition-all duration-1000"
+                                            className="h-full bg-blue-500 border-r border-blue-500/50 transition-all duration-1000"
                                             style={{ width: `${Math.min(100, (existingHealth / Math.max(1, idealHealth)) * 100)}%` }}
                                         />
                                         {healthGap > 0 && (
                                             <div
-                                                className="h-full bg-blue-500 animate-pulse transition-all duration-1000"
+                                                className="h-full bg-blue-500/20 animate-pulse transition-all duration-1000"
                                                 style={{ width: `${Math.min(100, (healthGap / idealHealth) * 100)}%` }}
                                             />
                                         )}
@@ -286,7 +286,7 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Life Recommendations */}
                             <div className="space-y-4">
-                                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-pink-500 flex items-center gap-2 mb-2">
+                                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-orange-500 flex items-center gap-2 mb-2">
                                     <HeartPulse className="w-4 h-4" /> Recommended Life Plans
                                 </h4>
                                 {life_recommendations.map((rec, idx) => (
@@ -296,13 +296,13 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                         borderStyle: 'solid',
                                         borderColor: 'var(--border-auth-card)'
                                     }}>
-                                        <div className="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 rounded-full blur-2xl -z-10" />
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -z-10" />
                                         <div className="mb-4">
                                             <h5 className="font-black text-base mb-0.5" style={{ color: 'var(--text-auth-primary)' }}>{rec.product_name}</h5>
                                             <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-auth-muted)' }}>{rec.provider}</p>
                                         </div>
-                                        <div className="bg-pink-500/5 border border-pink-500/10 rounded-xl p-3 mb-4">
-                                            <div className="text-[8px] font-black uppercase text-pink-500 tracking-widest mb-0.5">Recommended Cover</div>
+                                        <div className="bg-orange-500/5 border border-pink-500/10 rounded-xl p-3 mb-4">
+                                            <div className="text-[8px] font-black uppercase text-orange-500 tracking-widest mb-0.5">Recommended Cover</div>
                                             <div className="text-lg font-black" style={{ color: 'var(--text-auth-primary)' }}>{rec.recommended_cover}</div>
                                         </div>
                                         <div
