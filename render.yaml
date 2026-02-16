@@ -26,12 +26,12 @@ services:
       - key: SMTP_FROM_EMAIL
         value: onboarding@resend.dev
 
-  # Frontend Static Site
+  # Frontend Web Service
   - type: web
     name: insurance-wizard-frontend
-    runtime: static
+    runtime: node
     buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/dist
+    startCommand: cd frontend && npm run start
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
