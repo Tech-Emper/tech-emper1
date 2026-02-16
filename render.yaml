@@ -27,7 +27,7 @@ services:
         value: onboarding@resend.dev
 
   # Frontend Static Site
-  - type: static
+  - type: static_site
     name: insurance-wizard-frontend
     env: static
     buildCommand: cd frontend && npm install && npm run build
