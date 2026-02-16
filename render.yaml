@@ -23,11 +23,11 @@ services:
         generateValue: true
 
   # Frontend Static Site
-  - type: web
+  - type: static
     name: insurance-wizard-frontend
     env: static
     buildCommand: cd frontend && npm install && npm run build
-    staticPublishDir: frontend/dist
+    staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
