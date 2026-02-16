@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Heart, Shield, ArrowLeft } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function PolicyReviewSession({ onBack }) {
     const [files, setFiles] = useState([]);
@@ -26,8 +27,6 @@ export default function PolicyReviewSession({ onBack }) {
         });
 
         const token = localStorage.getItem('auth_token');
-        const rawBaseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:8000';
-        const API_BASE_URL = (rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`).replace(/\/$/, '');
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/policy/extract-multiple`, {
