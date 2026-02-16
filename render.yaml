@@ -15,6 +15,7 @@ services:
           type: web
           name: insurance-wizard-frontend
           property: url
+          envVarKey: RENDER_EXTERNAL_URL
       - key: GEMINI_API_KEY
         sync: false
       - key: RECOMMENDATION_MODE
@@ -37,7 +38,7 @@ services:
         fromService:
           type: web
           name: insurance-wizard-backend
-          property: url
+          envVarKey: RENDER_EXTERNAL_URL
 
 databases:
   - name: insurance-wizard-db
