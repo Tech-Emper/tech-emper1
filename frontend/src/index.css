@@ -24,6 +24,10 @@
   --color-brand-primary: #3B82F6;
   --color-brand-accent: #10B981;
   --color-brand-surface: rgba(255, 255, 255, 0.08);
+
+  /* Navbar branded colors */
+  --nav-bg: rgba(15, 23, 42, 0.8);
+  --nav-brand: #ffffff;
 }
 
 .light {
@@ -47,6 +51,10 @@
 
   /* Legacy compatibility for light mode */
   --color-brand-surface: #FFFFFF;
+
+  /* Navbar branded colors */
+  --nav-bg: #f6fbfc;
+  --nav-brand: #141d2e;
 }
 
 /* Light mode placeholder styling */
