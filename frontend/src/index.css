@@ -4,21 +4,16 @@
 :root {
   /* Default Dark Mode (Current Brand) */
   --bg-auth-main: #0B0F19;
+  --bg-auth-surface: rgba(255, 255, 255, 0.05);
   --bg-auth-card: rgba(255, 255, 255, 0.08);
-  /* White/8% */
   --bg-auth-input: rgba(255, 255, 255, 0.05);
   --border-auth-card: rgba(255, 255, 255, 0.1);
 
   --text-auth-primary: #e2e8f0;
-  /* Slate 200 */
   --text-auth-label: #e2e8f0;
-  /* Slate 200 */
   --text-auth-muted: #94a3b8;
-  /* Slate 400 */
   --text-auth-placeholder: #64748b;
-  /* Slate 500 */
   --text-success: #34d399;
-  /* Emerald 400 - for success messages */
 
   --btn-primary-bg: #3B82F6;
   --btn-primary-hover: #2563EB;
@@ -33,29 +28,25 @@
 
 .light {
   /* Emper.ai Light Theme */
-  --bg-auth-main: #F0F9FF;
-  /* Soft Cyan/Alice Blue */
+  --bg-auth-main: #F8FAFC;
+  /* Softer slate white */
+  --bg-auth-surface: #F1F5F9;
   --bg-auth-card: #FFFFFF;
-  --bg-auth-input: #F8FAFC;
-  /* Slate 50 */
-  --border-auth-card: #CBD5E1;
-  /* Slate 300 - More visible border */
+  --bg-auth-input: #FFFFFF;
+  --border-auth-card: #E2E8F0;
 
   --text-auth-primary: #0F172A;
-  /* Slate 900 - Dark text for high contrast */
   --text-auth-label: #1E293B;
-  /* Slate 800 - Very dark for labels */
-  --text-auth-muted: #334155;
-  /* Slate 700 - Darker for better readability */
-  --text-auth-placeholder: #64748B;
-  /* Slate 500 - Darker placeholder */
+  --text-auth-muted: #475569;
+  --text-auth-placeholder: #94A3B8;
   --text-success: #059669;
-  /* Emerald 600 - darker green for light mode */
 
   --btn-primary-bg: #3B82F6;
-  /* Bright Blue */
-  --btn-primary-hover: #2563EB;
+  --btn-primary-hover: #1D4ED8;
   --btn-primary-text: #FFFFFF;
+
+  /* Legacy compatibility for light mode */
+  --color-brand-surface: #FFFFFF;
 }
 
 /* Light mode placeholder styling */
@@ -94,7 +85,7 @@
 input[type="range"] {
   -webkit-appearance: none !important;
   appearance: none !important;
-  background: transparent !important;
+  background: transparent;
   cursor: pointer;
 }
 
@@ -141,7 +132,6 @@ input[type="range"]::-moz-range-thumb {
   background: currentColor !important;
   border: 2px solid #ffffff !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
-  cursor: pointer !important;
 }
 
 /* Light mode specific slider styling - much more visible */
@@ -178,6 +168,8 @@ input[type="range"]::-moz-range-thumb {
 
   --font-sans: "Outfit", sans-serif;
   --backdrop-blur-xs: 2px;
+
+  --breakpoint-nav: 1000px;
 }
 
 body {
