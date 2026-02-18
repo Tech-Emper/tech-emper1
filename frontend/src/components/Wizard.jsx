@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useThemeStyles } from '../hooks/useThemeStyles';
-
-const rawBaseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:8000';
-const API_BASE_URL = (rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`).replace(/\/$/, '');
+import { API_BASE_URL } from '../config';
 import { ArrowRight, ArrowLeft, Shield, Briefcase, User, Heart, Sparkles, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
