@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Heart, Shield, ArrowLeft, ArrowRight, TrendingUp, Info, Sparkles, User, Lock, Unlock } from 'lucide-react';
 import Step09_ProductRecommendations from './steps/Step09_ProductRecommendations';
+import { API_BASE_URL } from '../config';
 
 const STEPS = {
     UPLOAD: 'UPLOAD',
@@ -43,8 +44,6 @@ export default function ReverseGapFlow({ onBack }) {
 
     const { user, logout } = useAuth();
     const token = user?.token;
-    const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    const API_BASE_URL = rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`;
 
     useEffect(() => {
         // Pre-fetch profile if it exists

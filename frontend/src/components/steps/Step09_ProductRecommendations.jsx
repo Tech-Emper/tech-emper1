@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import StepWrapper from './StepWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, CheckCircle2, ShieldCheck, HeartPulse, Info, Loader2, Code, ChevronUp, ChevronDown, ArrowRight } from 'lucide-react';
-
-const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-const API_BASE_URL = rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`;
+import { API_BASE_URL } from '../../config';
 
 export default function Step09_ProductRecommendations({ formData, gapResult, onComplete }) {
     const [recommendations, setRecommendations] = useState(null);
