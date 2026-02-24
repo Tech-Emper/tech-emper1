@@ -71,6 +71,8 @@ log_now("Configuring CORS...")
 origins = [
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://insurance.emper.ai",
+    "https://insurance-api.emper.ai",
 ]
 raw_frontend_url = os.getenv("FRONTEND_URL", "").strip()
 if raw_frontend_url:
