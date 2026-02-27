@@ -24,8 +24,7 @@ services:
       - key: RESEND_API_KEY
         sync: false
       - key: SMTP_FROM_EMAIL
-        value: onboarding@resend.dev
-
+        sync: false
   # Frontend Web Service
   - type: web
     name: insurance-wizard-frontend

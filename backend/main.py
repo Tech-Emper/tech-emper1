@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 # Load environment variables early
 load_dotenv()
 
+from datetime import datetime
+
 def log_now(msg):
     print(f"--- [STARTUP LOG] {msg}", file=sys.stdout, flush=True)
 
@@ -112,9 +114,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 class UserData(BaseModel):
     first_name: Optional[str] = ""
-    last_name: Optional[str] = ""
     dob: Optional[str] = ""
     mobile: Optional[str] = ""
+    secondary_phone: Optional[str] = ""
+    secondary_email: Optional[str] = ""
+    aadhar_number: Optional[str] = ""
     income_level: Optional[str] = ""
     city: Optional[str] = ""
     gender: Optional[str] = ""
@@ -223,9 +227,12 @@ def get_recommendation(data: UserData, user_payload = Depends(get_current_user),
         db.add(user)
     
     user.first_name = data.first_name
-    user.last_name = data.last_name
     user.dob = data.dob
     user.mobile = data.mobile
+    # PROTECT fields that might be missing from the Wizard payload
+    if data.secondary_phone: user.secondary_phone = data.secondary_phone
+    if data.secondary_email: user.secondary_email = data.secondary_email
+    if data.aadhar_number: user.aadhar_number = data.aadhar_number
     user.income_level = data.income_level
     user.city = data.city
     user.gender = data.gender
@@ -309,10 +316,14 @@ def get_policy_recommendations(request: PolicyRecommendationRequest, user_payloa
 @app.get("/api/user/profile")
 def get_user_profile(user_payload = Depends(get_current_user), db: Session = Depends(get_db)):
     email = user_payload.get("sub")
+    log_now(f"GET profile called for {email}")
     user = db.query(User).filter(User.email == email).first()
     
     if not user:
+        log_now(f"User {email} not found in GET profile")
         return {"message": "User not found"}
+    
+    log_now(f"Returning profile for {email}: First={user.first_name}, Mobile={user.mobile}, Aadhar={user.aadhar_number}")
     
     # Get all recommendations sorted by most recent first
     all_recs = db.query(Recommendation).filter(Recommendation.user_id == user.id).order_by(Recommendation.created_at.desc()).all()
@@ -337,11 +348,16 @@ def get_user_profile(user_payload = Depends(get_current_user), db: Session = Dep
     ]
 
     return {
+        "email": user.email,
         "profile": {
+            "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "dob": user.dob,
             "mobile": user.mobile,
+            "secondary_phone": user.secondary_phone,
+            "secondary_email": user.secondary_email,
+            "aadhar_number": user.aadhar_number,
             "income_level": user.income_level,
             "city": user.city,
             "gender": user.gender,
@@ -391,9 +407,12 @@ def save_progress(request: ProgressRequest, user_payload = Depends(get_current_u
     
     data = request.formData
     user.first_name = data.first_name
-    user.last_name = data.last_name
     user.dob = data.dob
     user.mobile = data.mobile
+    # PROTECT fields that might be missing from the Wizard payload
+    if data.secondary_phone: user.secondary_phone = data.secondary_phone
+    if data.secondary_email: user.secondary_email = data.secondary_email
+    if data.aadhar_number: user.aadhar_number = data.aadhar_number
     user.income_level = data.income_level
     user.city = data.city
     user.gender = data.gender
@@ -408,6 +427,7 @@ def save_progress(request: ProgressRequest, user_payload = Depends(get_current_u
     user.industry_type = data.industry_type
     user.dependents_data = data.dependents
     user.num_children = data.num_children
+    user.secondary_phone = data.secondary_phone
     
     # Phase 2 persistence
     user.has_life_insurance = data.has_life_insurance
@@ -443,6 +463,10 @@ class ProfileSyncRequest(BaseModel):
     dob: Optional[str] = None
     gender: Optional[str] = None
     city: Optional[str] = None
+    mobile: Optional[str] = None
+    secondary_phone: Optional[str] = None
+    secondary_email: Optional[str] = None
+    aadhar_number: Optional[str] = None
     existing_life_cover_val: Optional[int] = None
     life_provider: Optional[str] = None
     life_policy_name: Optional[str] = None
@@ -454,74 +478,55 @@ class ProfileSyncRequest(BaseModel):
     income_level: Optional[str] = None
     smoking_status: Optional[str] = None
     lifestyle: Optional[str] = None
-
-@app.get("/api/user/profile")
-async def get_profile(user_payload = Depends(get_current_user), db: Session = Depends(get_db)):
-    email = user_payload.get("sub")
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        return {}
-    
-    return {
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "dob": user.dob,
-        "mobile": user.mobile,
-        "income_level": user.income_level,
-        "city": user.city,
-        "gender": user.gender,
-        "marital_status": user.marital_status,
-        "support_parents": user.support_parents,
-        "career_stage": user.career_stage,
-        "employment_type": user.employment_type,
-        "lifestyle": user.lifestyle,
-        "smoking_status": user.smoking_status,
-        "family_health_history": user.family_health_history,
-        "is_smoker": user.is_smoker,
-        "num_children": user.num_children,
-        "has_life_insurance": user.has_life_insurance,
-        "existing_life_cover_val": user.existing_life_cover_val,
-        "life_provider": user.life_provider,
-        "life_policy_name": user.life_policy_name,
-        "has_health_insurance": user.has_health_insurance,
-        "existing_health_cover_val": user.existing_health_cover_val,
-        "health_provider": user.health_provider,
-        "health_policy_name": user.health_policy_name
-    }
+    employment_type: Optional[str] = None
 
 @app.post("/api/user/sync-profile")
-async def sync_profile(data: ProfileSyncRequest, user_payload = Depends(get_current_user), db: Session = Depends(get_db)):
+def sync_profile(data: ProfileSyncRequest, user_payload = Depends(get_current_user), db: Session = Depends(get_db)):
     email = user_payload.get("sub")
     user = db.query(User).filter(User.email == email).first()
     if not user:
         user = User(email=email)
         db.add(user)
     
-    if data.first_name: user.first_name = data.first_name
-    if data.dob: user.dob = data.dob
-    if data.gender: user.gender = data.gender
-    if data.city: user.city = data.city
-    if data.marital_status: user.marital_status = data.marital_status
+    log_now(f"Syncing profile for {email}")
+    
+    if data.first_name is not None: user.first_name = data.first_name
+    if data.dob is not None: user.dob = data.dob
+    if data.gender is not None: user.gender = data.gender
+    if data.city is not None: user.city = data.city
+    if data.mobile is not None: user.mobile = data.mobile
+    if data.secondary_phone is not None: user.secondary_phone = data.secondary_phone
+    if data.secondary_email is not None: user.secondary_email = data.secondary_email
+    if data.aadhar_number is not None: user.aadhar_number = data.aadhar_number
+    if data.marital_status is not None: user.marital_status = data.marital_status
     if data.num_children is not None: user.num_children = data.num_children
-    if data.income_level: user.income_level = data.income_level
-    if data.smoking_status: user.smoking_status = data.smoking_status
-    if data.lifestyle: user.lifestyle = data.lifestyle
+    if data.income_level is not None: user.income_level = data.income_level
+    if data.smoking_status is not None: user.smoking_status = data.smoking_status
+    if data.lifestyle is not None: user.lifestyle = data.lifestyle
+    if data.employment_type is not None: user.employment_type = data.employment_type
     
     # Coverage data
     if data.existing_life_cover_val is not None:
         user.existing_life_cover_val = data.existing_life_cover_val
         user.has_life_insurance = True
-    if data.life_provider: user.life_provider = data.life_provider
-    if data.life_policy_name: user.life_policy_name = data.life_policy_name
+    if data.life_provider is not None: user.life_provider = data.life_provider
+    if data.life_policy_name is not None: user.life_policy_name = data.life_policy_name
     
-    if data.existing_health_cover_val is not None:
-        user.existing_health_cover_val = data.existing_health_cover_val
-        user.has_health_insurance = True
-    if data.health_provider: user.health_provider = data.health_provider
-    if data.health_policy_name: user.health_policy_name = data.health_policy_name
-    
-    db.commit()
-    return {"message": "Profile synced successfully"}
+    try:
+        if data.existing_health_cover_val is not None:
+            user.existing_health_cover_val = data.existing_health_cover_val
+            user.has_health_insurance = True
+        if data.health_provider: user.health_provider = data.health_provider
+        if data.health_policy_name: user.health_policy_name = data.health_policy_name
+        
+        db.commit()
+        log_now(f"Profile synced successfully for {email}")
+        return {"message": "Profile synced successfully"}
+    except Exception as e:
+        db.rollback()
+        log_now(f"CRITICAL ERROR during sync_profile for {email}: {str(e)}")
+        log_now(f"Data that failed to sync: {data.model_dump()}")
+        raise HTTPException(status_code=500, detail=f"Database sync error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

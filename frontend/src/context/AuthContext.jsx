@@ -5,17 +5,78 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [profile, setProfile] = useState(null);
+    const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Check for existing token
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            // For MVP, we'll just assume token is valid if it exists
-            // In a real app, we'd verify it with the backend
-            setUser({ token });
+    const fetchProfile = async (token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setProfile(data.profile);
+                setRecommendations(data.recommendations || []);
+                if (data.profile?.email) {
+                    setUser(prev => ({ ...prev, email: data.profile.email }));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch profile:", error);
         }
-        setLoading(false);
+    };
+
+    const updateProfile = async (profileData) => {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return false;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/user/sync-profile`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(profileData)
+            });
+
+            if (response.ok) {
+                await fetchProfile(token);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Failed to update profile:", error);
+            return false;
+        }
+    };
+
+    useEffect(() => {
+        const initAuth = async () => {
+            const token = localStorage.getItem('auth_token');
+            const emailFromLS = localStorage.getItem('auth_email');
+
+            // Safer check for the user email
+            let email = emailFromLS;
+            if (!email) {
+                try {
+                    const userObj = localStorage.getItem('user');
+                    if (userObj) {
+                        email = JSON.parse(userObj).email;
+                    }
+                } catch (e) {
+                    console.error("Failed to parse user from localStorage", e);
+                }
+            }
+
+            if (token && email) {
+                setUser({ token, email });
+                await fetchProfile(token);
+            }
+            setLoading(false);
+        };
+        initAuth();
     }, []);
 
     const login = async (email) => {
@@ -46,17 +107,33 @@ export const AuthProvider = ({ children }) => {
 
         const data = await response.json();
         localStorage.setItem('auth_token', data.access_token);
+        localStorage.setItem('auth_email', email);
         setUser({ token: data.access_token, email });
+        await fetchProfile(data.access_token);
         return true;
     };
 
     const logout = () => {
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_email');
         setUser(null);
+        setProfile(null);
+        setRecommendations([]);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, verify, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{
+            user,
+            profile,
+            recommendations,
+            loading,
+            login,
+            verify,
+            logout,
+            updateProfile,
+            refreshProfile: () => user?.token && fetchProfile(user.token),
+            isAuthenticated: !!user
+        }}>
             {children}
         </AuthContext.Provider>
     );

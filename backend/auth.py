@@ -41,7 +41,7 @@ def send_otp_email(email: str, otp: str):
             
             log_now("Sending email via Resend API...")
             params = {
-                "from": os.getenv("SMTP_FROM_EMAIL", "onboarding@resend.dev"),
+                "from": os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai"),
                 "to": [email],
                 "subject": f"{otp} is your Insurance Wizard verification code",
                 "html": f"""
@@ -71,7 +71,7 @@ def send_otp_email(email: str, otp: str):
             
             # Specific handling for the domain/recipient restriction
             if "domain is not verified" in error_msg.lower():
-                return False, "Resend Error: Please set SMTP_FROM_EMAIL to 'onboarding@resend.dev' in Railway."
+                return False, "Resend Error: Please set SMTP_FROM_EMAIL to 'tech@emper.ai' in Railway."
             if "restricted" in error_msg.lower() or "unauthorized" in error_msg.lower():
                 return False, "Resend Restriction: You can only send to your own email address until you verify your domain on Resend.com."
             
@@ -87,7 +87,7 @@ def send_otp_email(email: str, otp: str):
     smtp_port = int(os.getenv("SMTP_PORT", 587))
     smtp_user = os.getenv("SMTP_USERNAME")
     smtp_pass = os.getenv("SMTP_PASSWORD")
-    from_email = os.getenv("SMTP_FROM_EMAIL", "onboarding@resend.dev")
+    from_email = os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai")
 
     if not all([smtp_host, smtp_user, smtp_pass]):
         missing = f"host={smtp_host}, user={smtp_user}, pass={'SET' if smtp_pass else 'MISSING'}"

@@ -34,9 +34,12 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
     first_name = Column(String)
-    last_name = Column(String)
+    last_name = Column(String) # Keeping in DB for now to avoid migration issues, but will remove from UI
     dob = Column(String)
     mobile = Column(String)
+    secondary_phone = Column(String)
+    secondary_email = Column(String)
+    aadhar_number = Column(String)
     income_level = Column(String)
     city = Column(String)
     gender = Column(String)

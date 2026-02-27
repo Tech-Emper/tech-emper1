@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 import { API_BASE_URL } from '../config';
 import { ArrowRight, ArrowLeft, Shield, Briefcase, User, Heart, Sparkles, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 import Step01_Splash from './steps/Step01_Splash';
 import Step02_LifeStage from './steps/Step02_LifeStage';
@@ -15,12 +16,13 @@ import Step07_ExistingPolicyDetails from './steps/Step07_ExistingPolicyDetails';
 import Step09_ProductRecommendations from './steps/Step09_ProductRecommendations';
 import Dashboard from './Dashboard';
 
-export default function Wizard() {
+export default function Wizard({ onBack }) {
     const themeStyles = useThemeStyles();
+    const { profile, recommendations, refreshProfile, loading: authLoading } = useAuth();
     const [step, setStep] = useState(1);
+    const hasInitialized = useRef(false);
     const [formData, setFormData] = useState({
         first_name: "",
-        last_name: "", // Internal/Backward compatibility
         city: "",
         mobile: "",
         marital_status: "Single",
@@ -54,13 +56,43 @@ export default function Wizard() {
         health_provider: "",
         health_policy_name: "",
         health_provider_custom: "",
-        health_policy_name_custom: ""
+        health_policy_name_custom: "",
+        secondary_email: "",
+        aadhar_number: ""
     });
     const [result, setResult] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [view, setView] = useState('wizard'); // 'wizard' or 'dashboard'
+    const [showResumePrompt, setShowResumePrompt] = useState(false);
+    const [resumeData, setResumeData] = useState(null);
+
+    // Initial sync from global profile
+    useEffect(() => {
+        if (!authLoading && profile) {
+            setFormData(prev => ({ ...prev, ...profile }));
+
+            // Only auto-switch to dashboard ONCE on initial load
+            if (!hasInitialized.current) {
+                if (recommendations && recommendations.length > 0) {
+                    setResult(recommendations[0]);
+                    setHistory(recommendations);
+                    setView('dashboard');
+                } else if (profile.current_step > 1 && view === 'wizard') {
+                    setResumeData({ step: profile.current_step, formData: profile });
+                    setShowResumePrompt(true);
+                }
+                hasInitialized.current = true;
+            }
+        }
+    }, [profile, recommendations, authLoading]);
+
+    useEffect(() => {
+        if (!authLoading) {
+            setInitialLoading(false);
+        }
+    }, [authLoading]);
 
     const saveProgress = async (nextStep, currentFormData = formData) => {
         try {
@@ -79,11 +111,12 @@ export default function Wizard() {
                     current_step: nextStep
                 })
             });
-            if (!response.ok) {
+            if (response.ok) {
+                console.log("Progress saved successfully!");
+                refreshProfile();
+            } else {
                 const errData = await response.json();
                 console.error("Save progress failed:", errData);
-            } else {
-                console.log("Progress saved successfully!");
             }
         } catch (error) {
             console.error("Failed to save progress", error);
@@ -108,49 +141,11 @@ export default function Wizard() {
     };
 
     const handleStartOver = () => {
+        hasInitialized.current = true; // Stay in wizard
         setStep(1);
         saveProgress(1); // Reset step in DB
         setShowResumePrompt(false);
     };
-
-    const [showResumePrompt, setShowResumePrompt] = useState(false);
-    const [resumeData, setResumeData] = useState(null);
-
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const token = localStorage.getItem('auth_token');
-                if (!token) return;
-
-                const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-
-                if (data.profile) {
-                    setFormData(prev => ({
-                        ...prev,
-                        ...data.profile
-                    }));
-                }
-
-                if (data.recommendations && data.recommendations.length > 0) {
-                    setResult(data.recommendations[0]);
-                    setHistory(data.recommendations);
-                    setView('dashboard');
-                } else if (data.profile && data.profile.current_step > 1) {
-                    setResumeData({ step: data.profile.current_step, formData: data.profile });
-                    setShowResumePrompt(true);
-                }
-            } catch (error) {
-                console.error("Failed to fetch profile", error);
-            } finally {
-                setInitialLoading(false);
-            }
-        };
-
-        fetchProfile();
-    }, []);
 
     const updateField = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -333,6 +328,17 @@ export default function Wizard() {
 
     return (
         <div className="w-full max-w-2xl mx-auto px-4">
+            <div className="min-[1200px]:fixed min-[1200px]:top-24 min-[1200px]:left-8 mb-4 min-[1200px]:mb-0 z-50">
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest hover:text-brand-accent transition-all py-2 px-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg hover:scale-105"
+                    style={{ color: 'var(--text-auth-muted)' }}
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Dashboard
+                </button>
+            </div>
+
             {/* Resumption Prompt Overlay */}
             <AnimatePresence>
                 {showResumePrompt && (
@@ -386,9 +392,19 @@ export default function Wizard() {
             {/* Progress Header */}
             {view !== 'dashboard' && (
                 <div className="mb-6 md:mb-10">
+
                     {/* Desktop Stepper (Icon-based) */}
-                    <div className="hidden md:flex justify-between items-center relative pb-4">
-                        <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10 -translate-y-1/2 rounded-full"></div>
+                    <div className="hidden md:flex justify-between items-start relative pb-4 px-2">
+                        {/* Background Line */}
+                        <div className="absolute top-5 left-7 right-7 h-0.5 -z-10 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-auth-input)' }}>
+                            {/* Dynamic Filling Progress Bar */}
+                            <motion.div
+                                className="h-full bg-brand-accent shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
+                                transition={{ type: "spring", stiffness: 50, damping: 20 }}
+                            />
+                        </div>
                         {steps.map((s) => (
                             <button
                                 key={s.id}
@@ -403,22 +419,24 @@ export default function Wizard() {
                                     }
                                 }}
                                 disabled={loading}
-                                className={`flex flex-col items-center gap-2 relative z-10 group cursor-pointer disabled:cursor-not-allowed ${!canGoToStep(s.id) ? 'opacity-50' : ''}`}
+                                className={`flex flex-col items-center gap-2 relative z-10 group cursor-pointer disabled:cursor-not-allowed ${!canGoToStep(s.id) ? 'opacity-80' : ''}`}
                             >
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${canGoToStep(s.id) ? 'group-hover:scale-110' : ''} ${step >= s.id
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${canGoToStep(s.id) ? 'group-hover:scale-110' : ''} ${step > s.id
                                     ? 'bg-brand-accent border-brand-accent text-brand-dark shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                                    : `border-2 ${themeStyles.cardBorder.replace('border-', 'border-')} ${themeStyles.textMuted} group-hover:border-opacity-40`
+                                    : step === s.id
+                                        ? 'bg-brand-accent border-brand-accent text-brand-dark shadow-[0_0_15px_rgba(16,185,129,0.5)] scale-110 z-20'
+                                        : `border-2 bg-brand-dark border-white/10`
                                     }`}
                                     style={step < s.id ? {
-                                        backgroundColor: 'var(--bg-auth-main)',
+                                        backgroundColor: 'var(--bg-auth-card)',
                                         borderColor: 'var(--border-auth-card)',
-                                        color: 'var(--text-auth-placeholder)'
+                                        color: 'var(--text-auth-muted)'
                                     } : {}}
                                 >
                                     {step > s.id ? <Check className="w-5 h-5" /> : s.icon}
                                 </div>
                                 <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${step >= s.id ? 'text-brand-accent' : ''}`}
-                                    style={step < s.id ? { color: 'var(--text-auth-placeholder)' } : {}}
+                                    style={step < s.id ? { color: 'var(--text-auth-muted)' } : {}}
                                 >
                                     {s.title}
                                 </span>
@@ -453,8 +471,17 @@ export default function Wizard() {
                         userProfile={formData}
                         latestRecommendation={result}
                         history={history}
-                        onUpdatePlan={() => { setView('wizard'); setStep(1); }}
-                        onCompleteExistingDetails={() => { setView('wizard'); setStep(7); }}
+                        onBack={onBack}
+                        onUpdatePlan={() => {
+                            hasInitialized.current = true;
+                            setView('wizard');
+                            setStep(1);
+                        }}
+                        onCompleteExistingDetails={() => {
+                            hasInitialized.current = true;
+                            setView('wizard');
+                            setStep(7);
+                        }}
                     />
                 </div>
             ) : (
