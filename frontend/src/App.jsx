@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Power, LayoutDashboard, Wallet as WalletIcon, Menu, X, LogOut, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/common/Navbar';
+import Profile from './components/Profile';
 
 // Lazy load wallet components
 const WalletDashboard = lazy(() => import('./components/wallet/WalletDashboard'));
@@ -33,16 +34,16 @@ function MainApp() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-24 md:pt-32 p-4 md:p-8 relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col items-center pt-16 md:pt-24 p-4 md:p-8 relative overflow-x-hidden">
       <Background />
-      <Navbar />
+      <Navbar onHome={() => setSelectedFeature(null)} />
 
-      <div className="text-center mb-8 md:mb-12 z-10 w-full px-2">
+      {/* <div className="text-center mb-8 md:mb-12 z-10 w-full px-2">
         <h1 className="text-3xl md:text-6xl font-black mb-2 md:mb-4 tracking-tight" style={{ color: 'var(--text-auth-primary)' }}>
           Insurance <span className="text-brand-accent">Simplified</span>
         </h1>
         <p className="text-xs md:text-lg font-medium opacity-80" style={{ color: 'var(--text-auth-muted)' }}>No jargon. Just answers. (MVP v0.3)</p>
-      </div>
+      </div> */}
 
       <div className="z-10 w-full max-w-7xl flex-1 flex flex-col items-center">
         <Routes>
@@ -62,6 +63,8 @@ function MainApp() {
                   }
                 </div>
               } />
+
+              <Route path="/profile" element={<Profile />} />
 
               <Route path="/wallet" element={
                 <Suspense fallback={<div className="text-white">Loading Wallet...</div>}>

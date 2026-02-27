@@ -1,9 +1,9 @@
-import { Shield, Heart, User, RefreshCw, MapPin, Users, Sparkles, HeartPulse, CheckCircle2, Info, ChevronUp, ChevronDown, LayoutGrid, List } from 'lucide-react';
+import { Shield, Heart, User, RefreshCw, MapPin, Users, Sparkles, HeartPulse, CheckCircle2, Info, ChevronUp, ChevronDown, LayoutGrid, List, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 
-export default function Dashboard({ userProfile, latestRecommendation, history, onUpdatePlan, onCompleteExistingDetails }) {
+export default function Dashboard({ userProfile, latestRecommendation, history, onUpdatePlan, onCompleteExistingDetails, onBack }) {
     const themeStyles = useThemeStyles();
     const isPhase2Incomplete = userProfile.current_step < 9;
     const [view, setView] = useState((latestRecommendation?.life_recommendations?.length || latestRecommendation?.health_recommendations?.length) ? 'products' : 'gaps');
@@ -58,7 +58,7 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
             <div className="relative">
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
                     {/* Left Actions (Desktop) */}
-                    <div className="hidden md:flex justify-start">
+                    <div className="hidden md:flex justify-start items-center gap-4">
                         {hasProducts && (
                             <div className="flex p-1 rounded-xl border" style={{
                                 backgroundColor: 'var(--bg-auth-input)',

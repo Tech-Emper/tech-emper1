@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
 
-export default function Navbar() {
+export default function Navbar({ onHome }) {
     const { isAuthenticated, logout, user } = useAuth();
     const { theme } = useTheme();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,6 +22,12 @@ export default function Navbar() {
 
     const isHome = location.pathname === '/';
 
+    const handleHomeClick = () => {
+        if (onHome) onHome();
+        navigate('/');
+        setIsMenuOpen(false);
+    };
+
     const handleLogout = () => {
         logout();
         navigate('/');
@@ -32,7 +38,10 @@ export default function Navbar() {
         <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--nav-bg)] backdrop-blur-md border-b border-slate-200 dark:border-white/10 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 md:px-8 h-12 md:h-16 flex items-center justify-between">
                 {/* Logo */}
-                <Link to="/" className="flex items-center gap-2 group">
+                <button
+                    onClick={handleHomeClick}
+                    className="flex items-center gap-2 group bg-transparent border-none p-0"
+                >
                     <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-black text-lg shadow-lg group-hover:scale-110 transition-transform">
                         e
                     </div>
@@ -42,10 +51,10 @@ export default function Navbar() {
                     >
                         emper<span className="text-emerald-500">.ai</span>
                     </span>
-                </Link>
+                </button>
 
                 {/* Desktop Nav Links */}
-                <div className="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                {/* <div className="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-500 dark:text-slate-400">
                     {navLinks.map((link) => (
                         <a
                             key={link.name}
@@ -55,18 +64,28 @@ export default function Navbar() {
                             {link.name}
                         </a>
                     ))}
-                </div>
+                </div> */}
 
                 {/* Right Actions */}
                 <div className="hidden md:flex items-center gap-4 text-sm font-bold">
-                    <a href="#" className="text-slate-500 hover:text-emerald-500 transition-colors">
+                    {/* <a href="#" className="text-slate-500 hover:text-emerald-500 transition-colors">
                         Contact
-                    </a>
+                    </a> */}
 
                     <ThemeToggle />
 
                     {isAuthenticated ? (
                         <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-white/10">
+                            <button
+                                onClick={() => navigate('/profile')}
+                                className={`p-2 rounded-xl border transition-all ${location.pathname === '/profile'
+                                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
+                                    : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10'
+                                    }`}
+                                title="Profile"
+                            >
+                                <User className="w-5 h-5" />
+                            </button>
                             <button
                                 onClick={() => navigate('/wallet')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all border ${location.pathname.startsWith('/wallet')
@@ -126,38 +145,51 @@ export default function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-screen w-72 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-white/10 p-8 pt-20 z-[52] md:hidden flex flex-col gap-8 shadow-2xl overflow-y-auto"
+                            className={`fixed top-0 right-0 h-screen w-72 border-l border-slate-200 dark:border-white/10 p-6 z-[52] md:hidden flex flex-col gap-6 shadow-2xl overflow-y-auto ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-800'
+                                }`}
                         >
-                            <div className="flex flex-col gap-4">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">Navigation</p>
-                                {navLinks.map((link) => (
-                                    <a
-                                        key={link.name}
-                                        href={link.path}
-                                        className="text-lg font-bold text-slate-900 dark:text-white hover:text-emerald-500 transition-colors"
+                            {/* Mobile Menu Header */}
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Menu</p>
+                                <div className="flex items-center gap-3">
+                                    <ThemeToggle />
+                                    <button
                                         onClick={() => setIsMenuOpen(false)}
+                                        className="p-2 rounded-xl bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-emerald-500 transition-all"
                                     >
-                                        {link.name}
-                                    </a>
-                                ))}
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="flex flex-col gap-4 border-t border-slate-200 dark:border-white/10 pt-8">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">Member Portal</p>
+                            <div className="flex flex-col gap-4 border-t border-slate-300 dark:border-white/10">
                                 {isAuthenticated ? (
                                     <>
                                         <button
+                                            onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}
+                                            className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${location.pathname === '/profile'
+                                                ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
+                                                : 'bg-white/5 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 font-bold hover:bg-white/10'
+                                                }`}
+                                        >
+                                            <User className="w-5 h-5" />
+                                            <span>My Profile</span>
+                                        </button>
+                                        <button
                                             onClick={() => { navigate('/wallet'); setIsMenuOpen(false); }}
-                                            className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/20"
+                                            className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${location.pathname.startsWith('/wallet')
+                                                ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
+                                                : 'bg-white/5 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 font-bold hover:bg-white/10'
+                                                }`}
                                         >
                                             <ShieldCheck className="w-5 h-5" />
                                             <span>Insurance Wallet</span>
                                         </button>
                                         <button
-                                            onClick={() => { navigate('/'); setIsMenuOpen(false); }}
-                                            className={`flex items-center gap-3 p-4 rounded-2xl border ${isHome
-                                                ? 'bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-bold'
-                                                : 'text-slate-600 dark:text-slate-400 font-bold border-transparent'
+                                            onClick={handleHomeClick}
+                                            className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${isHome
+                                                ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
+                                                : 'bg-white/5 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 font-bold hover:bg-white/10'
                                                 }`}
                                         >
                                             <LayoutDashboard className="w-5 h-5" />
@@ -165,7 +197,7 @@ export default function Navbar() {
                                         </button>
                                         <button
                                             onClick={handleLogout}
-                                            className="flex items-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold mt-auto"
+                                            className="flex items-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold mt-4"
                                         >
                                             <LogOut className="w-5 h-5" />
                                             <span>Sign Out</span>
