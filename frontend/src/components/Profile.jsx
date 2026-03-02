@@ -9,12 +9,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const InputField = ({ label, name, value, icon: Icon, type = "text", placeholder, options = null, isEditing, onChange }) => (
-    <div className="space-y-2">
-        <label className="block text-xs font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-auth-muted)' }}>
+    <div className="flex flex-row items-center gap-3 md:flex-col md:items-start md:gap-2">
+        <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest ml-1 flex-shrink-0 w-24 md:w-auto opacity-70" style={{ color: 'var(--text-auth-muted)' }}>
             {label}
         </label>
-        <div className={`relative group transition-all duration-300 ${!isEditing ? 'opacity-80' : ''}`}>
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-brand-accent" style={{ color: 'var(--text-auth-muted)' }}>
+        <div className={`relative group transition-all duration-300 ${!isEditing ? 'opacity-80' : ''} flex-1 w-full`}>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-brand-accent scale-90 md:scale-100" style={{ color: 'var(--text-auth-muted)' }}>
                 <Icon className="w-5 h-5" />
             </div>
 
@@ -23,7 +23,7 @@ const InputField = ({ label, name, value, icon: Icon, type = "text", placeholder
                     name={name}
                     value={value}
                     onChange={onChange}
-                    className="w-full border rounded-2xl pl-11 pr-5 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-all font-bold text-sm md:text-base appearance-none cursor-pointer"
+                    className="w-full border rounded-xl md:rounded-2xl pl-10 md:pl-11 pr-5 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-all font-bold text-sm md:text-base appearance-none cursor-pointer"
                     style={{
                         backgroundColor: 'var(--bg-auth-input)',
                         borderColor: 'var(--border-auth-card)',
@@ -40,7 +40,7 @@ const InputField = ({ label, name, value, icon: Icon, type = "text", placeholder
                     value={value}
                     readOnly={!isEditing || name === 'email'}
                     onChange={onChange}
-                    className={`w-full border rounded-2xl pl-11 pr-5 py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-all font-bold text-sm md:text-base ${(!isEditing || name === 'email') ? 'border-transparent bg-transparent shadow-none' : 'bg-[var(--bg-auth-input)] border-[var(--border-auth-card)]'
+                    className={`w-full border rounded-xl md:rounded-2xl pl-10 md:pl-11 pr-5 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-all font-bold text-sm md:text-base ${(!isEditing || name === 'email') ? 'border-transparent bg-transparent shadow-none' : 'bg-[var(--bg-auth-input)] border-[var(--border-auth-card)]'
                         }`}
                     style={{
                         color: 'var(--text-auth-primary)'
@@ -257,9 +257,9 @@ const Profile = () => {
                     )}
                 </AnimatePresence>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 md:gap-y-8">
                     {/* Basic Info */}
-                    <div className="space-y-6">
+                    <div className="space-y-3 md:space-y-6">
                         <h3 className="text-xs font-black uppercase tracking-[0.3em] text-brand-accent border-b border-brand-accent/20 pb-2">Personal Details</h3>
 
                         <InputField
@@ -316,7 +316,7 @@ const Profile = () => {
                     </div>
 
                     {/* Contact & Professional */}
-                    <div className="space-y-6">
+                    <div className="space-y-3 md:space-y-6">
                         <h3 className="text-xs font-black uppercase tracking-[0.3em] text-brand-accent border-b border-brand-accent/20 pb-2">Professional & Lifestyle</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

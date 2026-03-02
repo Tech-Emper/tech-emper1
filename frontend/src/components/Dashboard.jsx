@@ -1,4 +1,4 @@
-import { Shield, Heart, User, RefreshCw, MapPin, Users, Sparkles, HeartPulse, CheckCircle2, Info, ChevronUp, ChevronDown, LayoutGrid, List, ArrowLeft } from 'lucide-react';
+import { Shield, Heart, User, RefreshCw, MapPin, Users, Sparkles, HeartPulse, CheckCircle2, Info, ChevronUp, ChevronDown, LayoutGrid, List, ArrowLeft, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { useThemeStyles } from '../hooks/useThemeStyles';
@@ -137,15 +137,34 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                     >
                         {/* Gap Analysis Dashboard */}
                         <div className="grid grid-cols-1 gap-6">
+                            {/* Profile Context */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* <div className="flex items-center gap-3 p-4 rounded-2xl border" style={{
+                    color: 'var(--text-auth-label)',
+                    backgroundColor: 'var(--bg-auth-input)',
+                    borderColor: 'var(--border-auth-card)'
+                }}>
+                    <MapPin className="w-4 h-4 text-brand-accent" />
+                    <span className="text-xs uppercase font-black tracking-widest">City: <strong style={{ color: 'var(--text-auth-primary)' }}>{city}</strong></span>
+                </div> */}
+                                <div className="flex items-center gap-3 p-4 rounded-2xl border" style={{
+                                    color: 'var(--text-auth-label)',
+                                    backgroundColor: 'var(--bg-auth-input)',
+                                    borderColor: 'var(--border-auth-card)'
+                                }}>
+                                    <Users className="w-4 h-4 text-brand-accent" />
+                                    <span className="text-xs uppercase font-black tracking-widest">Family: <strong style={{ color: 'var(--text-auth-primary)' }}>{activeDependents.join(', ') || 'Self Only'}</strong></span>
+                                </div>
+                            </div>
                             {/* Life Insurance Gap */}
                             <div className="border rounded-3xl p-6 relative overflow-hidden group" style={{
                                 backgroundColor: 'var(--bg-auth-input)',
                                 borderColor: 'var(--border-auth-card)'
                             }}>
-                                <div className="flex justify-between items-start mb-6">
+                                <div className="flex flex-col justify-between items-start mb-4 sm:flex-row">
                                     <div>
                                         <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
-                                            <Heart className="w-5 h-5 text-orange-500" /> Life Insurance Gap
+                                            <Heart className="w-5 h-5 text-orange-500" /> Life Insurance
                                         </h4>
                                         <p className="text-xs mt-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-muted)' }}>Additional protection Suggested</p>
                                     </div>
@@ -154,7 +173,7 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                             <span className={`text-2xl font-black ${lifeGap > 0 ? 'text-orange-500' : 'text-emerald-500'}`}>
                                                 {lifeGap > 0 ? `+${formatLakhs(lifeGap)}` : 'Fully Protected'}
                                             </span>
-                                            <div className="text-[10px] font-bold uppercase" style={{ color: 'var(--text-auth-placeholder)' }}>Gap Amount</div>
+                                            {/* <div className="text-[10px] font-bold uppercase" style={{ color: 'var(--text-auth-placeholder)' }}>Gap Amount</div> */}
                                         </div>
                                     )}
                                 </div>
@@ -187,10 +206,10 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                 backgroundColor: 'var(--bg-auth-input)',
                                 borderColor: 'var(--border-auth-card)'
                             }}>
-                                <div className="flex justify-between items-start mb-6">
+                                <div className="flex flex-col justify-between items-start mb-4 sm:flex-row">
                                     <div>
                                         <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
-                                            <Shield className="w-5 h-5 text-blue-500" /> Health Insurance Gap
+                                            <Shield className="w-5 h-5 text-blue-500" /> Health Insurance
                                         </h4>
                                         <p className="text-xs mt-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-muted)' }}>Suggested Medical Buffer</p>
                                     </div>
@@ -199,7 +218,7 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                                             <span className={`text-2xl font-black ${healthGap > 0 ? 'text-blue-500' : 'text-emerald-500'}`}>
                                                 {healthGap > 0 ? `+${formatLakhs(healthGap)}` : 'Fully Protected'}
                                             </span>
-                                            <div className="text-[10px] font-bold uppercase" style={{ color: 'var(--text-auth-placeholder)' }}>Gap Amount</div>
+                                            {/* <div className="text-[10px] font-bold uppercase" style={{ color: 'var(--text-auth-placeholder)' }}>Gap Amount</div> */}
                                         </div>
                                     )}
                                 </div>
@@ -408,30 +427,10 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                 )}
             </AnimatePresence>
 
-            {/* Profile Context */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 p-4 rounded-2xl border" style={{
-                    color: 'var(--text-auth-label)',
-                    backgroundColor: 'var(--bg-auth-input)',
-                    borderColor: 'var(--border-auth-card)'
-                }}>
-                    <MapPin className="w-4 h-4 text-brand-accent" />
-                    <span className="text-xs uppercase font-black tracking-widest">City: <strong style={{ color: 'var(--text-auth-primary)' }}>{city}</strong></span>
-                </div>
-                <div className="flex items-center gap-3 p-4 rounded-2xl border" style={{
-                    color: 'var(--text-auth-label)',
-                    backgroundColor: 'var(--bg-auth-input)',
-                    borderColor: 'var(--border-auth-card)'
-                }}>
-                    <Users className="w-4 h-4 text-brand-accent" />
-                    <span className="text-xs uppercase font-black tracking-widest">Family: <strong style={{ color: 'var(--text-auth-primary)' }}>{activeDependents.join(', ') || 'Self Only'}</strong></span>
-                </div>
-            </div>
-
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <button
-                    onClick={onUpdatePlan}
+                    // onClick={onUpdatePlan}
                     className={`flex-1 px-4 py-3 md:px-6 md:py-3 rounded-xl font-bold text-sm md:text-base flex items-center justify-center transition-all group active:scale-95 ${isPhase2Incomplete
                         ? 'border'
                         : 'bg-white text-brand-dark shadow-xl hover:shadow-white/10'
@@ -442,8 +441,8 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                         color: 'var(--text-auth-muted)'
                     } : {}}
                 >
-                    <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
-                    Start Over
+                    <Phone className="w-4 h-4 mr-2" />
+                    Contact our Agent
                 </button>
 
                 {isPhase2Incomplete && (
