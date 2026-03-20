@@ -71,7 +71,8 @@ export const AuthProvider = ({ children }) => {
             }
 
             if (token && email) {
-                setUser({ token, email });
+                const role = email === 'tech@emper.ai' ? 'superadmin' : 'user';
+                setUser({ token, email, role });
                 await fetchProfile(token);
             }
             setLoading(false);
@@ -108,7 +109,8 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         localStorage.setItem('auth_token', data.access_token);
         localStorage.setItem('auth_email', email);
-        setUser({ token: data.access_token, email });
+        const role = email === 'admin@emper.ai' ? 'superadmin' : 'user';
+        setUser({ token: data.access_token, email, role });
         await fetchProfile(data.access_token);
         return true;
     };

@@ -11,6 +11,7 @@ import { Power, LayoutDashboard, Wallet as WalletIcon, Menu, X, LogOut, Home } f
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/common/Navbar';
 import Profile from './components/Profile';
+import SuperAdmin from './components/SuperAdmin';
 
 // Lazy load wallet components
 const WalletDashboard = lazy(() => import('./components/wallet/WalletDashboard'));
@@ -65,6 +66,7 @@ function MainApp() {
               } />
 
               <Route path="/profile" element={<Profile />} />
+              <Route path="/superadmin" element={<SuperAdmin />} />
 
               <Route path="/wallet" element={
                 <Suspense fallback={<div className="text-white">Loading Wallet...</div>}>

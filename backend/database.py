@@ -102,9 +102,37 @@ class Recommendation(Base):
 
     user = relationship("User", back_populates="recommendations")
 
-# Create tables
+from sqlalchemy import text, inspect
+
+# Create tables and auto-migrate missing columns
 def init_db():
     Base.metadata.create_all(bind=engine)
+    try:
+        inspector = inspect(engine)
+        with engine.begin() as conn:
+            for table_name, table in Base.metadata.tables.items():
+                if inspector.has_table(table_name):
+                    existing_columns = [c["name"] for c in inspector.get_columns(table_name)]
+                    for column in table.columns:
+                        if column.name not in existing_columns:
+                            col_type = column.type.compile(engine.dialect)
+                            default_clause = ""
+                            # Generic fallback for defaults
+                            if "JSON" in str(col_type):
+                                default_clause = " DEFAULT '{}'"
+                            elif "BOOLEAN" in str(col_type).upper():
+                                default_clause = " DEFAULT FALSE"
+                            elif "INTEGER" in str(col_type).upper():
+                                default_clause = " DEFAULT 0"
+                                
+                            alter_stmt = f'ALTER TABLE "{table_name}" ADD COLUMN "{column.name}" {col_type}{default_clause}'
+                            print(f"[AUTO-MIGRATE] Running: {alter_stmt}")
+                            try:
+                                conn.execute(text(alter_stmt))
+                            except Exception as e:
+                                print(f"[AUTO-MIGRATE] Failed to add {column.name}: {e}")
+    except Exception as e:
+        print(f"[AUTO-MIGRATE] Auto-migration failed: {e}")
 
 # Dependency to get db session
 def get_db():
