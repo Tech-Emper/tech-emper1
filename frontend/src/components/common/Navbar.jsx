@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, LogOut, LayoutDashboard, User, ShieldCheck } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, User, ShieldCheck, Building } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
@@ -76,6 +76,18 @@ export default function Navbar({ onHome }) {
 
                     {isAuthenticated ? (
                         <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-white/10">
+                            {user?.role === 'superadmin' && (
+                                <button
+                                    onClick={() => navigate('/superadmin')}
+                                    className={`p-2 rounded-xl border transition-all ${location.pathname === '/superadmin'
+                                        ? 'bg-purple-500 text-white border-purple-500 shadow-lg shadow-purple-500/20'
+                                        : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-purple-500 hover:bg-purple-500/10'
+                                        }`}
+                                    title="Super Admin"
+                                >
+                                    <Building className="w-5 h-5" />
+                                </button>
+                            )}
                             <button
                                 onClick={() => navigate('/profile')}
                                 className={`p-2 rounded-xl border transition-all ${location.pathname === '/profile'
@@ -165,6 +177,18 @@ export default function Navbar({ onHome }) {
                             <div className="flex flex-col gap-4 border-t border-slate-300 dark:border-white/10">
                                 {isAuthenticated ? (
                                     <>
+                                        {user?.role === 'superadmin' && (
+                                            <button
+                                                onClick={() => { navigate('/superadmin'); setIsMenuOpen(false); }}
+                                                className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${location.pathname === '/superadmin'
+                                                    ? 'bg-purple-500 text-white border-purple-500 shadow-lg shadow-purple-500/20'
+                                                    : 'bg-white/5 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 font-bold hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                <Building className="w-5 h-5" />
+                                                <span>Super Admin</span>
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}
                                             className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${location.pathname === '/profile'
