@@ -22,24 +22,44 @@ export default function Step01_Splash({ formData, updateField }) {
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
-                {/* First Name */}
-                <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors" 
-                          style={{ color: 'var(--text-auth-placeholder)' }} />
-                    <input
-                        type="text"
-                        placeholder="Your name"
-                        value={formData.first_name || ""}
-                        onChange={(e) => updateField('first_name', e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 border rounded-2xl focus:ring-2 focus:ring-brand-accent outline-none transition-all font-medium placeholder:opacity-70"
-                        style={{ 
-                            backgroundColor: 'var(--bg-auth-input)',
-                            borderColor: 'var(--border-auth-card)',
-                            color: 'var(--text-auth-primary)',
-                            '--placeholder-color': 'var(--text-auth-placeholder)'
-                        }}
-                    />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 text-lg">*</div>
+                {/* First Name + Last Name */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative group">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors" 
+                              style={{ color: 'var(--text-auth-placeholder)' }} />
+                        <input
+                            type="text"
+                            placeholder="First Name"
+                            value={formData.first_name || ""}
+                            onChange={(e) => updateField('first_name', e.target.value)}
+                            className="w-full pl-12 pr-8 py-4 border rounded-2xl focus:ring-2 focus:ring-brand-accent outline-none transition-all font-medium placeholder:opacity-70"
+                            style={{ 
+                                backgroundColor: 'var(--bg-auth-input)',
+                                borderColor: 'var(--border-auth-card)',
+                                color: 'var(--text-auth-primary)',
+                                '--placeholder-color': 'var(--text-auth-placeholder)'
+                            }}
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-lg">*</div>
+                    </div>
+                    <div className="relative group">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors" 
+                              style={{ color: 'var(--text-auth-placeholder)' }} />
+                        <input
+                            type="text"
+                            placeholder="Last Name"
+                            value={formData.last_name || ""}
+                            onChange={(e) => updateField('last_name', e.target.value)}
+                            className="w-full pl-12 pr-8 py-4 border rounded-2xl focus:ring-2 focus:ring-brand-accent outline-none transition-all font-medium placeholder:opacity-70"
+                            style={{ 
+                                backgroundColor: 'var(--bg-auth-input)',
+                                borderColor: 'var(--border-auth-card)',
+                                color: 'var(--text-auth-primary)',
+                                '--placeholder-color': 'var(--text-auth-placeholder)'
+                            }}
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-lg">*</div>
+                    </div>
                 </div>
 
                 {/* Gender */}

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Building, Plus, Users, Upload, Edit, Save, X, Search, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE_URL } from '../config';
 
 export default function SuperAdmin() {
     const { user } = useAuth();
@@ -12,11 +13,8 @@ export default function SuperAdmin() {
         return <Navigate to="/" replace />;
     }
 
-    // Mock Organizations Data
-    const [organizations, setOrganizations] = useState([
-        { id: '1', name: 'Emper AI', employees: 12 },
-        { id: '2', name: 'Acme Corp', employees: 450 }
-    ]);
+    const [organizations, setOrganizations] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -26,7 +24,28 @@ export default function SuperAdmin() {
     const [editingOrgId, setEditingOrgId] = useState(null);
     const [editOrgName, setEditOrgName] = useState('');
 
-    const handleAddOrganization = (e) => {
+    useEffect(() => {
+        fetchOrganizations();
+    }, []);
+
+    const fetchOrganizations = async () => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${API_BASE_URL}/api/superadmin/organizations`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setOrganizations(data);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddOrganization = async (e) => {
         e.preventDefault();
         const trimmedName = newOrgName.trim();
         if (!trimmedName) {
@@ -34,22 +53,31 @@ export default function SuperAdmin() {
             return;
         }
 
-        const isDuplicate = organizations.some(org => org.name.toLowerCase() === trimmedName.toLowerCase());
-        if (isDuplicate) {
-            setAddError("An organization with this name already exists.");
-            return;
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${API_BASE_URL}/api/superadmin/organizations`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: trimmedName })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                setAddError(err.detail || "Failed to create organization");
+                return;
+            }
+
+            const newOrg = await res.json();
+            setOrganizations([...organizations, newOrg]);
+            setNewOrgName('');
+            setIsAddModalOpen(false);
+            setAddError('');
+        } catch (err) {
+            setAddError("Network error. Please try again.");
         }
-
-        const newOrg = {
-            id: Date.now().toString(),
-            name: trimmedName,
-            employees: 0
-        };
-
-        setOrganizations([...organizations, newOrg]);
-        setNewOrgName('');
-        setIsAddModalOpen(false);
-        setAddError('');
     };
 
     const startEditing = (org) => {
@@ -57,30 +85,67 @@ export default function SuperAdmin() {
         setEditOrgName(org.name);
     };
 
-    const saveEdit = (id) => {
+    const saveEdit = async (id) => {
         const trimmedName = editOrgName.trim();
         if (!trimmedName) {
             alert("Name cannot be empty.");
             return;
         }
 
-        const isDuplicate = organizations.some(org => org.id !== id && org.name.toLowerCase() === trimmedName.toLowerCase());
-        if (isDuplicate) {
-            alert("This name is already taken by another organization.");
-            return;
-        }
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${API_BASE_URL}/api/superadmin/organizations/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: trimmedName })
+            });
 
-        setOrganizations(organizations.map(org =>
-            org.id === id ? { ...org, name: trimmedName } : org
-        ));
-        setEditingOrgId(null);
+            if (!res.ok) {
+                const err = await res.json();
+                alert(err.detail || "Failed to edit");
+                return;
+            }
+            const updatedOrg = await res.json();
+            setOrganizations(organizations.map(org =>
+                org.id === id ? updatedOrg : org
+            ));
+            setEditingOrgId(null);
+        } catch (err) {
+            alert("Network error.");
+        }
     };
 
-    const handleCsvUpload = (e, orgName) => {
+    const handleCsvUpload = async (e, orgId, orgName) => {
         const file = e.target.files[0];
-        if (file) {
-            alert(`Mock Upload: Successfully processed ${file.name} for ${orgName}. Employees added!`);
-            // Reset the input so the same file could be selected again if needed
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${API_BASE_URL}/api/superadmin/organizations/${orgId}/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                alert(err.detail || "Failed to upload CSV");
+            } else {
+                const result = await res.json();
+                alert(result.message);
+                fetchOrganizations();
+            }
+        } catch (err) {
+            alert("Network error during upload.");
+        } finally {
             e.target.value = null;
         }
     };
@@ -180,7 +245,7 @@ export default function SuperAdmin() {
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4">
-                                                <div className="flex items-center justify-end gap-3 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex items-center justify-end gap-3">
                                                     {editingOrgId === org.id ? (
                                                         <>
                                                             <button
@@ -218,7 +283,7 @@ export default function SuperAdmin() {
                                                                     type="file"
                                                                     accept=".csv"
                                                                     className="hidden"
-                                                                    onChange={(e) => handleCsvUpload(e, org.name)}
+                                                                    onChange={(e) => handleCsvUpload(e, org.id, org.name)}
                                                                 />
                                                             </label>
                                                         </>

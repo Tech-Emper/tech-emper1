@@ -42,6 +42,7 @@ try:
     from routers.auth import router as auth_router
     from routers.users import router as users_router
     from routers.recommendations import router as recommendations_router
+    from routers.superadmin import router as superadmin_router
     
     log_now("Modules imported successfully.")
 except Exception as e:
@@ -104,6 +105,7 @@ app.include_router(policy_router)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(recommendations_router)
+app.include_router(superadmin_router)
 
 log_now(f"CORS configured with origins: {origins}")
 log_now("CORS configuration complete.")

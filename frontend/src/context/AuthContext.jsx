@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         localStorage.setItem('auth_token', data.access_token);
         localStorage.setItem('auth_email', email);
-        const role = email === 'admin@emper.ai' ? 'superadmin' : 'user';
+        const role = email === 'tech@emper.ai' ? 'superadmin' : 'user';
         setUser({ token: data.access_token, email, role });
         await fetchProfile(data.access_token);
         return true;

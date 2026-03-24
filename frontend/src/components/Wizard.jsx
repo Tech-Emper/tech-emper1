@@ -7,7 +7,6 @@ import { useAuth } from '../context/AuthContext';
 
 import Step01_Splash from './steps/Step01_Splash';
 import Step02_LifeStage from './steps/Step02_LifeStage';
-import Step03_CareerStage from './steps/Step03_CareerStage';
 import Step04_FinancialReality from './steps/Step04_FinancialReality';
 import Step05_HealthSnapshot from './steps/Step05_HealthSnapshot';
 import Step05_Results from './steps/Step05_Results';
@@ -23,6 +22,7 @@ export default function Wizard({ onBack }) {
     const hasInitialized = useRef(false);
     const [formData, setFormData] = useState({
         first_name: "",
+        last_name: "",
         city: "",
         mobile: "",
         marital_status: "Single",
@@ -155,6 +155,7 @@ export default function Wizard({ onBack }) {
         if (stepToCheck === 1) {
             return (
                 formData.first_name?.trim() !== "" &&
+                formData.last_name?.trim() !== "" &&
                 formData.city !== "" &&
                 formData.mobile?.length === 10 &&
                 formData.gender !== ""
@@ -164,28 +165,25 @@ export default function Wizard({ onBack }) {
             return formData.dob !== "";
         }
         if (stepToCheck === 3) {
-            return formData.career_stage !== "";
-        }
-        if (stepToCheck === 4) {
             return (
                 formData.income_level !== "" &&
                 formData.company_name?.trim() !== "" &&
                 formData.industry_type !== ""
             );
         }
-        if (stepToCheck === 5) {
+        if (stepToCheck === 4) {
             return (
                 formData.smoking_status !== "" &&
                 formData.lifestyle !== ""
             );
         }
-        if (stepToCheck === 7) {
+        if (stepToCheck === 6) {
             const lifeValid = !formData.has_life_insurance || (formData.existing_life_cover_val > 0);
             const healthValid = !formData.has_health_insurance || (formData.existing_health_cover_val > 0);
             const parentsValid = !formData.parents_covered || (formData.parents_health_cover_val > 0);
             return lifeValid && healthValid && parentsValid;
         }
-        if (stepToCheck === 8) {
+        if (stepToCheck === 7) {
             const lifeValid = !formData.has_life_insurance || (
                 (formData.life_provider === 'Other' ? formData.life_provider_custom?.trim() : formData.life_provider) &&
                 (formData.life_policy_name === 'Other' ? formData.life_policy_name_custom?.trim() : formData.life_policy_name)
@@ -250,7 +248,7 @@ export default function Wizard({ onBack }) {
             setResult(data);
             setHistory(prev => [data, ...prev]);
 
-            const nextStep = 6;
+            const nextStep = 5;
             setStep(nextStep);
             saveProgress(nextStep, formData);
         } catch (error) {
@@ -308,13 +306,12 @@ export default function Wizard({ onBack }) {
     const steps = [
         { id: 1, title: "Start", icon: <Sparkles className="w-5 h-5" /> },
         { id: 2, title: "Life", icon: <Heart className="w-5 h-5" /> },
-        { id: 3, title: "Career", icon: <Briefcase className="w-5 h-5" /> },
-        { id: 4, title: "Reality", icon: <Briefcase className="w-5 h-5" /> },
-        { id: 5, title: "Health", icon: <Sparkles className="w-5 h-5" /> },
-        { id: 6, title: "Results", icon: <Check className="w-5 h-5" /> },
-        { id: 7, title: "Coverage", icon: <Shield className="w-5 h-5" /> },
-        { id: 8, title: "History", icon: <Briefcase className="w-5 h-5" /> },
-        { id: 9, title: "Match", icon: <Sparkles className="w-5 h-5" /> }
+        { id: 3, title: "Reality", icon: <Briefcase className="w-5 h-5" /> },
+        { id: 4, title: "Health", icon: <Sparkles className="w-5 h-5" /> },
+        { id: 5, title: "Results", icon: <Check className="w-5 h-5" /> },
+        { id: 6, title: "Coverage", icon: <Shield className="w-5 h-5" /> },
+        { id: 7, title: "History", icon: <Briefcase className="w-5 h-5" /> },
+        { id: 8, title: "Match", icon: <Sparkles className="w-5 h-5" /> }
     ];
 
     if (initialLoading) {
@@ -480,7 +477,7 @@ export default function Wizard({ onBack }) {
                         onCompleteExistingDetails={() => {
                             hasInitialized.current = true;
                             setView('wizard');
-                            setStep(7);
+                            setStep(6);
                         }}
                     />
                 </div>
@@ -499,17 +496,16 @@ export default function Wizard({ onBack }) {
                     <AnimatePresence mode="wait" initial={false}>
                         {step === 1 && <Step01_Splash key="step1" formData={formData} updateField={updateField} />}
                         {step === 2 && <Step02_LifeStage key="step2" formData={formData} updateField={updateField} />}
-                        {step === 3 && <Step03_CareerStage key="step3" formData={formData} updateField={updateField} />}
-                        {step === 4 && <Step04_FinancialReality key="step4" formData={formData} updateField={updateField} />}
-                        {step === 5 && <Step05_HealthSnapshot key="step5" formData={formData} updateField={updateField} />}
-                        {step === 6 && <Step05_Results key="step6" result={result} formData={formData} />}
-                        {step === 7 && <Step06_ExistingCoverage key="step7" formData={formData} updateField={updateField} />}
-                        {step === 8 && <Step07_ExistingPolicyDetails key="step8" formData={formData} updateField={updateField} />}
-                        {step === 9 && <Step09_ProductRecommendations key="step9" formData={formData} gapResult={result} onComplete={saveSafetyNet} />}
+                        {step === 3 && <Step04_FinancialReality key="step3" formData={formData} updateField={updateField} />}
+                        {step === 4 && <Step05_HealthSnapshot key="step4" formData={formData} updateField={updateField} />}
+                        {step === 5 && <Step05_Results key="step5" result={result} formData={formData} />}
+                        {step === 6 && <Step06_ExistingCoverage key="step6" formData={formData} updateField={updateField} />}
+                        {step === 7 && <Step07_ExistingPolicyDetails key="step7" formData={formData} updateField={updateField} />}
+                        {step === 8 && <Step09_ProductRecommendations key="step8" formData={formData} gapResult={result} onComplete={saveSafetyNet} />}
                     </AnimatePresence>
 
                     {/* Navigation Buttons */}
-                    {step < 9 && (
+                    {step < 8 && (
                         <div className="flex justify-between items-center pt-6 md:pt-8 mt-6 md:mt-8"
                             style={{ borderTopColor: 'var(--border-auth-card)', borderTopWidth: '1px' }}>
                             <button
@@ -526,7 +522,7 @@ export default function Wizard({ onBack }) {
 
                             <button
                                 onClick={
-                                    step === 5 ? (isStepValid() ? fetchRecommendation : () => alert("Please fill mandatory fields.")) :
+                                    step === 4 ? (isStepValid() ? fetchRecommendation : () => alert("Please fill mandatory fields.")) :
                                         handleNext
                                 }
                                 disabled={loading}
@@ -538,11 +534,11 @@ export default function Wizard({ onBack }) {
                             >
                                 <span className="relative z-10 flex items-center">
                                     {loading ? 'Computing...' :
-                                        (step === 1 || step === 2 || step === 3 || step === 7 || step === 9) ? 'Next' :
-                                            step === 4 ? 'Continue' :
-                                                step === 5 ? 'Analyze My Needs' :
-                                                    step === 6 ? 'Identify Gaps' :
-                                                        step === 8 ? 'Recommend Plans' : 'Next'
+                                        (step === 1 || step === 2 || step === 6 || step === 8) ? 'Next' :
+                                            step === 3 ? 'Continue' :
+                                                step === 4 ? 'Analyze My Needs' :
+                                                    step === 5 ? 'Identify Gaps' :
+                                                        step === 7 ? 'Recommend Plans' : 'Next'
                                     }
                                     {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
                                 </span>

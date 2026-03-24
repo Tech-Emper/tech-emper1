@@ -1,8 +1,24 @@
 from pydantic import BaseModel
 from typing import Optional, Dict
+class OrganizationBase(BaseModel):
+    name: str
+
+class OrganizationCreate(OrganizationBase):
+    pass
+
+class OrganizationResponse(OrganizationBase):
+    id: int
+    employees: int
+    
+    class Config:
+        from_attributes = True
 
 class UserData(BaseModel):
+    organization_id: Optional[int] = None
+    role: Optional[str] = "user"
+    is_otp_verified: Optional[bool] = False
     first_name: Optional[str] = ""
+    last_name: Optional[str] = ""
     dob: Optional[str] = ""
     mobile: Optional[str] = ""
     secondary_phone: Optional[str] = ""
@@ -68,12 +84,14 @@ class PolicyRecommendationRequest(BaseModel):
     health_source: Optional[str] = ""
     # Profile context
     first_name: Optional[str] = ""
+    last_name: Optional[str] = ""
     age: Optional[int] = 30
     income_level: Optional[str] = ""
     city: Optional[str] = ""
 
 class ProfileSyncRequest(BaseModel):
     first_name: Optional[str] = None
+    last_name: Optional[str] = None
     dob: Optional[str] = None
     gender: Optional[str] = None
     city: Optional[str] = None
