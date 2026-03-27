@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 import { API_BASE_URL } from '../config';
-import { ArrowRight, ArrowLeft, Shield, Briefcase, User, Heart, Sparkles, Check } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Briefcase, FileText, User, Heart, Sparkles, Check, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,8 +10,8 @@ import Step02_LifeStage from './steps/Step02_LifeStage';
 import Step04_FinancialReality from './steps/Step04_FinancialReality';
 import Step05_HealthSnapshot from './steps/Step05_HealthSnapshot';
 import Step05_Results from './steps/Step05_Results';
-import Step06_ExistingCoverage from './steps/Step06_ExistingCoverage';
-import Step07_ExistingPolicyDetails from './steps/Step07_ExistingPolicyDetails';
+import Step05b_PolicyEntry from './steps/Step05b_PolicyEntry';
+import Step07_GapAnalysis from './steps/Step07_GapAnalysis';
 import Step09_ProductRecommendations from './steps/Step09_ProductRecommendations';
 import Dashboard from './Dashboard';
 
@@ -177,23 +177,7 @@ export default function Wizard({ onBack }) {
                 formData.lifestyle !== ""
             );
         }
-        if (stepToCheck === 6) {
-            const lifeValid = !formData.has_life_insurance || (formData.existing_life_cover_val > 0);
-            const healthValid = !formData.has_health_insurance || (formData.existing_health_cover_val > 0);
-            const parentsValid = !formData.parents_covered || (formData.parents_health_cover_val > 0);
-            return lifeValid && healthValid && parentsValid;
-        }
-        if (stepToCheck === 7) {
-            const lifeValid = !formData.has_life_insurance || (
-                (formData.life_provider === 'Other' ? formData.life_provider_custom?.trim() : formData.life_provider) &&
-                (formData.life_policy_name === 'Other' ? formData.life_policy_name_custom?.trim() : formData.life_policy_name)
-            );
-            const healthValid = !formData.has_health_insurance || (
-                (formData.health_provider === 'Other' ? formData.health_provider_custom?.trim() : formData.health_provider) &&
-                (formData.health_policy_name === 'Other' ? formData.health_policy_name_custom?.trim() : formData.health_policy_name)
-            );
-            return lifeValid && healthValid;
-        }
+        // Steps 5, 6, 7, 8 handle their own flow
         return true;
     };
 
@@ -309,9 +293,9 @@ export default function Wizard({ onBack }) {
         { id: 3, title: "Reality", icon: <Briefcase className="w-5 h-5" /> },
         { id: 4, title: "Health", icon: <Sparkles className="w-5 h-5" /> },
         { id: 5, title: "Results", icon: <Check className="w-5 h-5" /> },
-        { id: 6, title: "Coverage", icon: <Shield className="w-5 h-5" /> },
-        { id: 7, title: "History", icon: <Briefcase className="w-5 h-5" /> },
-        { id: 8, title: "Match", icon: <Sparkles className="w-5 h-5" /> }
+        { id: 6, title: "Policies", icon: <FileText className="w-5 h-5" /> },
+        { id: 7, title: "Gap", icon: <Shield className="w-5 h-5" /> },
+        { id: 8, title: "Match", icon: <Sparkles className="w-5 h-5" /> },
     ];
 
     if (initialLoading) {
@@ -325,7 +309,7 @@ export default function Wizard({ onBack }) {
 
     return (
         <div className="w-full max-w-2xl mx-auto px-4">
-            <div className="min-[1200px]:fixed min-[1200px]:top-24 min-[1200px]:left-8 mb-4 min-[1200px]:mb-0 z-50">
+            {/* <div className="min-[1200px]:fixed min-[1200px]:top-24 min-[1200px]:left-8 mb-4 min-[1200px]:mb-0 z-50">
                 <button
                     onClick={onBack}
                     className="flex items-center gap-2 text-xs font-black uppercase tracking-widest hover:text-brand-accent transition-all py-2 px-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg hover:scale-105"
@@ -334,7 +318,7 @@ export default function Wizard({ onBack }) {
                     <ArrowLeft className="w-4 h-4" />
                     Back to Dashboard
                 </button>
-            </div>
+            </div> */}
 
             {/* Resumption Prompt Overlay */}
             <AnimatePresence>
@@ -499,13 +483,19 @@ export default function Wizard({ onBack }) {
                         {step === 3 && <Step04_FinancialReality key="step3" formData={formData} updateField={updateField} />}
                         {step === 4 && <Step05_HealthSnapshot key="step4" formData={formData} updateField={updateField} />}
                         {step === 5 && <Step05_Results key="step5" result={result} formData={formData} />}
-                        {step === 6 && <Step06_ExistingCoverage key="step6" formData={formData} updateField={updateField} />}
-                        {step === 7 && <Step07_ExistingPolicyDetails key="step7" formData={formData} updateField={updateField} />}
+                        {step === 6 && <Step05b_PolicyEntry key="step6" formData={formData} updateField={updateField} onDone={(updates = {}) => {
+                            const ns = 7;
+                            setStep(ns);
+                            const mergedData = { ...formData, ...updates };
+                            setFormData(mergedData);
+                            saveProgress(ns, mergedData);
+                        }} />}
+                        {step === 7 && <Step07_GapAnalysis key="step7" formData={formData} result={result} onNext={() => { const ns = 8; setStep(ns); saveProgress(ns); }} />}
                         {step === 8 && <Step09_ProductRecommendations key="step8" formData={formData} gapResult={result} onComplete={saveSafetyNet} />}
                     </AnimatePresence>
 
-                    {/* Navigation Buttons */}
-                    {step < 8 && (
+                    {/* Navigation — hidden on step 6, 7, 8 which have their own actions */}
+                    {step < 6 && (
                         <div className="flex justify-between items-center pt-6 md:pt-8 mt-6 md:mt-8"
                             style={{ borderTopColor: 'var(--border-auth-card)', borderTopWidth: '1px' }}>
                             <button
@@ -534,11 +524,10 @@ export default function Wizard({ onBack }) {
                             >
                                 <span className="relative z-10 flex items-center">
                                     {loading ? 'Computing...' :
-                                        (step === 1 || step === 2 || step === 6 || step === 8) ? 'Next' :
+                                        (step === 1 || step === 2) ? 'Next' :
                                             step === 3 ? 'Continue' :
                                                 step === 4 ? 'Analyze My Needs' :
-                                                    step === 5 ? 'Identify Gaps' :
-                                                        step === 7 ? 'Recommend Plans' : 'Next'
+                                                    step === 5 ? 'Identify Gaps' : 'Next'
                                     }
                                     {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
                                 </span>
