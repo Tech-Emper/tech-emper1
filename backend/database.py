@@ -86,6 +86,7 @@ class User(Base):
     
     # JSON field for dependents structure
     dependents_data = Column(JSON)
+    insured_members = Column(JSON, default=dict)
     num_children = Column(Integer, default=0)
     is_smoker = Column(Boolean, default=False)
     current_step = Column(Integer, default=1)

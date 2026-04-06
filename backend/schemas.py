@@ -39,6 +39,8 @@ class UserData(BaseModel):
     is_smoker: Optional[bool] = False
     dependents: Optional[Dict[str, bool]] = {}
     num_children: Optional[int] = 0
+    insured_members: Optional[Dict] = {}
+    
     # Phase 2 Fields
     has_life_insurance: Optional[bool] = False
     existing_life_cover: Optional[str] = ""

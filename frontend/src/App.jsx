@@ -1,8 +1,8 @@
 import { useState, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Wizard from './components/Wizard';
-import FeatureSelector from './components/FeatureSelector';
-import ReverseGapFlow from './components/ReverseGapFlow';
+import LandingPage from './components/LandingPage';
+import DashboardWrapped from './components/DashboardWrapped';
 import Background from './components/Background';
 import Login from './components/Login';
 import ThemeToggle from './components/ThemeToggle';
@@ -23,8 +23,7 @@ const PolicyDetailView = lazy(() => import('./components/wallet/PolicyDetailView
 
 
 function MainApp() {
-  const { isAuthenticated, loading } = useAuth();
-  const [selectedFeature, setSelectedFeature] = useState(null);
+  const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -37,7 +36,7 @@ function MainApp() {
   return (
     <div className="min-h-screen flex flex-col items-center pt-16 md:pt-24 p-4 md:p-8 relative overflow-x-hidden">
       <Background />
-      <Navbar onHome={() => setSelectedFeature(null)} />
+      <Navbar onHome={() => window.location.href = '/'} />
 
       {/* <div className="text-center mb-8 md:mb-12 z-10 w-full px-2">
         <h1 className="text-3xl md:text-6xl font-black mb-2 md:mb-4 tracking-tight" style={{ color: 'var(--text-auth-primary)' }}>
@@ -48,21 +47,20 @@ function MainApp() {
 
       <div className="z-10 w-full max-w-7xl flex-1 flex flex-col items-center">
         <Routes>
-          {!isAuthenticated ? (
-            <Route path="*" element={<Login />} />
-          ) : (
+          {/* Public / Semi-Public Routes */}
+          <Route path="/" element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/details" element={
+            <div className="w-full flex justify-center">
+              <Wizard onBack={() => window.location.href = '/'} />
+            </div>
+          } />
+
+          {/* Protected Routes */}
+          {isAuthenticated && (
             <>
-              <Route path="/" element={
-                <div className="w-full flex justify-center">
-                  {!selectedFeature ? (
-                    <FeatureSelector onSelectFeature={setSelectedFeature} />
-                  ) : selectedFeature === 'wizard' ? (
-                    <Wizard onBack={() => setSelectedFeature(null)} />
-                  ) : (
-                    <ReverseGapFlow onBack={() => setSelectedFeature(null)} />
-                  )
-                  }
-                </div>
+              <Route path="/dashboard" element={
+                (user && user.current_step < 9) ? <Navigate to="/details" replace /> : <DashboardWrapped />
               } />
 
               <Route path="/profile" element={<Profile />} />
@@ -107,6 +105,9 @@ function MainApp() {
               <Route path="/wallet/*" element={<Navigate to="/wallet" replace />} />
             </>
           )}
+
+          {/* Catch-all Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </div>

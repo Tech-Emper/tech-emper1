@@ -67,6 +67,7 @@ def get_user_profile(user_payload = Depends(get_current_user), db: Session = Dep
             "smoking_status": user.smoking_status,
             "family_health_history": user.family_health_history,
             "dependents": user.dependents_data,
+            "insured_members": user.insured_members,
             "num_children": user.num_children,
             "company_name": user.company_name,
             "industry_type": user.industry_type,
@@ -125,6 +126,7 @@ def save_progress(request: ProgressRequest, user_payload = Depends(get_current_u
     user.company_name = data.company_name
     user.industry_type = data.industry_type
     user.dependents_data = data.dependents
+    user.insured_members = data.insured_members
     user.num_children = data.num_children
     user.secondary_phone = data.secondary_phone
     

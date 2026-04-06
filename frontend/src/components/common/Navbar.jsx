@@ -73,19 +73,19 @@ export default function Navbar({ onHome }) {
                     </a> */}
 
                     {/* <ThemeToggle /> */}
-                    <button
-                        onClick={handleHomeClick}
-                        className={`p-2 rounded-xl border transition-all ${isHome
-                            ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
-                            : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10'
-                            }`}
-                        title="Home"
-                    >
-                        <Home className="w-5 h-5" />
-                    </button>
 
                     {isAuthenticated ? (
                         <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-white/10">
+                            <button
+                                onClick={handleHomeClick}
+                                className={`p-2 rounded-xl border transition-all ${isHome
+                                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
+                                    : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10'
+                                    }`}
+                                title="Home"
+                            >
+                                <Home className="w-5 h-5" />
+                            </button>
                             {user?.role === 'superadmin' && (
                                 <button
                                     onClick={() => navigate('/superadmin')}
@@ -139,16 +139,18 @@ export default function Navbar({ onHome }) {
                 {/* Mobile Menu Toggle */}
                 <div className="flex md:hidden items-center gap-3">
                     {/* <ThemeToggle /> */}
-                    <button
-                        onClick={handleHomeClick}
-                        className={`p-2 rounded-lg border transition-all ${isHome
-                            ? 'bg-emerald-500 text-white border-emerald-500'
-                            : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500'
-                            }`}
-                        title="Home"
-                    >
-                        <Home className="w-5 h-5" />
-                    </button>
+                    {isAuthenticated && (
+                        <button
+                            onClick={handleHomeClick}
+                            className={`p-2 rounded-lg border transition-all ${isHome
+                                ? 'bg-emerald-500 text-white border-emerald-500'
+                                : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500'
+                                }`}
+                            title="Home"
+                        >
+                            <Home className="w-5 h-5" />
+                        </button>
+                    )}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className={`p-2 rounded-lg border transition-all ${isMenuOpen
@@ -185,13 +187,15 @@ export default function Navbar({ onHome }) {
                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Menu</p>
                                 <div className="flex items-center gap-3">
                                     {/* <ThemeToggle /> */}
-                                    <button
-                                        onClick={handleHomeClick}
-                                        className="p-2 rounded-xl bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-emerald-500 transition-all"
-                                        title="Home"
-                                    >
-                                        <Home className="w-5 h-5" />
-                                    </button>
+                                    {isAuthenticated && (
+                                        <button
+                                            onClick={handleHomeClick}
+                                            className="p-2 rounded-xl bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-emerald-500 transition-all"
+                                            title="Home"
+                                        >
+                                            <Home className="w-5 h-5" />
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => setIsMenuOpen(false)}
                                         className="p-2 rounded-xl bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-emerald-500 transition-all"

@@ -8,17 +8,23 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/otp")
 async def login(request: LoginRequest):
+    import os
     email = request.email.lower().strip()
     otp = generate_otp()
     
+    # Store OTP first — so even if email fails, local bypass still works
+    store_otp(email, otp)
+
     # Send email
     success, error_msg = send_otp_email(email, otp)
-    if not success:
+    
+    # In local/dev environment: don't block login if email sending fails.
+    # The verify endpoint accepts any OTP in non-production mode anyway.
+    is_local = os.getenv("ENVIRONMENT", "local").lower() != "production"
+    if not success and not is_local:
         raise HTTPException(status_code=500, detail=error_msg)
     
-    # Store for verification
-    store_otp(email, otp)
-    return {"message": "OTP sent successfully"}
+    return {"message": "OTP sent successfully" if success else "OTP generated (local dev — any 6-digit code works)"}
 
 @router.post("/verify")
 def verify(request: VerifyRequest, db: Session = Depends(get_db)):

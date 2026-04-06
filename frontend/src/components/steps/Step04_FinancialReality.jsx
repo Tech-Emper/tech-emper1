@@ -1,35 +1,38 @@
+import { useEffect } from 'react';
 import StepWrapper from './StepWrapper';
-import { IndianRupee, Briefcase, Building2, Factory } from 'lucide-react';
+import { IndianRupee, Briefcase, Building2 } from 'lucide-react';
 
 export default function Step04_FinancialReality({ formData, updateField }) {
     const incomeBrackets = [
-        { range: 'Under ₹5 lakhs', tier: 'Essential Tier' },
-        { range: '₹5-7.5 lakhs', tier: 'Standard Tier' },
-        { range: '₹7.5-15 lakhs', tier: 'Enhanced Tier' },
-        { range: '₹15-25 lakhs', tier: 'Premium Tier' },
-        { range: '₹25-40 lakhs', tier: 'Comprehensive Tier' },
-        { range: '₹40+ lakhs', tier: 'Elite Tier' }
+        { range: 'Under ₹5L', tier: 'Essential' },
+        { range: '₹6–10L', tier: 'Standard' },
+        { range: '₹11–20L', tier: 'Enhanced' },
+        { range: '₹21–40L', tier: 'Premium' },
+        { range: '₹40L+', tier: 'Comprehensive' }
     ];
 
-    const industryTypes = [
-        'IT & Software',
-        'Healthcare & Pharma',
-        'Banking & Finance',
-        'Manufacturing',
-        'Education',
-        'Consulting',
-        'Retail & E-commerce',
-        'Government/PSU',
-        'Media & Entertainment',
-        'Construction & Real Estate',
-        'Others'
-    ];
+    // Automatically calculate Career Stage on mount if missing
+    useEffect(() => {
+        if (!formData.career_stage && formData.insured_members?.self?.age) {
+            const age = parseInt(formData.insured_members.self.age, 10);
+            let autoStage = "Launch Pad";
+            if (age >= 25 && age <= 32) autoStage = "Growth Gear";
+            else if (age >= 33 && age <= 39) autoStage = "Peak Performer";
+            else if (age >= 40) autoStage = "Legacy Builder";
+
+            updateField('career_stage', autoStage);
+        }
+    }, [formData.insured_members, formData.career_stage, updateField]);
 
     return (
         <StepWrapper className="space-y-6 md:space-y-8">
             <div className="text-center">
-                <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--text-auth-primary)' }}>Your financial landscape</h2>
-                <p className="text-sm md:text-base" style={{ color: 'var(--text-auth-muted)' }}>This helps us recommend coverage that fits your budget.</p>
+                <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--text-auth-primary)' }}>
+                    {formData.first_name || 'Hey'}, you are <span className="text-brand-accent">{formData.career_stage || 'Launch Pad'}</span>
+                </h2>
+                <p className="text-sm md:text-base" style={{ color: 'var(--text-auth-muted)' }}>
+                    Your work fuels more than just your career. Tell us what you do.
+                </p>
             </div>
 
             <div className="space-y-6">
@@ -54,37 +57,33 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                     </div>
                 </div>
 
-                {/* Industry Type */}
+                {/* Designation */}
                 <div className="space-y-3">
                     <label className="block text-sm font-semibold ml-1 flex items-center gap-2" style={{ color: 'var(--text-auth-label)' }}>
-                        <Factory className="w-4 h-4 text-blue-400" /> Industry Type
+                        <Briefcase className="w-4 h-4 text-blue-400" /> Designation
                     </label>
                     <div className="relative group">
-                        <select
-                            value={formData.industry_type || ""}
-                            onChange={(e) => updateField('industry_type', e.target.value)}
-                            className="w-full p-4 border rounded-xl outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-brand-accent transition-all font-medium"
+                        <input
+                            type="text"
+                            placeholder="e.g. Software Engineer, Manager, Director"
+                            value={formData.employment_type || ""}
+                            onChange={(e) => updateField('employment_type', e.target.value)}
+                            className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-brand-accent outline-none transition-all font-medium"
                             style={{
                                 backgroundColor: 'var(--bg-auth-input)',
                                 borderColor: 'var(--border-auth-card)',
                                 color: 'var(--text-auth-primary)'
                             }}
-                        >
-                            <option value="" disabled style={{ backgroundColor: 'var(--bg-auth-main)' }}>Select Industry</option>
-                            {industryTypes.map(industry => (
-                                <option key={industry} value={industry} style={{ backgroundColor: 'var(--bg-auth-main)' }}>{industry}</option>
-                            ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-xs" style={{ color: 'var(--text-auth-placeholder)' }}>▼</div>
+                        />
                     </div>
                 </div>
 
                 <div className="space-y-3">
                     <label className="block text-sm font-semibold ml-1 flex items-center gap-2" style={{ color: 'var(--text-auth-label)' }}>
-                        <IndianRupee className="w-4 h-4 text-emerald-400" /> Annual Income Bracket
+                        <IndianRupee className="w-4 h-4 text-emerald-400" /> Annual Income
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                        {incomeBrackets.map(bracket => {
+                        {incomeBrackets.map((bracket, index) => {
                             const value = `${bracket.range} - ${bracket.tier}`;
                             return (
                                 <button
@@ -94,7 +93,7 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                                         formData.income_level === value 
                                             ? 'bg-brand-accent/20 border-brand-accent' 
                                             : 'hover:bg-opacity-10'
-                                    }`}
+                                    } ${index === incomeBrackets.length - 1 ? 'sm:col-span-2' : ''}`}
                                     style={formData.income_level !== value ? {
                                         backgroundColor: 'var(--bg-auth-input)',
                                         borderColor: 'var(--border-auth-card)',
@@ -104,7 +103,7 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                                     }}
                                 >
                                     <div className="flex flex-col">
-                                        <span className="text-xs md:text-sm font-bold">{bracket.range}</span>
+                                        <span className="text-sm font-bold">{bracket.range}</span>
                                         <span className={`text-[10px] uppercase tracking-widest font-black transition-colors ${
                                             formData.income_level === value 
                                                 ? 'text-brand-accent' 
@@ -112,7 +111,7 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                                         }`} style={formData.income_level !== value ? {
                                             color: 'var(--text-auth-placeholder)'
                                         } : {}}>
-                                            {bracket.tier}
+                                            {bracket.tier} Tier
                                         </span>
                                     </div>
                                 </button>
@@ -121,8 +120,6 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                     </div>
                 </div>
             </div>
-
-            
         </StepWrapper>
     );
 }

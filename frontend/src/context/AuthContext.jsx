@@ -10,9 +10,11 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async (token) => {
+        const activeToken = token || localStorage.getItem('auth_token');
+        if (!activeToken) return;
         try {
             const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${activeToken}` }
             });
             if (response.ok) {
                 const data = await response.json();
@@ -133,7 +135,7 @@ export const AuthProvider = ({ children }) => {
             verify,
             logout,
             updateProfile,
-            refreshProfile: () => user?.token && fetchProfile(user.token),
+            refreshProfile: () => fetchProfile(),
             isAuthenticated: !!user
         }}>
             {children}

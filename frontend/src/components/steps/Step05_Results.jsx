@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import StepWrapper from './StepWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Heart, Shield, Code, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Heart, Shield, Code, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 
-export default function Step05_Results({ result, formData }) {
+export default function Step05_Results({ result, formData, onNext }) {
     const [showPrompt, setShowPrompt] = useState(false);
     const [expandedReason, setExpandedReason] = useState(false);
     const [expandedFeatureList, setExpandedFeatureList] = useState(false);
@@ -73,13 +73,22 @@ export default function Step05_Results({ result, formData }) {
             </div>
 
             <div className="max-w-md mx-auto">
-                <h2 className="text-2xl md:text-3xl font-extrabold mb-2" style={{ color: 'var(--text-auth-primary)' }}>Your Personalized Shield</h2>
+                <h2 className="text-2xl md:text-3xl font-extrabold mb-2" style={{ color: 'var(--text-auth-primary)' }}>Your insurance target</h2>
                 <p className="text-xs md:text-sm leading-relaxed px-4 font-medium italic" style={{ color: 'var(--text-auth-muted)' }}>
-                    {result.tagline || result.details || "We've crafted the perfect plan for your needs."}
+                    {"Your ideal coverage based on life stage, Career and Health score"}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="bg-brand-accent/10 p-4 md:p-6 rounded-2xl border border-brand-accent/20 backdrop-blur-sm relative overflow-hidden"
+                >
+                    <Shield className="w-6 h-6 md:w-8 md:h-8 text-brand-accent mx-auto mb-2 md:mb-3" />
+                    <h3 className="text-[10px] md:text-xs uppercase tracking-widest text-emerald-300 font-bold mb-1">Health Cover</h3>
+                    <p className="text-2xl md:text-3xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{healthCover || "Calculated below"}</p>
+                </motion.div>
+
                 <motion.div
                     whileHover={{ scale: 1.02 }}
                     className="bg-blue-500/10 p-4 md:p-6 rounded-2xl border border-blue-500/20 backdrop-blur-sm relative overflow-hidden"
@@ -89,22 +98,14 @@ export default function Step05_Results({ result, formData }) {
                     <p className="text-2xl md:text-3xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{lifeCover || "Calculated below"}</p>
                 </motion.div>
 
-                <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="bg-brand-accent/10 p-4 md:p-6 rounded-2xl border border-brand-accent/20 backdrop-blur-sm relative overflow-hidden"
-                >
-                    <Shield className="w-6 h-6 md:w-8 md:h-8 text-brand-accent mx-auto mb-2 md:mb-3" />
-                    <h3 className="text-[10px] md:text-xs uppercase tracking-widest text-emerald-300 font-bold mb-1">Health Cover</h3>
-                    <p className="text-2xl md:text-3xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{healthCover || "Calculated below"}</p>
-                </motion.div>
             </div>
 
             {result.reasoning && (
                 <div
                     className="text-left border rounded-2xl overflow-hidden cursor-pointer transition-all group"
-                    style={{ 
-                        backgroundColor: 'var(--bg-auth-input)', 
-                        borderColor: 'var(--border-auth-card)' 
+                    style={{
+                        backgroundColor: 'var(--bg-auth-input)',
+                        borderColor: 'var(--border-auth-card)'
                     }}
                     onClick={() => setExpandedReason(!expandedReason)}
                 >
@@ -126,9 +127,9 @@ export default function Step05_Results({ result, formData }) {
                                     exit={{ height: 0, opacity: 0 }}
                                     className="overflow-hidden"
                                 >
-                                    <p className="text-xs leading-relaxed italic border-t pt-3 mt-1" style={{ 
-                                        color: 'var(--text-auth-muted)', 
-                                        borderTopColor: 'var(--border-auth-card)' 
+                                    <p className="text-xs leading-relaxed italic border-t pt-3 mt-1" style={{
+                                        color: 'var(--text-auth-muted)',
+                                        borderTopColor: 'var(--border-auth-card)'
                                     }}>
                                         {result.reasoning}
                                     </p>
@@ -164,9 +165,9 @@ export default function Step05_Results({ result, formData }) {
                                     <div
                                         key={idx}
                                         className="border rounded-xl transition-colors group cursor-pointer"
-                                        style={{ 
-                                            backgroundColor: 'var(--bg-auth-input)', 
-                                            borderColor: 'var(--border-auth-card)' 
+                                        style={{
+                                            backgroundColor: 'var(--bg-auth-input)',
+                                            borderColor: 'var(--border-auth-card)'
                                         }}
                                         onClick={() => toggleFeature(idx)}
                                     >
@@ -187,9 +188,9 @@ export default function Step05_Results({ result, formData }) {
                                                         exit={{ height: 0, opacity: 0 }}
                                                         className="overflow-hidden"
                                                     >
-                                                        <p className="text-xs leading-relaxed pt-2 border-t mt-2 transition-colors" style={{ 
-                                                            color: 'var(--text-auth-muted)', 
-                                                            borderTopColor: 'var(--border-auth-card)' 
+                                                        <p className="text-xs leading-relaxed pt-2 border-t mt-2 transition-colors" style={{
+                                                            color: 'var(--text-auth-muted)',
+                                                            borderTopColor: 'var(--border-auth-card)'
                                                         }}>
                                                             {feature.reason}
                                                         </p>
@@ -226,9 +227,9 @@ export default function Step05_Results({ result, formData }) {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                             >
-                                <div className="mt-4 text-left bg-black/40 border p-4 rounded-xl font-mono text-[10px] max-w-full overflow-x-auto leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto custom-scrollbar" style={{ 
-                                    borderColor: 'var(--border-auth-card)', 
-                                    color: 'var(--text-auth-muted)' 
+                                <div className="mt-4 text-left bg-black/40 border p-4 rounded-xl font-mono text-[10px] max-w-full overflow-x-auto leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto custom-scrollbar" style={{
+                                    borderColor: 'var(--border-auth-card)',
+                                    color: 'var(--text-auth-muted)'
                                 }}>
                                     <div className="flex items-center justify-between mb-2 pb-2 border-b" style={{ borderBottomColor: 'var(--border-auth-card)' }}>
                                         <span className="text-blue-400 font-bold">RAW PROMPT SENT TO LLM</span>
@@ -241,6 +242,24 @@ export default function Step05_Results({ result, formData }) {
                     </AnimatePresence>
                 </div>
             )}
+
+            {/* CTA to proceed to Policy Entry */}
+            <div className="pt-2 pb-2">
+                <button
+                    onClick={onNext}
+                    className="w-full sm:w-auto mx-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-base shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                    style={{
+                        backgroundColor: 'var(--btn-primary-bg)',
+                        color: 'var(--btn-primary-text)'
+                    }}
+                >
+                    <span>Tell us about your existing policies</span>
+                    <ArrowRight className="w-5 h-5" />
+                </button>
+                <p className="text-xs mt-2 text-center" style={{ color: 'var(--text-auth-muted)' }}>
+                    Already have coverage? Let us factor it in.
+                </p>
+            </div>
 
         </StepWrapper>
     );

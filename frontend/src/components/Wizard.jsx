@@ -6,18 +6,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
 import Step01_Splash from './steps/Step01_Splash';
-import Step02_LifeStage from './steps/Step02_LifeStage';
 import Step04_FinancialReality from './steps/Step04_FinancialReality';
 import Step05_HealthSnapshot from './steps/Step05_HealthSnapshot';
 import Step05_Results from './steps/Step05_Results';
 import Step05b_PolicyEntry from './steps/Step05b_PolicyEntry';
 import Step07_GapAnalysis from './steps/Step07_GapAnalysis';
 import Step09_ProductRecommendations from './steps/Step09_ProductRecommendations';
+import OTPModal from './OTPModal';
 import Dashboard from './Dashboard';
 
 export default function Wizard({ onBack }) {
     const themeStyles = useThemeStyles();
-    const { profile, recommendations, refreshProfile, loading: authLoading } = useAuth();
+    const { profile, recommendations, refreshProfile, loading: authLoading, isAuthenticated, login: sendOtp, verify } = useAuth();
     const [step, setStep] = useState(1);
     const hasInitialized = useRef(false);
     const [formData, setFormData] = useState({
@@ -25,19 +25,28 @@ export default function Wizard({ onBack }) {
         last_name: "",
         city: "",
         mobile: "",
+        email: "",
         marital_status: "Single",
         num_children: 0,
         support_parents: false,
         dob: "",
-        career_stage: "Launch Pad",
-        income_level: "₹5-7.5 lakhs - Standard Tier",
-        employment_type: "Salaried (MNC/Large)",
+        career_stage: "",
+        income_level: "",
+        employment_type: "",
         company_name: "",
         industry_type: "",
-        smoking_status: "Never",
-        family_health_history: ["No significant history"],
-        lifestyle: "Moderately Active",
+        smoking_status: "",
+        family_health_history: [],
+        lifestyle: "",
         gender: "", // Default
+        insured_members: {
+            self: { selected: true, age: '' },
+            spouse: { selected: false, age: '' },
+            son: { count: 0 },
+            daughter: { count: 0 },
+            father: { selected: false, age: '' },
+            mother: { selected: false, age: '' }
+        },
         // Phase 2 Fields
         has_life_insurance: false,
         existing_life_cover: "",
@@ -67,11 +76,24 @@ export default function Wizard({ onBack }) {
     const [view, setView] = useState('wizard'); // 'wizard' or 'dashboard'
     const [showResumePrompt, setShowResumePrompt] = useState(false);
     const [resumeData, setResumeData] = useState(null);
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [tempEmail, setTempEmail] = useState("");
+    const [emailError, setEmailError] = useState("");
+
+    const [otpModalState, setOtpModalState] = useState({ show: false, loading: false, error: null });
 
     // Initial sync from global profile
     useEffect(() => {
         if (!authLoading && profile) {
-            setFormData(prev => ({ ...prev, ...profile }));
+            setFormData(prev => {
+                const merged = { ...prev };
+                Object.keys(profile).forEach(key => {
+                    if (profile[key] !== null && profile[key] !== undefined && profile[key] !== "") {
+                        merged[key] = profile[key];
+                    }
+                });
+                return merged;
+            });
 
             // Only auto-switch to dashboard ONCE on initial load
             if (!hasInitialized.current) {
@@ -153,31 +175,42 @@ export default function Wizard({ onBack }) {
 
     const isStepValid = (stepToCheck = step) => {
         if (stepToCheck === 1) {
-            return (
+            let valid = (
                 formData.first_name?.trim() !== "" &&
                 formData.last_name?.trim() !== "" &&
                 formData.city !== "" &&
-                formData.mobile?.length === 10 &&
-                formData.gender !== ""
+                formData.gender !== "" &&
+                formData.marital_status !== ""
             );
+
+            if (valid && formData.insured_members) {
+                const adults = ['self', 'spouse', 'father', 'mother'];
+                for (let key of adults) {
+                    if (formData.insured_members[key]?.selected) {
+                        const age = formData.insured_members[key].age;
+                        if (!age || age < 18 || age > 100) {
+                            valid = false;
+                        }
+                    }
+                }
+            }
+            return valid;
         }
         if (stepToCheck === 2) {
-            return formData.dob !== "";
+            return (
+                formData.company_name?.trim() !== "" &&
+                formData.employment_type?.trim() !== "" &&
+                formData.income_level !== ""
+            );
         }
         if (stepToCheck === 3) {
             return (
-                formData.income_level !== "" &&
-                formData.company_name?.trim() !== "" &&
-                formData.industry_type !== ""
-            );
-        }
-        if (stepToCheck === 4) {
-            return (
                 formData.smoking_status !== "" &&
-                formData.lifestyle !== ""
+                formData.lifestyle !== "" &&
+                formData.family_health_history?.length > 0
             );
         }
-        // Steps 5, 6, 7, 8 handle their own flow
+        // Steps 4, 5, 6, 7 handle their own flow
         return true;
     };
 
@@ -192,39 +225,35 @@ export default function Wizard({ onBack }) {
         return isStepValid(step);
     };
 
-    const fetchRecommendation = async () => {
+    const fetchRecommendation = async (emailOverride = null) => {
         setLoading(true);
         try {
-            // Prep dependents for calculation
+            // Prep dependents intelligently from insured_members
             const updatedDependents = {};
-            if (formData.marital_status === "Married") updatedDependents["Spouse"] = true;
-            if (formData.num_children > 0) updatedDependents["Children"] = true;
-            if (formData.support_parents) updatedDependents["Parents"] = true;
+            if (formData.insured_members?.spouse?.selected) updatedDependents["Spouse"] = true;
+            if (formData.insured_members?.son?.count > 0 || formData.insured_members?.daughter?.count > 0) updatedDependents["Children"] = true;
+            if (formData.insured_members?.father?.selected || formData.insured_members?.mother?.selected) updatedDependents["Parents"] = true;
 
             const finalPayload = {
                 ...formData,
-                is_smoker: formData.smoking_status !== "Never",
+                ...(emailOverride ? { email: emailOverride } : {}),
+                is_smoker: formData.smoking_status !== "No",
                 dependents: updatedDependents
             };
 
             const token = localStorage.getItem('auth_token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token && token !== 'null' && token !== 'undefined') {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
             const response = await fetch(`${API_BASE_URL}/api/recommend`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers,
                 body: JSON.stringify(finalPayload)
             });
 
             if (!response.ok) {
-                if (response.status === 401) {
-                    alert("Your session has expired. Please log in again.");
-                    localStorage.removeItem('auth_token');
-                    window.location.reload();
-                    return;
-                }
-                const errorData = await response.json();
+                const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.detail || "Failed to fetch recommendation");
             }
 
@@ -232,7 +261,7 @@ export default function Wizard({ onBack }) {
             setResult(data);
             setHistory(prev => [data, ...prev]);
 
-            const nextStep = 5;
+            const nextStep = 4;
             setStep(nextStep);
             saveProgress(nextStep, formData);
         } catch (error) {
@@ -247,6 +276,39 @@ export default function Wizard({ onBack }) {
         const prevStep = step - 1;
         setStep(prevStep);
         saveProgress(prevStep);
+    };
+
+    const handleEmailSubmit = async () => {
+        if (!tempEmail || !tempEmail.includes('@')) {
+            setEmailError("Please enter a valid email address.");
+            return;
+        }
+        setEmailError("");
+        // Update state for future renders
+        updateField('email', tempEmail);
+        setShowEmailModal(false);
+        // Pass email DIRECTLY to avoid React state batching race condition
+        fetchRecommendation(tempEmail);
+    };
+
+    const handleVerifyOtp = async (otpString) => {
+        setOtpModalState(prev => ({ ...prev, loading: true, error: null }));
+        const emailToVerify = formData.email || tempEmail;
+        try {
+            await verify(emailToVerify, otpString);
+            setOtpModalState(prev => ({ ...prev, show: false, loading: false }));
+            
+            // Now fully authenticated, if we were deferred from a step transition:
+            if (otpModalState.nextStep) {
+                const ns = otpModalState.nextStep;
+                setStep(ns);
+                const mergedData = { ...formData, email: emailToVerify, ...(otpModalState.tempUpdates || {}) };
+                setFormData(mergedData);
+                saveProgress(ns, mergedData);
+            }
+        } catch (err) {
+            setOtpModalState(prev => ({ ...prev, error: err.message || "Invalid OTP", loading: false }));
+        }
     };
 
     const saveSafetyNet = async (finalResult) => {
@@ -289,13 +351,12 @@ export default function Wizard({ onBack }) {
 
     const steps = [
         { id: 1, title: "Start", icon: <Sparkles className="w-5 h-5" /> },
-        { id: 2, title: "Life", icon: <Heart className="w-5 h-5" /> },
-        { id: 3, title: "Reality", icon: <Briefcase className="w-5 h-5" /> },
-        { id: 4, title: "Health", icon: <Sparkles className="w-5 h-5" /> },
-        { id: 5, title: "Results", icon: <Check className="w-5 h-5" /> },
-        { id: 6, title: "Policies", icon: <FileText className="w-5 h-5" /> },
-        { id: 7, title: "Gap", icon: <Shield className="w-5 h-5" /> },
-        { id: 8, title: "Match", icon: <Sparkles className="w-5 h-5" /> },
+        { id: 2, title: "Career", icon: <Briefcase className="w-5 h-5" /> },
+        { id: 3, title: "Health", icon: <Heart className="w-5 h-5" /> },
+        { id: 4, title: "Results", icon: <Check className="w-5 h-5" /> },
+        { id: 5, title: "Policies", icon: <FileText className="w-5 h-5" /> },
+        { id: 6, title: "Gap", icon: <Shield className="w-5 h-5" /> },
+        { id: 7, title: "Match", icon: <Sparkles className="w-5 h-5" /> },
     ];
 
     if (initialLoading) {
@@ -461,7 +522,7 @@ export default function Wizard({ onBack }) {
                         onCompleteExistingDetails={() => {
                             hasInitialized.current = true;
                             setView('wizard');
-                            setStep(6);
+                            setStep(4);
                         }}
                     />
                 </div>
@@ -479,23 +540,44 @@ export default function Wizard({ onBack }) {
 
                     <AnimatePresence mode="wait" initial={false}>
                         {step === 1 && <Step01_Splash key="step1" formData={formData} updateField={updateField} />}
-                        {step === 2 && <Step02_LifeStage key="step2" formData={formData} updateField={updateField} />}
-                        {step === 3 && <Step04_FinancialReality key="step3" formData={formData} updateField={updateField} />}
-                        {step === 4 && <Step05_HealthSnapshot key="step4" formData={formData} updateField={updateField} />}
-                        {step === 5 && <Step05_Results key="step5" result={result} formData={formData} />}
-                        {step === 6 && <Step05b_PolicyEntry key="step6" formData={formData} updateField={updateField} onDone={(updates = {}) => {
-                            const ns = 7;
-                            setStep(ns);
-                            const mergedData = { ...formData, ...updates };
-                            setFormData(mergedData);
-                            saveProgress(ns, mergedData);
+                        {step === 2 && <Step04_FinancialReality key="step2" formData={formData} updateField={updateField} />}
+                        {step === 3 && <Step05_HealthSnapshot key="step3" formData={formData} updateField={updateField} />}
+                        {step === 4 && <Step05_Results key="step4" result={result} formData={formData} onNext={() => { const ns = 5; setStep(ns); saveProgress(ns); }} />}
+                        {step === 5 && <Step05b_PolicyEntry key="step5" formData={formData} updateField={updateField} onDone={async (updates = {}) => {
+                            const ns = 6;
+                            if (!isAuthenticated) {
+                                // Resolve which email to use - tempEmail is most reliable as formData.email update is async
+                                const emailToUse = formData.email || tempEmail;
+                                if (!emailToUse) {
+                                    alert("We couldn't find your email. Please restart the journey.");
+                                    return;
+                                }
+                                // Show modal immediately
+                                setOtpModalState({ show: true, loading: true, error: null, tempUpdates: updates, nextStep: ns });
+                                try {
+                                    await sendOtp(emailToUse);
+                                    // OTP sent — remove loading from modal (user inputs now)
+                                    setOtpModalState(prev => ({ ...prev, loading: false }));
+                                } catch (err) {
+                                    setOtpModalState(prev => ({
+                                        ...prev,
+                                        loading: false,
+                                        error: `Failed to send OTP: ${err.message || 'Please try again.'}`
+                                    }));
+                                }
+                            } else {
+                                setStep(ns);
+                                const mergedData = { ...formData, ...updates };
+                                setFormData(mergedData);
+                                saveProgress(ns, mergedData);
+                            }
                         }} />}
-                        {step === 7 && <Step07_GapAnalysis key="step7" formData={formData} result={result} onNext={() => { const ns = 8; setStep(ns); saveProgress(ns); }} />}
-                        {step === 8 && <Step09_ProductRecommendations key="step8" formData={formData} gapResult={result} onComplete={saveSafetyNet} />}
+                        {step === 6 && <Step07_GapAnalysis key="step6" formData={formData} result={result} onNext={() => { const ns = 7; setStep(ns); saveProgress(ns); }} />}
+                        {step === 7 && <Step09_ProductRecommendations key="step7" formData={formData} gapResult={result} onComplete={saveSafetyNet} />}
                     </AnimatePresence>
 
-                    {/* Navigation — hidden on step 6, 7, 8 which have their own actions */}
-                    {step < 6 && (
+                    {/* Navigation — hidden on step 4, 5, 6, 7 which have their own actions */}
+                    {step < 4 && (
                         <div className="flex justify-between items-center pt-6 md:pt-8 mt-6 md:mt-8"
                             style={{ borderTopColor: 'var(--border-auth-card)', borderTopWidth: '1px' }}>
                             <button
@@ -512,10 +594,15 @@ export default function Wizard({ onBack }) {
 
                             <button
                                 onClick={
-                                    step === 4 ? (isStepValid() ? fetchRecommendation : () => alert("Please fill mandatory fields.")) :
+                                    step === 3 ? (isStepValid() ? () => {
+                                        // Pre-fill email if already known (returning user or profile loaded)
+                                        setTempEmail(formData.email || "");
+                                        setEmailError("");
+                                        setShowEmailModal(true);
+                                    } : () => alert("Please fill mandatory fields.")) :
                                         handleNext
                                 }
-                                disabled={loading}
+                                disabled={loading || otpModalState.loading}
                                 className="relative overflow-hidden bg-white text-brand-dark px-5 py-2.5 md:px-7 md:py-3 rounded-xl font-bold flex items-center shadow-lg hover:shadow-white/20 transition-all disabled:opacity-70 disabled:cursor-wait text-sm md:text-base"
                                 style={{
                                     backgroundColor: 'var(--btn-primary-bg)',
@@ -525,9 +612,7 @@ export default function Wizard({ onBack }) {
                                 <span className="relative z-10 flex items-center">
                                     {loading ? 'Computing...' :
                                         (step === 1 || step === 2) ? 'Next' :
-                                            step === 3 ? 'Continue' :
-                                                step === 4 ? 'Analyze My Needs' :
-                                                    step === 5 ? 'Identify Gaps' : 'Next'
+                                            step === 3 ? 'Analyze My Needs' : 'Next'
                                     }
                                     {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
                                 </span>
@@ -536,6 +621,92 @@ export default function Wizard({ onBack }) {
                     )}
                 </div>
             )}
+
+            {/* Email Intercept Modal purely triggered from Step 3 */}
+            <AnimatePresence>
+                {showEmailModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            onClick={() => setShowEmailModal(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-md p-6 rounded-3xl shadow-2xl overflow-hidden"
+                            style={{
+                                backgroundColor: 'var(--bg-auth-card)',
+                                borderColor: 'var(--border-auth-card)',
+                                border: '1px solid'
+                            }}
+                        >
+                            <div className="text-center space-y-4 mb-6 relative z-10">
+                                <div className="w-16 h-16 rounded-full bg-brand-primary/20 flex items-center justify-center mx-auto mb-2">
+                                    <Sparkles className="w-8 h-8 text-brand-primary" />
+                                </div>
+                                <h3 className="text-2xl font-bold" style={{ color: 'var(--text-auth-primary)' }}>
+                                    Where should we send your results?
+                                </h3>
+                                <p className="text-sm" style={{ color: 'var(--text-auth-muted)' }}>
+                                    We'll instantly calculate your unique insurance portrait.
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 relative z-10">
+                                <div>
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={tempEmail}
+                                        onChange={(e) => setTempEmail(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()}
+                                        className="w-full text-center p-4 border rounded-xl focus:ring-2 focus:ring-brand-accent outline-none font-medium transition-all"
+                                        style={{
+                                            backgroundColor: 'var(--bg-auth-input)',
+                                            borderColor: emailError ? '#ef4444' : 'var(--border-auth-card)',
+                                            color: 'var(--text-auth-primary)'
+                                        }}
+                                        autoFocus
+                                    />
+                                    {emailError && <p className="text-red-400 text-xs mt-2 text-center font-semibold">{emailError}</p>}
+                                </div>
+
+                                <button
+                                    onClick={handleEmailSubmit}
+                                    className="w-full relative overflow-hidden bg-white text-brand-dark px-5 py-4 rounded-xl font-bold flex justify-center items-center shadow-lg hover:shadow-white/20 transition-all text-base"
+                                    style={{
+                                        backgroundColor: 'var(--btn-primary-bg)',
+                                        color: 'var(--btn-primary-text)'
+                                    }}
+                                >
+                                    Reveal My Plan <ArrowRight className="w-4 h-4 ml-2" />
+                                </button>
+                                
+                                <button
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="w-full mt-2 text-xs font-semibold hover:underline"
+                                    style={{ color: 'var(--text-auth-muted)' }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            <OTPModal 
+                show={otpModalState.show}
+                email={formData.email || tempEmail}
+                loading={otpModalState.loading}
+                error={otpModalState.error}
+                onVerify={handleVerifyOtp}
+                onClose={() => setOtpModalState(prev => ({ ...prev, show: false }))}
+            />
         </div>
     );
 }
