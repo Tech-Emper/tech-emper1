@@ -100,16 +100,31 @@ export default function Wizard({ onBack }) {
 
             // Only auto-switch to dashboard ONCE on initial load
             if (!hasInitialized.current) {
+                // 1. Always populate result if they exist (vital for both Dashboard and Wizard steps 4+)
+                let hasValidResult = false;
                 if (recommendations && recommendations.length > 0) {
                     setResult(recommendations[0]);
                     setHistory(recommendations);
-                    setView('dashboard');
-                } else if (profile.current_step > 1 && view === 'wizard') {
-                    if (profile.current_step >= 7) {
+                    hasValidResult = true;
+                }
+
+                // 2. Decide View & Step
+                if (profile.current_step >= 7) {
+                    if (hasValidResult) {
                         setView('dashboard');
+                    } else {
+                        // Corrupted state: says finished but has no recommendation
+                        setStep(3);
+                        setView('wizard');
+                    }
+                } else if (profile.current_step > 1) {
+                    if (profile.current_step >= 4 && !hasValidResult) {
+                        // Needs a result to render these steps properly
+                        setStep(3);
                     } else {
                         setStep(profile.current_step);
                     }
+                    setView('wizard');
                 }
                 hasInitialized.current = true;
             }
