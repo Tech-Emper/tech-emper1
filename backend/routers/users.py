@@ -67,6 +67,7 @@ def get_user_profile(user_payload = Depends(get_current_user), db: Session = Dep
             "smoking_status": user.smoking_status,
             "family_health_history": user.family_health_history,
             "dependents": user.dependents_data,
+            "insured_members": user.insured_members,
             "num_children": user.num_children,
             "company_name": user.company_name,
             "industry_type": user.industry_type,
@@ -105,6 +106,7 @@ def save_progress(request: ProgressRequest, user_payload = Depends(get_current_u
     
     data = request.formData
     user.first_name = data.first_name
+    user.last_name = data.last_name
     user.dob = data.dob
     user.mobile = data.mobile
     # PROTECT fields that might be missing from the Wizard payload
@@ -124,6 +126,7 @@ def save_progress(request: ProgressRequest, user_payload = Depends(get_current_u
     user.company_name = data.company_name
     user.industry_type = data.industry_type
     user.dependents_data = data.dependents
+    user.insured_members = data.insured_members
     user.num_children = data.num_children
     user.secondary_phone = data.secondary_phone
     
@@ -168,6 +171,7 @@ def sync_profile(data: ProfileSyncRequest, user_payload = Depends(get_current_us
     log_now(f"Syncing profile for {email}")
     
     if data.first_name is not None: user.first_name = data.first_name
+    if data.last_name is not None: user.last_name = data.last_name
     if data.dob is not None: user.dob = data.dob
     if data.gender is not None: user.gender = data.gender
     if data.city is not None: user.city = data.city

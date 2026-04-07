@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, LogOut, LayoutDashboard, User, ShieldCheck, Building } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, User, ShieldCheck, Building, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
+import LogoWhite from '../../assets/images/Logo_White.jpg';
 
 export default function Navbar({ onHome }) {
     const { isAuthenticated, logout, user } = useAuth();
@@ -42,15 +43,11 @@ export default function Navbar({ onHome }) {
                     onClick={handleHomeClick}
                     className="flex items-center gap-2 group bg-transparent border-none p-0"
                 >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-black text-lg shadow-lg group-hover:scale-110 transition-transform">
-                        e
-                    </div>
-                    <span
-                        className="text-xl font-black tracking-tight"
-                        style={{ color: theme === 'light' ? '#141d2e' : '#ffffff' }}
-                    >
-                        emper<span className="text-emerald-500">.ai</span>
-                    </span>
+                    <img
+                        src={LogoWhite}
+                        alt="Emper AI Logo"
+                        className="h-10 md:h-14 object-contain group-hover:scale-105 transition-transform"
+                    />
                 </button>
 
                 {/* Desktop Nav Links */}
@@ -72,10 +69,20 @@ export default function Navbar({ onHome }) {
                         Contact
                     </a> */}
 
-                    <ThemeToggle />
+                    {/* <ThemeToggle /> */}
 
                     {isAuthenticated ? (
                         <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-white/10">
+                            <button
+                                onClick={handleHomeClick}
+                                className={`p-2 rounded-xl border transition-all ${isHome
+                                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
+                                    : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10'
+                                    }`}
+                                title="Home"
+                            >
+                                <Home className="w-5 h-5" />
+                            </button>
                             {user?.role === 'superadmin' && (
                                 <button
                                     onClick={() => navigate('/superadmin')}
@@ -128,7 +135,19 @@ export default function Navbar({ onHome }) {
 
                 {/* Mobile Menu Toggle */}
                 <div className="flex md:hidden items-center gap-3">
-                    <ThemeToggle />
+                    {/* <ThemeToggle /> */}
+                    {isAuthenticated && (
+                        <button
+                            onClick={handleHomeClick}
+                            className={`p-2 rounded-lg border transition-all ${isHome
+                                ? 'bg-emerald-500 text-white border-emerald-500'
+                                : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500'
+                                }`}
+                            title="Home"
+                        >
+                            <Home className="w-5 h-5" />
+                        </button>
+                    )}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className={`p-2 rounded-lg border transition-all ${isMenuOpen
@@ -164,7 +183,16 @@ export default function Navbar({ onHome }) {
                             <div className="flex items-center justify-between mb-2">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Menu</p>
                                 <div className="flex items-center gap-3">
-                                    <ThemeToggle />
+                                    {/* <ThemeToggle /> */}
+                                    {isAuthenticated && (
+                                        <button
+                                            onClick={handleHomeClick}
+                                            className="p-2 rounded-xl bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-emerald-500 transition-all"
+                                            title="Home"
+                                        >
+                                            <Home className="w-5 h-5" />
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => setIsMenuOpen(false)}
                                         className="p-2 rounded-xl bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-emerald-500 transition-all"

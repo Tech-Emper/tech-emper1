@@ -30,16 +30,17 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
         const cleanStr = str.replace(/[₹,]/g, '').trim();
         const parts = cleanStr.split(' ');
         const num = parseFloat(parts[0]);
-        if (str.toLowerCase().includes('crore')) return num * 100;
+        const lowerStr = str.toLowerCase();
+        if (lowerStr.includes('crore') || lowerStr.includes('cr')) return num * 100;
         return num;
     };
 
     const idealLife = parseToLakhs(life_cover);
-    const existingLife = parseToLakhs(userProfile.existing_life_cover);
+    const existingLife = (userProfile.existing_life_cover_val || 0) / 100000;
     const lifeGap = Math.max(0, idealLife - existingLife);
 
     const idealHealth = parseToLakhs(health_cover);
-    const existingHealth = parseToLakhs(userProfile.existing_health_cover);
+    const existingHealth = (userProfile.existing_health_cover_val || 0) / 100000;
     const healthGap = Math.max(0, idealHealth - existingHealth);
 
     const formatLakhs = (lakhs) => {

@@ -58,6 +58,7 @@ const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         first_name: '',
+        last_name: '',
         mobile: '',
         secondary_phone: '',
         secondary_email: '',
@@ -90,6 +91,7 @@ const Profile = () => {
             }
             setFormData({
                 first_name: profile.first_name || '',
+                last_name: profile.last_name || '',
                 mobile: profile.mobile || '',
                 secondary_phone: profile.secondary_phone || '',
                 secondary_email: profile.secondary_email || '',
@@ -113,7 +115,7 @@ const Profile = () => {
         if (profile) {
             setFormData({
                 first_name: profile.first_name || '',
-                // last_name: profile.last_name || '', // Removed as per instruction
+                last_name: profile.last_name || '',
                 mobile: profile.mobile || '',
                 secondary_phone: profile.secondary_phone || '',
                 secondary_email: profile.secondary_email || '', // Added back
@@ -262,15 +264,26 @@ const Profile = () => {
                     <div className="space-y-3 md:space-y-6">
                         <h3 className="text-xs font-black uppercase tracking-[0.3em] text-brand-accent border-b border-brand-accent/20 pb-2">Personal Details</h3>
 
-                        <InputField
-                            label="First Name"
-                            name="first_name"
-                            value={formData.first_name}
-                            icon={User}
-                            placeholder="Your First Name"
-                            isEditing={isEditing}
-                            onChange={handleChange}
-                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <InputField
+                                label="First Name"
+                                name="first_name"
+                                value={formData.first_name}
+                                icon={User}
+                                placeholder="First Name"
+                                isEditing={isEditing}
+                                onChange={handleChange}
+                            />
+                            <InputField
+                                label="Last Name"
+                                name="last_name"
+                                value={formData.last_name}
+                                icon={User}
+                                placeholder="Last Name"
+                                isEditing={isEditing}
+                                onChange={handleChange}
+                            />
+                        </div>
 
                         <InputField
                             label="Email (Primary)"

@@ -28,11 +28,24 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+class Organization(Base):
+    __tablename__ = "organizations"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    users = relationship("User", back_populates="organization")
+
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     email = Column(String, unique=True, index=True)
+    role = Column(String, default="user") # 'user', 'superadmin'
+    password_hash = Column(String, nullable=True) # For future use
+    is_otp_verified = Column(Boolean, default=False)
     first_name = Column(String)
     last_name = Column(String) # Keeping in DB for now to avoid migration issues, but will remove from UI
     dob = Column(String)
@@ -73,10 +86,12 @@ class User(Base):
     
     # JSON field for dependents structure
     dependents_data = Column(JSON)
+    insured_members = Column(JSON, default=dict)
     num_children = Column(Integer, default=0)
     is_smoker = Column(Boolean, default=False)
     current_step = Column(Integer, default=1)
 
+    organization = relationship("Organization", back_populates="users")
     recommendations = relationship("Recommendation", back_populates="user")
 
 class Recommendation(Base):
