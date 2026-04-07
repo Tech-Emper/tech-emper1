@@ -5,6 +5,7 @@ import { Menu, X, LogOut, LayoutDashboard, User, ShieldCheck, Building, Home } f
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
+import LogoWhite from '../../assets/images/Logo_White.jpg';
 
 export default function Navbar({ onHome }) {
     const { isAuthenticated, logout, user } = useAuth();
@@ -42,15 +43,11 @@ export default function Navbar({ onHome }) {
                     onClick={handleHomeClick}
                     className="flex items-center gap-2 group bg-transparent border-none p-0"
                 >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-black text-lg shadow-lg group-hover:scale-110 transition-transform">
-                        e
-                    </div>
-                    <span
-                        className="text-xl font-black tracking-tight"
-                        style={{ color: theme === 'light' ? '#141d2e' : '#ffffff' }}
-                    >
-                        emper<span className="text-emerald-500">.ai</span>
-                    </span>
+                    <img
+                        src={LogoWhite}
+                        alt="Emper AI Logo"
+                        className="h-10 md:h-14 object-contain group-hover:scale-105 transition-transform"
+                    />
                 </button>
 
                 {/* Desktop Nav Links */}

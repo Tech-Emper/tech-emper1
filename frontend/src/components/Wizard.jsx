@@ -102,8 +102,11 @@ export default function Wizard({ onBack }) {
                     setHistory(recommendations);
                     setView('dashboard');
                 } else if (profile.current_step > 1 && view === 'wizard') {
-                    setResumeData({ step: profile.current_step, formData: profile });
-                    setShowResumePrompt(true);
+                    if (profile.current_step >= 7) {
+                        setView('dashboard');
+                    } else {
+                        setStep(profile.current_step);
+                    }
                 }
                 hasInitialized.current = true;
             }

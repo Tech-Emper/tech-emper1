@@ -46,16 +46,12 @@ const fmtCover = (rupees) => {
 };
 
 const EMPTY_FORM = {
-    type: 'Life',
+    type: 'Health',
     provider: '',
     providerCustom: '',
     policyName: '',
     policyNameCustom: '',
-    coverVal: 0,
-    policyNumber: '',
-    term: 1,
-    timeline: '',
-    premium: 0
+    coverVal: 0
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -124,7 +120,7 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
     const canAddManual = () => {
         const providerOk = form.provider === 'Other' ? form.providerCustom.trim() !== '' : form.provider !== '';
         const policyOk = form.provider === 'Other' ? form.policyNameCustom.trim() !== '' : form.policyName !== '';
-        return providerOk && policyOk && form.coverVal > 0 && form.policyNumber.trim() !== '' && form.timeline !== '';
+        return providerOk && policyOk && form.coverVal > 0;
     };
 
     const addManualPolicy = () => {
@@ -132,22 +128,11 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
         const effectiveProvider = form.provider === 'Other' ? form.providerCustom : form.provider;
         const effectivePolicy = form.provider === 'Other' ? form.policyNameCustom : form.policyName;
 
-        // format date from YYYY-MM-DD to DD/MM/YYYY for wallet
-        let formattedTimeline = form.timeline;
-        if (formattedTimeline && formattedTimeline.includes('-')) {
-            const [y, m, d] = formattedTimeline.split('-');
-            formattedTimeline = `${d}/${m}/${y}`;
-        }
-
         setPolicies(prev => [...prev, {
             type: form.type,
             provider: effectiveProvider,
             policyName: effectivePolicy,
             coverVal: form.coverVal,
-            policyNumber: form.policyNumber,
-            term: form.term,
-            timeline: formattedTimeline,
-            premium: form.premium,
             source: 'manual',
         }]);
         setForm(EMPTY_FORM);
@@ -224,6 +209,20 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                 {view === VIEW.CHOICE && (
                     <motion.div key="choice" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
                         className="space-y-4">
+                        {/* Manual card */}
+                        <button onClick={() => setView(VIEW.MANUAL)}
+                            className="w-full flex items-center gap-5 p-5 rounded-2xl border-2 text-left transition-all hover:border-indigo-500/60 hover:bg-indigo-500/5 group"
+                            style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)' }}>
+                            <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                <Plus className="w-6 h-6 text-indigo-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-black text-base" style={{ color: 'var(--text-auth-primary)' }}>Add Policy Details</p>
+                                <p className="text-xs mt-0.5" style={{ color: 'var(--text-auth-muted)' }}>Pick provider, policy name & cover amount — add as many as you like</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 shrink-0 opacity-40 group-hover:opacity-100 group-hover:text-indigo-400 transition-all" />
+                        </button>
+
                         {/* Upload card */}
                         <button onClick={() => setView(VIEW.UPLOAD)}
                             className="w-full flex items-center gap-5 p-5 rounded-2xl border-2 text-left transition-all hover:border-brand-accent/60 hover:bg-brand-accent/5 group"
@@ -238,19 +237,7 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                             <ArrowRight className="w-5 h-5 shrink-0 opacity-40 group-hover:opacity-100 group-hover:text-brand-accent transition-all" />
                         </button>
 
-                        {/* Manual card */}
-                        <button onClick={() => setView(VIEW.MANUAL)}
-                            className="w-full flex items-center gap-5 p-5 rounded-2xl border-2 text-left transition-all hover:border-indigo-500/60 hover:bg-indigo-500/5 group"
-                            style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)' }}>
-                            <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <Plus className="w-6 h-6 text-indigo-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="font-black text-base" style={{ color: 'var(--text-auth-primary)' }}>Add Policy Details</p>
-                                <p className="text-xs mt-0.5" style={{ color: 'var(--text-auth-muted)' }}>Pick provider, policy name & cover amount — add as many as you like</p>
-                            </div>
-                            <ArrowRight className="w-5 h-5 shrink-0 opacity-40 group-hover:opacity-100 group-hover:text-indigo-400 transition-all" />
-                        </button>
+
 
                         {/* Skip */}
                         <button onClick={() => onDone()}
@@ -404,13 +391,13 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                         <div>
                             <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--text-auth-placeholder)' }}>Policy Type</p>
                             <div className="grid grid-cols-2 gap-3">
-                                {['Life', 'Health'].map(t => (
+                                {['Health', 'Life'].map(t => (
                                     <button key={t} onClick={() => setForm({ ...form, type: t, provider: '', policyName: '', providerCustom: '', policyNameCustom: '' })}
                                         className={`py-3 rounded-xl border font-black text-sm transition-all ${form.type === t
                                             ? (t === 'Life' ? 'bg-pink-500/20 border-pink-500' : 'bg-blue-500/20 border-blue-500')
                                             : ''}`}
                                         style={form.type !== t ? { backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-placeholder)' } : { color: 'var(--text-auth-primary)' }}>
-                                        {t === 'Life' ? '🧬' : '🏥'} {t} Insurance
+                                        {t === 'Health' ? '🏥' : '🧬'} {t} Insurance
                                     </button>
                                 ))}
                             </div>
@@ -461,39 +448,7 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                             )}
                         </div>
 
-                        {/* Policy Number & Details Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--text-auth-placeholder)' }}>Policy Number</p>
-                                <div className="relative">
-                                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-auth-placeholder)' }} />
-                                    <input type="text" placeholder="e.g. PRO-12345" value={form.policyNumber}
-                                        onChange={e => setForm({ ...form, policyNumber: e.target.value })}
-                                        className="w-full border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-brand-accent transition-colors"
-                                        style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} />
-                                </div>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--text-auth-placeholder)' }}>Policy Term (Years)</p>
-                                <div className="relative">
-                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-auth-placeholder)' }} />
-                                    <input type="number" min="1" value={form.term}
-                                        onChange={e => setForm({ ...form, term: parseInt(e.target.value) || 1 })}
-                                        className="w-full border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-brand-accent transition-colors"
-                                        style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} />
-                                </div>
-                            </div>
-                            <div className="md:col-span-2">
-                                <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--text-auth-placeholder)' }}>Renewal / Start Date</p>
-                                <div className="relative">
-                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-auth-placeholder)' }} />
-                                    <input type="date" value={form.timeline}
-                                        onChange={e => setForm({ ...form, timeline: e.target.value })}
-                                        className="w-full border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-brand-accent transition-colors"
-                                        style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} />
-                                </div>
-                            </div>
-                        </div>
+
 
                         {/* Cover amount */}
                         <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-auth-surface)', borderColor: 'var(--border-auth-card)' }}>
@@ -519,29 +474,7 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                             </div>
                         </div>
 
-                        {/* Annual Premium */}
-                        <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-auth-surface)', borderColor: 'var(--border-auth-card)' }}>
-                            <div className="flex justify-between items-end mb-4">
-                                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-auth-placeholder)' }}>Annual Premium</p>
-                                <p className="text-xl font-black text-emerald-500">₹{form.premium?.toLocaleString('en-IN')}</p>
-                            </div>
-                                {/* Custom Premium Slider */}
-                                <div className="relative w-full h-2 rounded-full mt-4 mb-3" style={{ backgroundColor: 'var(--bg-auth-input)', border: '1px solid var(--border-auth-card)' }}>
-                                    <div className="absolute top-0 left-0 h-full rounded-full pointer-events-none transition-all duration-100" style={{ backgroundColor: '#10b981', width: `${(form.premium / 500000) * 100}%` }} />
-                                    <div className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full shadow-md border-2 border-white pointer-events-none transition-all duration-100 z-10"
-                                         style={{ left: `calc(${(form.premium / 500000) * 100}% - 8px)`, backgroundColor: '#10b981' }} />
-                                    
-                                    <input type="range" min="0" max="500000"
-                                        step="500"
-                                        value={form.premium}
-                                        onChange={e => setForm({ ...form, premium: parseInt(e.target.value) })}
-                                        className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-8 opacity-0 cursor-pointer z-20" />
-                                </div>
-                            <div className="flex justify-between text-[9px] font-bold mt-2" style={{ color: 'var(--text-auth-placeholder)' }}>
-                                <span>0</span>
-                                <span>5 Lakhs</span>
-                            </div>
-                        </div>
+
 
                         {/* Actions */}
                         <div className="flex gap-3">

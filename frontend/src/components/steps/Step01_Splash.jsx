@@ -3,6 +3,81 @@ import StepWrapper from './StepWrapper';
 import { User, MapPin, Mail, Phone } from 'lucide-react';
 import { useThemeStyles } from '../../hooks/useThemeStyles';
 
+const MemberCard = ({ memberKey, icon, label, isChild = false, data, onUpdate, onMaritalStatusUpdate }) => {
+    const selected = isChild ? data.count > 0 : data.selected;
+
+    const handleCardClick = () => {
+        if (!isChild) {
+            // Prevent deselecting 'self'
+            if (memberKey === 'self' && selected) {
+                return;
+            }
+            // If it's spouse, and currently unselected, maybe we should auto-set marital status to Married?
+            if (memberKey === 'spouse' && !selected && onMaritalStatusUpdate) {
+                onMaritalStatusUpdate('Married');
+            }
+            onUpdate(memberKey, 'selected', !selected);
+        }
+    };
+
+    const increment = (e) => {
+        e.stopPropagation();
+        onUpdate(memberKey, 'count', (data.count || 0) + 1);
+    };
+
+    const decrement = (e) => {
+        e.stopPropagation();
+        if (data.count > 0) {
+            onUpdate(memberKey, 'count', data.count - 1);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center gap-2">
+            <div
+                onClick={handleCardClick}
+                className={`relative w-full flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${!isChild ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''} ${selected ? 'border-brand-accent bg-brand-accent/5' : 'border-gray-300 dark:border-gray-600 opacity-70 hover:opacity-100'}`}
+                style={selected ? {} : { backgroundColor: 'var(--bg-auth-input)' }}
+            >
+                <div className="text-4xl mb-2 select-none" style={{ textShadow: selected ? '0 0 15px rgba(var(--brand-accent-rgb), 0.5)' : 'none' }}>
+                    {icon}
+                </div>
+                <div className={`text-sm font-bold ${selected ? 'text-brand-accent' : ''}`} style={selected ? {} : { color: 'var(--text-auth-primary)' }}>
+                    {label}
+                </div>
+
+                {isChild && (
+                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-brand-accent text-white rounded-full flex items-center shadow-lg border-2 border-[var(--bg-auth-main)] select-none z-10" style={{ height: '32px' }}>
+                        <button onClick={decrement} className="px-3 h-full flex items-center justify-center font-black rounded-l-full hover:bg-black/10 transition-colors">-</button>
+                        <span className="px-1 min-w-[16px] text-center font-bold text-sm leading-none">{data.count}</span>
+                        <button onClick={increment} className="px-3 h-full flex items-center justify-center font-black rounded-r-full hover:bg-black/10 transition-colors">+</button>
+                    </div>
+                )}
+            </div>
+
+            {/* Age Input Box natively below the adult card */}
+            {selected && !isChild && (
+                <div className="w-full mt-1">
+                    <input
+                        type="number"
+                        placeholder="Age"
+                        min="1"
+                        max="100"
+                        value={data.age || ''}
+                        onChange={(e) => onUpdate(memberKey, 'age', e.target.value)}
+                        className="w-full text-center py-2 px-2 border-2 rounded-xl focus:ring-2 focus:ring-brand-accent/50 outline-none transition-all font-black"
+                        style={{
+                            backgroundColor: 'var(--bg-auth-input)',
+                            borderColor: data.age ? 'var(--border-auth-card)' : 'rgba(239, 68, 68, 0.4)', // light red hint if empty
+                            color: 'var(--text-auth-primary)'
+                        }}
+                    />
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function Step01_Splash({ formData, updateField }) {
     const themeStyles = useThemeStyles();
 
@@ -24,79 +99,6 @@ export default function Step01_Splash({ formData, updateField }) {
                 [field]: value
             }
         });
-    };
-
-    // Card component for members
-    const MemberCard = ({ memberKey, icon, label, isChild = false }) => {
-        const data = insuredMembers[memberKey];
-        const selected = isChild ? data.count > 0 : data.selected;
-
-        const handleCardClick = () => {
-            if (!isChild) {
-                // If it's spouse, and currently unselected, maybe we should auto-set marital status to Married?
-                if (memberKey === 'spouse' && !selected) {
-                    updateField('marital_status', 'Married');
-                }
-                handleMemberUpdate(memberKey, 'selected', !selected);
-            }
-        };
-
-        const increment = (e) => {
-            e.stopPropagation();
-            handleMemberUpdate(memberKey, 'count', (data.count || 0) + 1);
-        };
-
-        const decrement = (e) => {
-            e.stopPropagation();
-            if (data.count > 0) {
-                handleMemberUpdate(memberKey, 'count', data.count - 1);
-            }
-        };
-
-        return (
-            <div className="flex flex-col items-center gap-2">
-                <div
-                    onClick={handleCardClick}
-                    className={`relative w-full flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${!isChild ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''} ${selected ? 'border-brand-accent bg-brand-accent/5' : 'border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'}`}
-                    style={selected ? {} : { backgroundColor: 'var(--bg-auth-input)' }}
-                >
-                    <div className="text-4xl mb-2 select-none" style={{ textShadow: selected ? '0 0 15px rgba(var(--brand-accent-rgb), 0.5)' : 'none' }}>
-                        {icon}
-                    </div>
-                    <div className={`text-sm font-bold ${selected ? 'text-brand-accent' : ''}`} style={selected ? {} : { color: 'var(--text-auth-primary)' }}>
-                        {label}
-                    </div>
-
-                    {isChild && (
-                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-brand-accent text-white rounded-full flex items-center shadow-lg border-2 border-[var(--bg-auth-main)] select-none z-10" style={{ height: '32px' }}>
-                            <button onClick={decrement} className="px-3 h-full flex items-center justify-center font-black rounded-l-full hover:bg-black/10 transition-colors">-</button>
-                            <span className="px-1 min-w-[16px] text-center font-bold text-sm leading-none">{data.count}</span>
-                            <button onClick={increment} className="px-3 h-full flex items-center justify-center font-black rounded-r-full hover:bg-black/10 transition-colors">+</button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Age Input Box natively below the adult card */}
-                {selected && !isChild && (
-                    <div className="w-full mt-1">
-                        <input
-                            type="number"
-                            placeholder="Age"
-                            min="18"
-                            max="100"
-                            value={data.age || ''}
-                            onChange={(e) => handleMemberUpdate(memberKey, 'age', e.target.value)}
-                            className="w-full text-center py-2 px-2 border-2 rounded-xl focus:ring-2 focus:ring-brand-accent/50 outline-none transition-all font-black"
-                            style={{
-                                backgroundColor: 'var(--bg-auth-input)',
-                                borderColor: data.age ? 'var(--border-auth-card)' : 'rgba(239, 68, 68, 0.4)', // light red hint if empty
-                                color: 'var(--text-auth-primary)'
-                            }}
-                        />
-                    </div>
-                )}
-            </div>
-        );
     };
 
     return (
@@ -154,7 +156,7 @@ export default function Step01_Splash({ formData, updateField }) {
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-xs opacity-50">▼</div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     {/* 3. Marital Status */}
                     <div className="space-y-2">
                         <label className="text-xs font-black uppercase opacity-70 tracking-wider">Marital Status</label>
@@ -198,12 +200,12 @@ export default function Step01_Splash({ formData, updateField }) {
                         Select members you want to insure
                     </h3>
                     <div className="grid grid-cols-3 gap-3">
-                        <MemberCard memberKey="self" icon={formData.gender === 'Female' ? '👩' : '👨'} label="You" />
-                        <MemberCard memberKey="spouse" icon={formData.gender === 'Female' ? '👨' : '👩'} label={formData.gender === 'Female' ? 'Husband' : 'Wife'} />
-                        <MemberCard memberKey="daughter" icon="👧" label="Daughter" isChild={true} />
-                        <MemberCard memberKey="son" icon="👦" label="Son" isChild={true} />
-                        <MemberCard memberKey="father" icon="👴" label="Father" />
-                        <MemberCard memberKey="mother" icon="👵" label="Mother" />
+                        <MemberCard memberKey="self" icon={formData.gender === 'Female' ? '👩' : '👨'} label="You" data={insuredMembers.self} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="spouse" icon={formData.gender === 'Female' ? '👨' : '👩'} label={formData.gender === 'Female' ? 'Husband' : 'Wife'} data={insuredMembers.spouse} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="daughter" icon="👧" label="Daughter" isChild={true} data={insuredMembers.daughter} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="son" icon="👦" label="Son" isChild={true} data={insuredMembers.son} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="father" icon="👴" label="Father" data={insuredMembers.father} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="mother" icon="👵" label="Mother" data={insuredMembers.mother} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
                     </div>
                 </div>
             </div>
