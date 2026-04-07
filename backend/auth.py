@@ -159,13 +159,6 @@ def store_otp(email: str, otp: str):
 
 def verify_otp_logic(email: str, code: str):
     """Verify OTP and check for expiry."""
-    # Local Environment Bypass (accepts any OTP)
-    if os.getenv("ENVIRONMENT", "local").lower() != "production":
-        log_now(f"Local bypass triggered: accepting OTP {code} for {email}")
-        if email in otp_store:
-            del otp_store[email]
-        return True, "Verified"
-
     data = otp_store.get(email)
     if not data:
         return False, "No OTP found for this email."
