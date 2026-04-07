@@ -82,7 +82,7 @@ export default function Step01_Splash({ formData, updateField }) {
     const themeStyles = useThemeStyles();
 
     // Default initializer fallback for insured_members if not present
-    const insuredMembers = formData.insured_members || {
+    const insuredMembers = (formData.insured_members && Object.keys(formData.insured_members).length > 0) ? formData.insured_members : {
         self: { selected: true, age: '' },
         spouse: { selected: false, age: '' },
         son: { count: 0 },

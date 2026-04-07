@@ -89,6 +89,9 @@ export default function Wizard({ onBack }) {
                 const merged = { ...prev };
                 Object.keys(profile).forEach(key => {
                     if (profile[key] !== null && profile[key] !== undefined && profile[key] !== "") {
+                        if (key === 'insured_members' && typeof profile[key] === 'object' && Object.keys(profile[key]).length === 0) {
+                            return;
+                        }
                         merged[key] = profile[key];
                     }
                 });
