@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 import { API_BASE_URL } from '../config';
-import { ArrowRight, ArrowLeft, Briefcase, FileText, User, Heart, Sparkles, Check, Shield } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Briefcase, FileText, User, Heart, Sparkles, Check, Shield, MailCheck, MailOpen, MailCheckIcon, MailIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -322,9 +322,22 @@ export default function Wizard({ onBack }) {
             // Now fully authenticated, if we were deferred from a step transition:
             if (otpModalState.nextStep) {
                 const ns = otpModalState.nextStep;
-                setStep(ns);
                 const mergedData = { ...formData, email: emailToVerify, ...(otpModalState.tempUpdates || {}) };
                 setFormData(mergedData);
+                
+                // Silently persist recommendation to DB now that user has an auth token
+                try {
+                    const token = localStorage.getItem('auth_token');
+                    await fetch(`${API_BASE_URL}/api/recommend`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ ...mergedData, is_smoker: mergedData.smoking_status !== "No" })
+                    });
+                } catch(e) {
+                    console.error("Silent recommend fetch failed", e);
+                }
+
+                setStep(ns);
                 saveProgress(ns, mergedData);
             }
         } catch (err) {
@@ -511,10 +524,10 @@ export default function Wizard({ onBack }) {
                     <div className="md:hidden space-y-3">
                         <div className="flex justify-between items-end mb-1">
                             <span className="text-[10px] font-black text-brand-accent uppercase tracking-[0.2em]">
-                                Progress: Step {step} of {steps.length}
+                                {steps[step - 1].title}
                             </span>
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
-                                {steps[step - 1].title}
+                                Progress: Step {step} of {steps.length}
                             </span>
                         </div>
                         <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-auth-input)' }}>
@@ -564,7 +577,7 @@ export default function Wizard({ onBack }) {
                         {step === 2 && <Step04_FinancialReality key="step2" formData={formData} updateField={updateField} />}
                         {step === 3 && <Step05_HealthSnapshot key="step3" formData={formData} updateField={updateField} />}
                         {step === 4 && <Step05_Results key="step4" result={result} formData={formData} onNext={() => { const ns = 5; setStep(ns); saveProgress(ns); }} />}
-                        {step === 5 && <Step05b_PolicyEntry key="step5" formData={formData} updateField={updateField} onDone={async (updates = {}) => {
+                        {step === 5 && <Step05b_PolicyEntry key="step5" formData={formData} updateField={updateField} onBack={handleBack} onDone={async (updates = {}) => {
                             const ns = 6;
                             if (!isAuthenticated) {
                                 // Resolve which email to use - tempEmail is most reliable as formData.email update is async
@@ -616,10 +629,14 @@ export default function Wizard({ onBack }) {
                             <button
                                 onClick={
                                     step === 3 ? (isStepValid() ? () => {
-                                        // Pre-fill email if already known (returning user or profile loaded)
-                                        setTempEmail(formData.email || "");
-                                        setEmailError("");
-                                        setShowEmailModal(true);
+                                        if (isAuthenticated && formData.email) {
+                                            fetchRecommendation(formData.email);
+                                        } else {
+                                            // Pre-fill email if already known (returning user or profile loaded)
+                                            setTempEmail(formData.email || "");
+                                            setEmailError("");
+                                            setShowEmailModal(true);
+                                        }
                                     } : () => alert("Please fill mandatory fields.")) :
                                         handleNext
                                 }
@@ -667,7 +684,7 @@ export default function Wizard({ onBack }) {
                         >
                             <div className="text-center space-y-4 mb-6 relative z-10">
                                 <div className="w-16 h-16 rounded-full bg-brand-primary/20 flex items-center justify-center mx-auto mb-2">
-                                    <Sparkles className="w-8 h-8 text-brand-primary" />
+                                    <MailIcon className="w-8 h-8 text-brand-primary" />
                                 </div>
                                 <h3 className="text-2xl font-bold" style={{ color: 'var(--text-auth-primary)' }}>
                                     Where should we send your results?

@@ -44,7 +44,7 @@ export default function Step05_Results({ result, formData, onNext }) {
 
     return (
         <StepWrapper className="text-center space-y-4 md:space-y-6">
-            {result.mode === 'AI' && (
+            {/* {result.mode === 'AI' && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -55,58 +55,70 @@ export default function Step05_Results({ result, formData, onNext }) {
                         <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-blue-400">AI Powered Recommendation</span>
                     </div>
                 </motion.div>
-            )}
+            )} */}
 
             <div className="flex justify-center">
 
                 <div className="max-w-md mx-auto mt-2">
                     <h2 className="text-2xl md:text-3xl font-extrabold mb-2" style={{ color: 'var(--text-auth-primary)' }}>Your insurance target</h2>
                     <p className="text-xs md:text-sm leading-relaxed px-4 font-medium italic" style={{ color: 'var(--text-auth-muted)' }}>
-                        {"Your ideal coverage based on life stage, Career and Health score"}
+                        {"Your ideal coverage based on life stage, career and health"}
                     </p>
                 </div>
 
                 <div className="inline-block relative">
-                    <div className="text-5xl md:text-7xl animate-bounce">{result.icon || "🛡️"}</div>
+                    <div className="text-5xl md:text-7xl animate-bounce">{"🎯"}</div>
                     <Sparkles className="absolute -top-4 -right-4 text-yellow-400 w-6 h-6 md:w-8 md:h-8 animate-pulse" />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="bg-brand-accent/10 p-4 md:p-6 rounded-2xl border border-brand-accent/20 backdrop-blur-sm relative overflow-hidden flex flex-col h-full"
+                    className="bg-brand-accent/10 p-4 min-[600px]:p-6 rounded-2xl border border-brand-accent/20 backdrop-blur-sm relative overflow-hidden flex flex-col h-full"
                 >
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                        <Shield className="w-6 h-6 md:w-8 md:h-8 text-brand-accent" />
-                        <h3 className="text-sm md:text-base uppercase tracking-widest text-emerald-300 font-extrabold">Health Cover</h3>
+                    <div className="flex flex-col min-[600px]:flex-row lg:flex-col min-[600px]:items-center lg:items-stretch justify-between w-full h-full gap-4">
+                        <div className="flex flex-col items-center min-[600px]:items-center lg:items-center min-[600px]:w-1/2 lg:w-full">
+                            <div className="flex items-center justify-center min-[600px]:justify-start lg:justify-center gap-2 mb-2 min-[600px]:mb-3">
+                                <Shield className="w-6 h-6 min-[600px]:w-8 min-[600px]:h-8 text-brand-accent" />
+                                <h3 className="text-sm min-[600px]:text-base uppercase tracking-widest text-emerald-600 font-extrabold">Health Cover</h3>
+                            </div>
+                            <p className="text-2xl min-[600px]:text-3xl font-black mb-2 min-[600px]:mb-0 lg:mb-4" style={{ color: 'var(--text-auth-primary)' }}>{healthCover || "Calculated below"}</p>
+                        </div>
+
+                        <div className="flex-grow min-[600px]:w-1/2 lg:w-full border-t border-emerald-500/20 min-[600px]:border-t-0 min-[600px]:border-l lg:border-l-0 lg:border-t pt-4 min-[600px]:pt-0 min-[600px]:pl-6 lg:pl-0 lg:pt-4">
+                            <p className="text-xs min-[600px]:text-sm font-bold mb-2 opacity-70 text-left" style={{ color: 'var(--text-auth-primary)' }}>Recommended Features:</p>
+                            <ul className="text-left text-xs min-[600px]:text-sm space-y-2 opacity-90 mx-auto w-full" style={{ color: 'var(--text-auth-primary)' }}>
+                                <li className="flex items-start gap-2"><span className="text-brand-accent mt-0.5">•</span> Cashless hospitalization across major hospitals</li>
+                                <li className="flex items-start gap-2"><span className="text-brand-accent mt-0.5">•</span> Pre &amp; post hospitalization expenses (30–60 days)</li>
+                                <li className="flex items-start gap-2"><span className="text-brand-accent mt-0.5">•</span> No-claim bonus (increases cover every year)</li>
+                            </ul>
+                        </div>
                     </div>
-                    <p className="text-2xl md:text-3xl font-black mb-4" style={{ color: 'var(--text-auth-primary)' }}>{healthCover || "Calculated below"}</p>
-                    
-                    <p className="text-xs md:text-sm font-bold text-left w-full max-w-[250px] mx-auto mb-2 opacity-70" style={{ color: 'var(--text-auth-primary)' }}>Recommended Features:</p>
-                    <ul className="text-left text-xs md:text-sm space-y-2 flex-grow opacity-90 mx-auto w-full max-w-[250px]" style={{ color: 'var(--text-auth-primary)' }}>
-                        <li className="flex items-start gap-2"><span className="text-brand-accent mt-0.5">•</span> Cashless hospitalization across major hospitals</li>
-                        <li className="flex items-start gap-2"><span className="text-brand-accent mt-0.5">•</span> Pre &amp; post hospitalization expenses (30–60 days)</li>
-                        <li className="flex items-start gap-2"><span className="text-brand-accent mt-0.5">•</span> No-claim bonus (increases cover every year)</li>
-                    </ul>
                 </motion.div>
 
                 <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="bg-blue-500/10 p-4 md:p-6 rounded-2xl border border-blue-500/20 backdrop-blur-sm relative overflow-hidden flex flex-col h-full"
+                    className="bg-blue-500/10 p-4 min-[600px]:p-6 rounded-2xl border border-blue-500/20 backdrop-blur-sm relative overflow-hidden flex flex-col h-full"
                 >
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                        <Heart className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
-                        <h3 className="text-sm md:text-base uppercase tracking-widest text-blue-300 font-extrabold">Life Cover</h3>
-                    </div>
-                    <p className="text-2xl md:text-3xl font-black mb-4" style={{ color: 'var(--text-auth-primary)' }}>{lifeCover || "Calculated below"}</p>
+                    <div className="flex flex-col min-[600px]:flex-row lg:flex-col min-[600px]:items-center lg:items-stretch justify-between w-full h-full gap-4">
+                        <div className="flex flex-col items-center min-[600px]:items-center lg:items-center min-[600px]:w-1/2 lg:w-full">
+                            <div className="flex items-center justify-center min-[600px]:justify-start lg:justify-center gap-2 mb-2 min-[600px]:mb-3">
+                                <Heart className="w-6 h-6 min-[600px]:w-8 min-[600px]:h-8 text-blue-400" />
+                                <h3 className="text-sm min-[600px]:text-base uppercase tracking-widest text-blue-600 font-extrabold">Life Cover</h3>
+                            </div>
+                            <p className="text-2xl min-[600px]:text-3xl font-black mb-2 min-[600px]:mb-0 lg:mb-4" style={{ color: 'var(--text-auth-primary)' }}>{lifeCover || "Calculated below"}</p>
+                        </div>
 
-                    <p className="text-xs md:text-sm font-bold text-left w-full max-w-[250px] mx-auto mb-2 opacity-70" style={{ color: 'var(--text-auth-primary)' }}>Recommended Features:</p>
-                    <ul className="text-left text-xs md:text-sm space-y-2 flex-grow opacity-90 mx-auto w-full max-w-[250px]" style={{ color: 'var(--text-auth-primary)' }}>
-                        <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Comprehensive life cover up to 99 years</li>
-                        <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Waiver of premium on critical illness</li>
-                        <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Fixed premium for the entire policy term</li>
-                    </ul>
+                        <div className="flex-grow min-[600px]:w-1/2 lg:w-full border-t border-blue-500/20 min-[600px]:border-t-0 min-[600px]:border-l lg:border-l-0 lg:border-t pt-4 min-[600px]:pt-0 min-[600px]:pl-6 lg:pl-0 lg:pt-4">
+                            <p className="text-xs min-[600px]:text-sm font-bold mb-2 opacity-70 text-left" style={{ color: 'var(--text-auth-primary)' }}>Recommended Features:</p>
+                            <ul className="text-left text-xs min-[600px]:text-sm space-y-2 opacity-90 mx-auto w-full" style={{ color: 'var(--text-auth-primary)' }}>
+                                <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Comprehensive life cover up to 99 years</li>
+                                <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Waiver of premium on critical illness</li>
+                                <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Fixed premium for the entire policy term</li>
+                            </ul>
+                        </div>
+                    </div>
                 </motion.div>
             </div>
 
@@ -121,7 +133,7 @@ export default function Step05_Results({ result, formData, onNext }) {
                 >
                     <div className="p-5 md:p-6 space-y-3">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
+                            <h3 className="text-sm font-bold tracking-wider flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-brand-accent"></span>
                                 Why this coverage?
                             </h3>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, color } from 'framer-motion';
 import {
     Upload, FileText, Plus, Loader2, ChevronDown,
     X, ArrowRight, Shield, Heart, CheckCircle2, Lock, Unlock, SkipForward, CreditCard, Clock, Calendar
@@ -55,7 +55,7 @@ const EMPTY_FORM = {
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
-export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
+export default function Step05b_PolicyEntry({ formData, updateField, onDone, onBack }) {
     const [view, setView] = useState(VIEW.CHOICE);
     const [policies, setPolicies] = useState([]);      // accumulated confirmed policies
     const [files, setFiles] = useState([]);
@@ -191,16 +191,16 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
         <StepWrapper className="space-y-6 md:space-y-8">
             {/* Header */}
             <div className="text-center space-y-2">
-                <div className="inline-block bg-brand-accent/20 border border-brand-accent/30 px-3 py-1 rounded-full mb-1">
+                {/* <div className="inline-block bg-brand-accent/20 border border-brand-accent/30 px-3 py-1 rounded-full mb-1">
                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-brand-accent">
                         Your Existing Coverage
                     </span>
-                </div>
+                </div> */}
                 <h2 className="text-2xl md:text-3xl font-black leading-tight" style={{ color: 'var(--text-auth-primary)' }}>
                     Do you have <span className="text-brand-accent italic">existing policies?</span>
                 </h2>
                 <p className="text-xs md:text-sm max-w-md mx-auto" style={{ color: 'var(--text-auth-muted)' }}>
-                    Add your current coverage so we can calculate your exact gap — or skip if you're starting fresh.
+                    Add your current coverage so we can calculate exact coverage gap — or skip if you're starting fresh.
                 </p>
             </div>
 
@@ -239,13 +239,22 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
 
 
 
-                        {/* Skip */}
-                        <button onClick={() => onDone()}
-                            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border font-bold text-sm transition-all hover:bg-white/5"
-                            style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' }}>
-                            <SkipForward className="w-4 h-4" />
-                            Skip — I don't have existing coverage
-                        </button>
+                        {/* Skip & Back */}
+                        <div className="flex gap-3">
+                            {onBack && (
+                                <button onClick={() => onBack()}
+                                    className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl border font-bold text-sm transition-all hover:bg-white/5"
+                                    style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' }}>
+                                    ← Back
+                                </button>
+                            )}
+                            <button onClick={() => onDone()}
+                                className="flex-[2] flex items-center justify-center gap-2 py-4 rounded-2xl border font-bold text-sm transition-all hover:bg-white/5"
+                                style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' }}>
+                                <SkipForward className="w-4 h-4" />
+                                Skip — No coverage
+                            </button>
+                        </div>
                     </motion.div>
                 )}
 
@@ -389,14 +398,16 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                         className="space-y-5">
                         {/* Type toggle */}
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--text-auth-placeholder)' }}>Policy Type</p>
+                            <label className="block text-xs font-semibold ml-1 flex items-center gap-2 tracking-wider mb-2" style={{ color: 'var(--text-auth-label)' }}>
+                                <FileText className="w-4 h-4 text-orange-400" /> Policy Type
+                            </label>
                             <div className="grid grid-cols-2 gap-3">
                                 {['Health', 'Life'].map(t => (
                                     <button key={t} onClick={() => setForm({ ...form, type: t, provider: '', policyName: '', providerCustom: '', policyNameCustom: '' })}
                                         className={`py-3 rounded-xl border font-black text-sm transition-all ${form.type === t
                                             ? (t === 'Life' ? 'bg-pink-500/20 border-pink-500' : 'bg-blue-500/20 border-blue-500')
                                             : ''}`}
-                                        style={form.type !== t ? { backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-placeholder)' } : { color: 'var(--text-auth-primary)' }}>
+                                        style={form.type !== t ? { backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' } : { color: 'var(--text-auth-primary)' }}>
                                         {t === 'Health' ? '🏥' : '🧬'} {t} Insurance
                                     </button>
                                 ))}
@@ -405,7 +416,9 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
 
                         {/* Provider */}
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--text-auth-placeholder)' }}>Provider</p>
+                            <label className="block text-xs font-semibold ml-1 flex items-center gap-2 tracking-wider mb-2" style={{ color: 'var(--text-auth-label)' }}>
+                                <Shield className="w-4 h-4 text-blue-400" /> Provider
+                            </label>
                             <div className="relative">
                                 <select value={form.provider}
                                     onChange={e => setForm({ ...form, provider: e.target.value, policyName: '', policyNameCustom: '' })}
@@ -427,7 +440,9 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
 
                         {/* Policy name */}
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--text-auth-placeholder)' }}>Policy Name</p>
+                            <label className="block text-xs font-semibold ml-1 flex items-center gap-2 tracking-wider mb-2" style={{ color: 'var(--text-auth-label)' }}>
+                                <Heart className="w-4 h-4 text-pink-400" /> Policy Name
+                            </label>
                             <div className="relative">
                                 <select value={form.policyName}
                                     onChange={e => setForm({ ...form, policyName: e.target.value })}
@@ -453,21 +468,23 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                         {/* Cover amount */}
                         <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--bg-auth-surface)', borderColor: 'var(--border-auth-card)' }}>
                             <div className="flex justify-between items-end mb-4">
-                                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-auth-placeholder)' }}>Cover Amount (Sum Insured)</p>
+                                <label className="block text-xs font-semibold ml-1 flex items-center gap-2 tracking-wider" style={{ color: 'var(--text-auth-label)' }}>
+                                    <CreditCard className="w-4 h-4 text-brand-accent" /> Cover Amount (Sum Insured)
+                                </label>
                                 <p className="text-xl font-black text-brand-accent">{fmtCover(form.coverVal)}</p>
                             </div>
-                                {/* Custom Cover Slider */}
-                                <div className="relative w-full h-2 rounded-full mt-4 mb-3" style={{ backgroundColor: 'var(--bg-auth-input)', border: '1px solid var(--border-auth-card)' }}>
-                                    <div className="absolute top-0 left-0 h-full rounded-full pointer-events-none transition-all duration-100" style={{ backgroundColor: form.type === 'Life' ? '#ec4899' : '#3b82f6', width: `${(form.coverVal / (form.type === 'Life' ? 50000000 : 20000000)) * 100}%` }} />
-                                    <div className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full shadow-md border-2 border-white pointer-events-none transition-all duration-100 z-10"
-                                         style={{ left: `calc(${(form.coverVal / (form.type === 'Life' ? 50000000 : 20000000)) * 100}% - 8px)`, backgroundColor: form.type === 'Life' ? '#ec4899' : '#3b82f6' }} />
-                                    
-                                    <input type="range" min="0" max={form.type === 'Life' ? 50000000 : 20000000}
-                                        step="50000"
-                                        value={form.coverVal}
-                                        onChange={e => setForm({ ...form, coverVal: parseInt(e.target.value) })}
-                                        className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-8 opacity-0 cursor-pointer z-20" />
-                                </div>
+                            {/* Custom Cover Slider */}
+                            <div className="relative w-full h-2 rounded-full mt-4 mb-3" style={{ backgroundColor: 'var(--bg-auth-input)', border: '1px solid var(--border-auth-card)' }}>
+                                <div className="absolute top-0 left-0 h-full rounded-full pointer-events-none transition-all duration-100" style={{ backgroundColor: form.type === 'Life' ? '#ec4899' : '#3b82f6', width: `${(form.coverVal / (form.type === 'Life' ? 50000000 : 20000000)) * 100}%` }} />
+                                <div className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full shadow-md border-2 border-white pointer-events-none transition-all duration-100 z-10"
+                                    style={{ left: `calc(${(form.coverVal / (form.type === 'Life' ? 50000000 : 20000000)) * 100}% - 8px)`, backgroundColor: form.type === 'Life' ? '#ec4899' : '#3b82f6' }} />
+
+                                <input type="range" min="0" max={form.type === 'Life' ? 50000000 : 20000000}
+                                    step="50000"
+                                    value={form.coverVal}
+                                    onChange={e => setForm({ ...form, coverVal: parseInt(e.target.value) })}
+                                    className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-8 opacity-0 cursor-pointer z-20" />
+                            </div>
                             <div className="flex justify-between text-[9px] font-bold mt-2" style={{ color: 'var(--text-auth-placeholder)' }}>
                                 <span>0</span>
                                 <span>{form.type === 'Life' ? '5 Cr' : '2 Cr'}</span>
@@ -484,7 +501,7 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                                 ← Back
                             </button>
                             <button onClick={addManualPolicy} disabled={!canAddManual()}
-                                className="flex-[2] py-3 rounded-xl font-black text-sm transition-all disabled:opacity-40 bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center gap-2">
+                                className="flex-[2] py-3 rounded-xl font-black text-sm transition-all disabled:opacity-40 bg-brand-accent hover:opacity-90 text-white flex items-center justify-center gap-2" style={{ color: 'white' }}>
                                 <Plus className="w-4 h-4" /> Save Policy
                             </button>
                         </div>
@@ -524,10 +541,17 @@ export default function Step05b_PolicyEntry({ formData, updateField, onDone }) {
                             <Plus className="w-4 h-4" /> Add Another Policy
                         </button>
 
-                        <button onClick={() => commitAndDone(policies)}
-                            className="w-full py-4 rounded-xl font-black text-sm bg-brand-accent text-white flex items-center justify-center gap-2 hover:bg-brand-accent/90 transition-all">
-                            <CheckCircle2 className="w-4 h-4" /> Done — Analyse My Gaps
-                        </button>
+                        <div className="flex gap-3">
+                            <button onClick={() => setView(VIEW.CHOICE)}
+                                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl border font-bold text-sm hover:bg-white/5 transition-all"
+                                style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)', backgroundColor: 'var(--bg-auth-input)' }}>
+                                ← Back
+                            </button>
+                            <button onClick={() => commitAndDone(policies)}
+                                className="flex-[2] py-4 rounded-xl font-black text-sm bg-brand-accent text-white flex items-center justify-center gap-2 hover:bg-brand-accent/90 transition-all" style={{ color: 'white' }}>
+                                <CheckCircle2 className="w-4 h-4" /> Done — Analyse My Gaps
+                            </button>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

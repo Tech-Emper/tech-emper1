@@ -47,7 +47,7 @@ const MemberCard = ({ memberKey, icon, label, isChild = false, data, onUpdate, o
                 </div>
 
                 {isChild && (
-                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-brand-accent text-white rounded-full flex items-center shadow-lg border-2 border-[var(--bg-auth-main)] select-none z-10" style={{ height: '32px' }}>
+                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-brand-accent text-white rounded-lg flex items-center shadow-lg border-2 border-[var(--bg-auth-main)] select-none z-10" style={{ height: '32px' }}>
                         <button onClick={decrement} className="px-3 h-full flex items-center justify-center font-black rounded-l-full hover:bg-black/10 transition-colors">-</button>
                         <span className="px-1 min-w-[16px] text-center font-bold text-sm leading-none">{data.count}</span>
                         <button onClick={increment} className="px-3 h-full flex items-center justify-center font-black rounded-r-full hover:bg-black/10 transition-colors">+</button>
@@ -156,10 +156,10 @@ export default function Step01_Splash({ formData, updateField }) {
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-xs opacity-50">▼</div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     {/* 3. Marital Status */}
                     <div className="space-y-2">
-                        <label className="block text-xs font-semibold ml-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-label)' }}>Marital Status</label>
+                        <label className="block text-xs font-semibold ml-1 tracking-wider" style={{ color: 'var(--text-auth-label)' }}>Marital Status</label>
                         <div className="grid grid-cols-2 gap-2 md:gap-3">
                             {['Single', 'Married'].map(status => (
                                 <button
@@ -185,7 +185,7 @@ export default function Step01_Splash({ formData, updateField }) {
 
                     {/* 4. Gender */}
                     <div className="space-y-2">
-                        <label className="block text-xs font-semibold ml-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-label)' }}>Gender</label>
+                        <label className="block text-xs font-semibold ml-1 tracking-wider" style={{ color: 'var(--text-auth-label)' }}>Gender</label>
                         <div className="grid grid-cols-2 gap-2 md:gap-3">
                             {['Male', 'Female'].map(g => (
                                 <button
