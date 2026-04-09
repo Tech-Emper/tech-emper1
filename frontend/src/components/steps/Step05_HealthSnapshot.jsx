@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import StepWrapper from './StepWrapper';
-import { Activity, Cigarette, Stethoscope, Shield } from 'lucide-react';
+import { Activity, Cigarette, Stethoscope, Shield, Dumbbell, Coffee } from 'lucide-react';
 
 export default function Step05_HealthSnapshot({ formData, updateField }) {
     const [otherCondition, setOtherCondition] = useState("");
@@ -33,9 +33,9 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
     ];
 
     const lifestyles = [
-        { label: 'Active', sub: '4+ days/week', value: 'Active' },
-        { label: 'Moderate', sub: '1–3 days/week', value: 'Moderate' },
-        { label: 'Sedentary', sub: 'Mostly desk job', value: 'Sedentary' }
+        { label: 'Active', sub: '4+ days/week', value: 'Active', Icon: Dumbbell },
+        { label: 'Moderate', sub: '1–3 days/week', value: 'Moderate', Icon: Activity },
+        { label: 'Sedentary', sub: 'Mostly desk job', value: 'Sedentary', Icon: Coffee }
     ];
 
     const staticConditions = ['None', 'Diabetes', 'Blood Pressure', 'Heart Condition', 'Cancer', 'Other'];
@@ -81,13 +81,13 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
         <StepWrapper className="space-y-6 md:space-y-8">
             <div className="text-center">
                 <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--text-auth-primary)' }}>A quick peek into your health & lifestyle</h2>
-                <p className="text-sm md:text-base" style={{ color: 'var(--text-auth-muted)' }}>A few quick questions to understand your health priorities.</p>
+                <p className="text-sm md:text-base" style={{ color: 'var(--text-auth-muted)' }}>A few quick questions to understand your health priorities</p>
             </div>
 
             <div className="space-y-4 md:space-y-6">
                 {/* Tobacco */}
                 <div className="space-y-2 md:space-y-3">
-                    <label className="block text-xs font-semibold ml-1 flex items-center gap-2 uppercase tracking-wider" style={{ color: 'var(--text-auth-label)' }}>
+                    <label className="block text-xs font-semibold ml-1 flex items-center gap-2 tracking-wider" style={{ color: 'var(--text-auth-label)' }}>
                         <Cigarette className="w-4 h-4 text-orange-400" /> Tobacco Usage
                     </label>
                     <div className="grid grid-cols-3 gap-2 md:gap-3">
@@ -96,8 +96,8 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
                                 key={opt.value}
                                 onClick={() => updateField('smoking_status', opt.value)}
                                 className={`p-2.5 md:p-4 rounded-xl border transition-all duration-200 ${formData.smoking_status === opt.value
-                                        ? 'bg-brand-accent/20 border-brand-accent shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                                        : 'hover:bg-opacity-10'
+                                    ? 'bg-brand-accent/20 border-brand-accent shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                                    : 'hover:bg-opacity-10'
                                     }`}
                                 style={formData.smoking_status !== opt.value ? {
                                     backgroundColor: 'var(--bg-auth-input)',
@@ -115,7 +115,7 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
 
                 {/* Existing Conditions */}
                 <div className="space-y-2 md:space-y-3">
-                    <label className="block text-xs font-semibold ml-1 flex items-center gap-2 uppercase tracking-wider" style={{ color: 'var(--text-auth-label)' }}>
+                    <label className="block text-xs font-semibold ml-1 flex items-center gap-2 tracking-wider" style={{ color: 'var(--text-auth-label)' }}>
                         <Stethoscope className="w-4 h-4 text-blue-400" /> Existing Conditions
                     </label>
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
@@ -126,8 +126,8 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
                                     key={condition}
                                     onClick={() => toggleCondition(condition)}
                                     className={`p-3 md:p-4 rounded-xl border text-center transition-all duration-200 ${isSelected
-                                            ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.15)]'
-                                            : 'hover:bg-opacity-10'
+                                        ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.15)]'
+                                        : 'hover:bg-opacity-10'
                                         }`}
                                     style={isSelected ? {
                                         color: 'var(--text-auth-primary)'
@@ -163,7 +163,7 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
 
                 {/* Lifestyle */}
                 <div className="space-y-2 md:space-y-3">
-                    <label className="block text-xs font-semibold ml-1 flex items-center gap-2 uppercase tracking-wider" style={{ color: 'var(--text-auth-label)' }}>
+                    <label className="block text-xs font-semibold ml-1 flex items-center gap-2 tracking-wider" style={{ color: 'var(--text-auth-label)' }}>
                         <Shield className="w-4 h-4 text-brand-accent" /> Lifestyle
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
@@ -172,8 +172,8 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
                                 key={opt.value}
                                 onClick={() => updateField('lifestyle', opt.value)}
                                 className={`flex flex-col items-start p-3 md:p-4 rounded-xl border transition-all duration-200 ${formData.lifestyle === opt.value
-                                        ? 'bg-brand-accent/20 border-brand-accent shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                                        : 'hover:bg-opacity-10'
+                                    ? 'bg-brand-accent/20 border-brand-accent shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                                    : 'hover:bg-opacity-10'
                                     }`}
                                 style={formData.lifestyle !== opt.value ? {
                                     backgroundColor: 'var(--bg-auth-input)',
@@ -185,7 +185,7 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
                             >
                                 <div className="text-sm font-bold mb-1 flex justify-between w-full">
                                     <span>{opt.label}</span>
-                                    <Activity className={`w-4 h-4 ${formData.lifestyle === opt.value ? 'text-brand-accent' : 'opacity-40'}`} />
+                                    <opt.Icon className={`w-4 h-4 ${formData.lifestyle === opt.value ? 'text-brand-accent' : 'opacity-40'}`} />
                                 </div>
                                 <div className="text-[10px] uppercase font-black tracking-widest" style={{ color: 'var(--text-auth-placeholder)' }}>
                                     {opt.sub}

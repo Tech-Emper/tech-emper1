@@ -9,21 +9,17 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const InputField = ({ label, name, value, icon: Icon, type = "text", placeholder, options = null, isEditing, onChange }) => (
-    <div className="flex flex-row items-center gap-3 md:flex-col md:items-start md:gap-2">
-        <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest ml-1 flex-shrink-0 w-24 md:w-auto opacity-70" style={{ color: 'var(--text-auth-muted)' }}>
-            {label}
+    <div className="flex flex-row items-center gap-3 md:flex-col md:items-start md:gap-1">
+        <label className="flex items-center gap-1.5 text-[10px] md:text-xs font-black tracking-widest ml-1 flex-shrink-0 w-28 md:w-auto opacity-70" style={{ color: 'var(--text-auth-muted)' }}>
+            {Icon && <Icon className="w-4 h-4 text-brand-accent shrink-0" />} {label}
         </label>
         <div className={`relative group transition-all duration-300 ${!isEditing ? 'opacity-80' : ''} flex-1 w-full`}>
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-brand-accent scale-90 md:scale-100" style={{ color: 'var(--text-auth-muted)' }}>
-                <Icon className="w-5 h-5" />
-            </div>
-
             {isEditing && options ? (
                 <select
                     name={name}
                     value={value}
                     onChange={onChange}
-                    className="w-full border rounded-xl md:rounded-2xl pl-10 md:pl-11 pr-5 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-all font-bold text-sm md:text-base appearance-none cursor-pointer"
+                    className="w-full border rounded-xl md:rounded-2xl px-4 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-all font-bold text-sm md:text-base appearance-none cursor-pointer"
                     style={{
                         backgroundColor: 'var(--bg-auth-input)',
                         borderColor: 'var(--border-auth-card)',
@@ -40,7 +36,7 @@ const InputField = ({ label, name, value, icon: Icon, type = "text", placeholder
                     value={value}
                     readOnly={!isEditing || name === 'email'}
                     onChange={onChange}
-                    className={`w-full border rounded-xl md:rounded-2xl pl-10 md:pl-11 pr-5 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-all font-bold text-sm md:text-base ${(!isEditing || name === 'email') ? 'border-transparent bg-transparent shadow-none' : 'bg-[var(--bg-auth-input)] border-[var(--border-auth-card)]'
+                    className={`w-full font-bold text-sm md:text-base focus:outline-none transition-all ${(!isEditing || name === 'email') ? 'bg-transparent border-transparent shadow-none px-1 py-1' : 'border rounded-xl md:rounded-2xl px-4 py-2 md:py-3 bg-[var(--bg-auth-input)] border-[var(--border-auth-card)] focus:ring-2 focus:ring-brand-accent/30'
                         }`}
                     style={{
                         color: 'var(--text-auth-primary)'
@@ -210,7 +206,7 @@ const Profile = () => {
                         {!isEditing ? (
                             <button
                                 onClick={() => setIsEditing(true)}
-                                className="hidden md:flex items-center gap-2 px-6 py-3 bg-brand-accent text-brand-dark rounded-2xl font-black shadow-lg shadow-brand-accent/20 hover:scale-[1.05] active:scale-[0.95] transition-all"
+                                className="hidden md:flex items-center gap-2 px-6 py-3 bg-brand-accent text-brand-dark rounded-2xl font-black shadow-lg shadow-brand-accent/20 hover:scale-[1.05] active:scale-[0.95] transition-all" style={{ color: 'white' }}
                             >
                                 <Edit3 className="w-5 h-5" />
                                 Edit Profile
@@ -227,7 +223,7 @@ const Profile = () => {
                                 <button
                                     onClick={handleSubmit}
                                     disabled={isSaving}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-brand-accent text-brand-dark rounded-2xl font-black shadow-lg shadow-brand-accent/20 hover:scale-[1.05] active:scale-[0.95] transition-all disabled:opacity-50"
+                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-brand-accent text-brand-dark rounded-2xl font-black shadow-lg shadow-brand-accent/20 hover:scale-[1.05] active:scale-[0.95] transition-all disabled:opacity-50" style={{ color: 'white' }}
                                 >
                                     {isSaving ? (
                                         <div className="w-5 h-5 border-2 border-brand-dark/30 border-t-brand-dark animate-spin rounded-full" />
@@ -262,7 +258,7 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 md:gap-y-8">
                     {/* Basic Info */}
                     <div className="space-y-3 md:space-y-6">
-                        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-brand-accent border-b border-brand-accent/20 pb-2">Personal Details</h3>
+                        <h3 className="text-xs font-black tracking-[0.3em] text-brand-accent border-b border-brand-accent/20 pb-2">Personal Details</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <InputField
@@ -330,9 +326,9 @@ const Profile = () => {
 
                     {/* Contact & Professional */}
                     <div className="space-y-3 md:space-y-6">
-                        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-brand-accent border-b border-brand-accent/20 pb-2">Professional & Lifestyle</h3>
+                        <h3 className="text-xs font-black tracking-[0.3em] text-brand-accent border-b border-brand-accent/20 pb-2">Professional & Lifestyle</h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <InputField
                                 label="Mobile"
                                 name="mobile"
@@ -414,7 +410,7 @@ const Profile = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="mt-12 p-6 rounded-3xl bg-brand-accent/5 border border-brand-accent/20 flex items-start gap-4"
                         >
-                            <div className="p-2 bg-brand-accent text-brand-dark rounded-xl">
+                            <div className="p-2 bg-brand-accent text-brand-dark rounded-xl" style={{ color: 'white' }}>
                                 <Save className="w-4 h-4" />
                             </div>
                             <div>

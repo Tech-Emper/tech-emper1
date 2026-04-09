@@ -3,28 +3,19 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    // Default to 'light' if no preference is saved
-    const [theme, setTheme] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const savedTheme = localStorage.getItem('theme');
-            return savedTheme || 'light';
-        }
-        return 'light';
-    });
+    const theme = 'light';
 
     useEffect(() => {
         const root = window.document.documentElement;
-
-        // Remove the old theme class and add the new one
-        root.classList.remove('light', 'dark');
-        root.classList.add(theme);
-
-        // Persist to localStorage
-        localStorage.setItem('theme', theme);
-    }, [theme]);
+        // Enforce light theme
+        root.classList.remove('dark');
+        root.classList.add('light');
+        // Clear any old saved theme preference
+        localStorage.removeItem('theme');
+    }, []);
 
     const toggleTheme = () => {
-        setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'));
+        // Theme toggle is disabled
     };
 
     return (

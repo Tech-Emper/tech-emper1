@@ -202,7 +202,7 @@ export default function Step07_GapAnalysis({ formData, result, onNext }) {
                 <div className="pt-4">
                     <button
                         onClick={onNext}
-                        className="w-full bg-brand-accent text-brand-dark px-6 py-4 rounded-xl font-black text-base md:text-lg flex items-center justify-center shadow-xl hover:shadow-brand-accent/30 transition-all active:scale-[0.98] border-b-4 border-emerald-700"
+                        className="w-full py-4 rounded-xl font-black text-base md:text-lg bg-brand-accent text-white flex items-center justify-center gap-2 hover:bg-brand-accent/90 transition-all" style={{ color: 'white' }}
                     >
                         Get Suggestion ✨
                     </button>

@@ -31,7 +31,7 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                     {formData.first_name || 'Hey'}, you are <span className="text-brand-accent">{formData.career_stage || 'Launch Pad'}</span>
                 </h2>
                 <p className="text-sm md:text-base" style={{ color: 'var(--text-auth-muted)' }}>
-                    Your work fuels more than just your career. Tell us what you do.
+                    Your work fuels more than just your career
                 </p>
             </div>
 
@@ -89,11 +89,10 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                                 <button
                                     key={value}
                                     onClick={() => updateField('income_level', value)}
-                                    className={`p-3 md:p-4 rounded-xl border text-left transition-all duration-200 group ${
-                                        formData.income_level === value 
-                                            ? 'bg-brand-accent/20 border-brand-accent' 
+                                    className={`p-3 md:p-4 rounded-xl border text-left transition-all duration-200 group ${formData.income_level === value
+                                            ? 'bg-brand-accent/20 border-brand-accent'
                                             : 'hover:bg-opacity-10'
-                                    } ${index === incomeBrackets.length - 1 ? 'sm:col-span-2' : ''}`}
+                                        } ${index === incomeBrackets.length - 1 ? 'sm:col-span-2' : ''}`}
                                     style={formData.income_level !== value ? {
                                         backgroundColor: 'var(--bg-auth-input)',
                                         borderColor: 'var(--border-auth-card)',
@@ -104,13 +103,12 @@ export default function Step04_FinancialReality({ formData, updateField }) {
                                 >
                                     <div className="flex flex-col">
                                         <span className="text-sm font-bold">{bracket.range}</span>
-                                        <span className={`text-[10px] uppercase tracking-widest font-black transition-colors ${
-                                            formData.income_level === value 
-                                                ? 'text-brand-accent' 
+                                        <span className={`text-[10px] uppercase tracking-widest font-black transition-colors ${formData.income_level === value
+                                                ? 'text-brand-accent'
                                                 : ''
-                                        }`} style={formData.income_level !== value ? {
-                                            color: 'var(--text-auth-placeholder)'
-                                        } : {}}>
+                                            }`} style={formData.income_level !== value ? {
+                                                color: 'var(--text-auth-placeholder)'
+                                            } : {}}>
                                             {bracket.tier} Tier
                                         </span>
                                     </div>
