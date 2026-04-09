@@ -36,13 +36,13 @@ const MemberCard = ({ memberKey, icon, label, isChild = false, data, onUpdate, o
         <div className="flex flex-col items-center gap-2">
             <div
                 onClick={handleCardClick}
-                className={`relative w-full flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${!isChild ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''} ${selected ? 'border-brand-accent bg-brand-accent/5' : 'border-gray-300 dark:border-gray-600 opacity-70 hover:opacity-100'}`}
-                style={selected ? {} : { backgroundColor: 'var(--bg-auth-input)' }}
+                className={`relative w-full flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 ${!isChild ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''} ${selected ? 'bg-brand-accent/20 border-brand-accent shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'hover:bg-opacity-10 opacity-70 hover:opacity-100'}`}
+                style={!selected ? { backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' } : { color: 'var(--text-auth-primary)' }}
             >
                 <div className="text-4xl mb-2 select-none" style={{ textShadow: selected ? '0 0 15px rgba(var(--brand-accent-rgb), 0.5)' : 'none' }}>
                     {icon}
                 </div>
-                <div className={`text-sm font-bold ${selected ? 'text-brand-accent' : ''}`} style={selected ? {} : { color: 'var(--text-auth-primary)' }}>
+                <div className={`text-sm font-bold ${selected ? 'text-brand-accent' : ''}`}>
                     {label}
                 </div>
 
@@ -61,7 +61,7 @@ const MemberCard = ({ memberKey, icon, label, isChild = false, data, onUpdate, o
                     <input
                         type="number"
                         placeholder="Age"
-                        min="1"
+                        min="18"
                         max="100"
                         value={data.age || ''}
                         onChange={(e) => onUpdate(memberKey, 'age', e.target.value)}
@@ -105,10 +105,10 @@ export default function Step01_Splash({ formData, updateField }) {
         <StepWrapper className="space-y-6 md:space-y-8 pb-10">
             <div className="text-center space-y-3 md:space-y-4">
                 <h1 className="text-3xl md:text-5xl font-black leading-tight" style={{ color: 'var(--text-auth-primary)' }}>
-                    Your personal <span className="text-brand-accent">insurance </span>check.
+                    Your personal <span className="text-brand-accent">insurance </span>check
                 </h1>
                 <p className="text-base md:text-lg max-w-lg mx-auto leading-relaxed" style={{ color: 'var(--text-auth-label)' }}>
-                    Insurance is about people, not just policies.
+                    Insurance is about people, not just policies
                 </p>
             </div>
 
@@ -145,7 +145,7 @@ export default function Step01_Splash({ formData, updateField }) {
                     <select
                         value={formData.city || ""}
                         onChange={(e) => updateField('city', e.target.value)}
-                        className="w-full pl-12 pr-10 py-3.5 border rounded-2xl focus:ring-2 focus:ring-brand-accent outline-none appearance-none cursor-pointer font-bold"
+                        className="w-full pl-12 pr-10 py-3.5 border rounded-2xl focus:ring-2 focus:ring-brand-accent outline-none appearance-none cursor-pointer"
                         style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }}
                     >
                         <option value="" disabled>Select your city</option>
@@ -156,22 +156,28 @@ export default function Step01_Splash({ formData, updateField }) {
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-xs opacity-50">▼</div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* 3. Marital Status */}
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase opacity-70 tracking-wider">Marital Status</label>
-                        <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                        <label className="block text-xs font-semibold ml-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-label)' }}>Marital Status</label>
+                        <div className="grid grid-cols-2 gap-2 md:gap-3">
                             {['Single', 'Married'].map(status => (
                                 <button
                                     key={status}
                                     onClick={() => {
                                         updateField('marital_status', status);
-                                        // Auto-toggle spouse based on marital status
                                         if (status === 'Single') handleMemberUpdate('spouse', 'selected', false);
                                     }}
-                                    className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all ${formData.marital_status === status ? 'bg-brand-accent text-white shadow-md' : 'opacity-70 hover:opacity-100'}`}
+                                    className={`p-2.5 md:p-3 rounded-xl border transition-all duration-200 ${formData.marital_status === status ? 'bg-brand-accent/20 border-brand-accent shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'hover:bg-opacity-10'}`}
+                                    style={formData.marital_status !== status ? {
+                                        backgroundColor: 'var(--bg-auth-input)',
+                                        borderColor: 'var(--border-auth-card)',
+                                        color: 'var(--text-auth-muted)'
+                                    } : {
+                                        color: 'var(--text-auth-primary)'
+                                    }}
                                 >
-                                    {status}
+                                    <span className="text-xs md:text-sm font-bold">{status}</span>
                                 </button>
                             ))}
                         </div>
@@ -179,15 +185,22 @@ export default function Step01_Splash({ formData, updateField }) {
 
                     {/* 4. Gender */}
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase opacity-70 tracking-wider">Gender</label>
-                        <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                        <label className="block text-xs font-semibold ml-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-label)' }}>Gender</label>
+                        <div className="grid grid-cols-2 gap-2 md:gap-3">
                             {['Male', 'Female'].map(g => (
                                 <button
                                     key={g}
                                     onClick={() => updateField('gender', g)}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${formData.gender === g ? 'bg-brand-accent text-white shadow-md' : 'opacity-70 hover:opacity-100'}`}
+                                    className={`flex items-center justify-center gap-2 p-2.5 md:p-3 rounded-xl border transition-all duration-200 ${formData.gender === g ? 'bg-brand-accent/20 border-brand-accent shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'hover:bg-opacity-10'}`}
+                                    style={formData.gender !== g ? {
+                                        backgroundColor: 'var(--bg-auth-input)',
+                                        borderColor: 'var(--border-auth-card)',
+                                        color: 'var(--text-auth-muted)'
+                                    } : {
+                                        color: 'var(--text-auth-primary)'
+                                    }}
                                 >
-                                    {g}
+                                    <span className="text-xs md:text-sm font-bold">{g}</span>
                                 </button>
                             ))}
                         </div>
@@ -200,12 +213,12 @@ export default function Step01_Splash({ formData, updateField }) {
                         Select members you want to insure
                     </h3>
                     <div className="grid grid-cols-3 gap-3">
-                        <MemberCard memberKey="self" icon={formData.gender === 'Female' ? '👩' : '👨'} label="You" data={insuredMembers.self} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
-                        <MemberCard memberKey="spouse" icon={formData.gender === 'Female' ? '👨' : '👩'} label={formData.gender === 'Female' ? 'Husband' : 'Wife'} data={insuredMembers.spouse} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
-                        <MemberCard memberKey="daughter" icon="👧" label="Daughter" isChild={true} data={insuredMembers.daughter} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
-                        <MemberCard memberKey="son" icon="👦" label="Son" isChild={true} data={insuredMembers.son} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
-                        <MemberCard memberKey="father" icon="👴" label="Father" data={insuredMembers.father} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
-                        <MemberCard memberKey="mother" icon="👵" label="Mother" data={insuredMembers.mother} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="self" icon={formData.gender === 'Female' ? '👩🏻' : '🧔🏻‍♂️'} label="You" data={insuredMembers.self} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="spouse" icon={formData.gender === 'Female' ? '🧔🏻‍♂️' : '👩🏻'} label={formData.gender === 'Female' ? 'Husband' : 'Wife'} data={insuredMembers.spouse} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="daughter" icon="👧🏻" label="Daughter" isChild={true} data={insuredMembers.daughter} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="son" icon="👦🏻" label="Son" isChild={true} data={insuredMembers.son} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="father" icon="👴🏻" label="Father" data={insuredMembers.father} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
+                        <MemberCard memberKey="mother" icon="👵🏻" label="Mother" data={insuredMembers.mother} onUpdate={handleMemberUpdate} onMaritalStatusUpdate={(val) => updateField('marital_status', val)} />
                     </div>
                 </div>
             </div>

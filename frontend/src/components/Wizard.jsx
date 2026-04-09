@@ -318,7 +318,7 @@ export default function Wizard({ onBack }) {
         try {
             await verify(emailToVerify, otpString);
             setOtpModalState(prev => ({ ...prev, show: false, loading: false }));
-            
+
             // Now fully authenticated, if we were deferred from a step transition:
             if (otpModalState.nextStep) {
                 const ns = otpModalState.nextStep;
@@ -624,9 +624,9 @@ export default function Wizard({ onBack }) {
                                         handleNext
                                 }
                                 disabled={loading || otpModalState.loading}
-                                className="relative overflow-hidden bg-white text-brand-dark px-5 py-2.5 md:px-7 md:py-3 rounded-xl font-bold flex items-center shadow-lg hover:shadow-white/20 transition-all disabled:opacity-70 disabled:cursor-wait text-sm md:text-base"
+                                className="relative overflow-hidden bg-brand-accent text-brand-dark px-5 py-2.5 md:px-7 md:py-3 rounded-xl font-bold flex items-center shadow-lg hover:shadow-white/20 transition-all disabled:opacity-70 disabled:cursor-wait text-sm md:text-base"
                                 style={{
-                                    backgroundColor: 'var(--btn-primary-bg)',
+                                    // backgroundColor: '#059669',
                                     color: 'var(--btn-primary-text)'
                                 }}
                             >
@@ -706,7 +706,7 @@ export default function Wizard({ onBack }) {
                                 >
                                     Reveal My Plan <ArrowRight className="w-4 h-4 ml-2" />
                                 </button>
-                                
+
                                 <button
                                     onClick={() => setShowEmailModal(false)}
                                     className="w-full mt-2 text-xs font-semibold hover:underline"
@@ -720,7 +720,7 @@ export default function Wizard({ onBack }) {
                 )}
             </AnimatePresence>
 
-            <OTPModal 
+            <OTPModal
                 show={otpModalState.show}
                 email={formData.email || tempEmail}
                 loading={otpModalState.loading}
