@@ -21,6 +21,7 @@ const PolicyDetailsForm = lazy(() => import('./components/wallet/PolicyDetailsFo
 const PolicyConfirmation = lazy(() => import('./components/wallet/PolicyConfirmation'));
 const PolicyDetailView = lazy(() => import('./components/wallet/PolicyDetailView'));
 
+import CoverageReport from './components/CoverageReport';
 
 function MainApp() {
   const { isAuthenticated, loading } = useAuth();
@@ -48,6 +49,9 @@ function MainApp() {
 
       <div className="z-10 w-full max-w-7xl flex-1 flex flex-col items-center">
         <Routes>
+          {/* Public Routes for previewing UI */}
+          <Route path="/coverage-report" element={<CoverageReport />} />
+
           {!isAuthenticated ? (
             <Route path="*" element={<Login />} />
           ) : (
