@@ -72,21 +72,21 @@ export default function Step05_Results({ result, formData, onNext }) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 <motion.div
                     whileHover={{ scale: 1.02 }}
                     className="bg-brand-accent/10 p-4 min-[600px]:p-6 rounded-2xl border border-brand-accent/20 backdrop-blur-sm relative overflow-hidden flex flex-col h-full"
                 >
-                    <div className="flex flex-col min-[600px]:flex-row lg:flex-col min-[600px]:items-center lg:items-stretch justify-between w-full h-full gap-4">
-                        <div className="flex flex-col items-center min-[600px]:items-center lg:items-center min-[600px]:w-1/2 lg:w-full">
-                            <div className="flex items-center justify-center min-[600px]:justify-start lg:justify-center gap-2 mb-2 min-[600px]:mb-3">
+                    <div className="flex flex-col min-[600px]:flex-row min-[600px]:items-center justify-between w-full h-full gap-4">
+                        <div className="flex flex-col items-center min-[600px]:items-start min-[600px]:w-1/2">
+                            <div className="flex items-center justify-center min-[600px]:justify-start gap-2 mb-2 min-[600px]:mb-3">
                                 <Shield className="w-6 h-6 min-[600px]:w-8 min-[600px]:h-8 text-brand-accent" />
                                 <h3 className="text-sm min-[600px]:text-base uppercase tracking-widest text-emerald-600 font-extrabold">Health Cover</h3>
                             </div>
-                            <p className="text-2xl min-[600px]:text-3xl font-black mb-2 min-[600px]:mb-0 lg:mb-4" style={{ color: 'var(--text-auth-primary)' }}>{healthCover || "Calculated below"}</p>
+                            <p className="text-2xl min-[600px]:text-3xl font-black mb-2 min-[600px]:mb-0" style={{ color: 'var(--text-auth-primary)' }}>{healthCover || "Calculated below"}</p>
                         </div>
 
-                        <div className="flex-grow min-[600px]:w-1/2 lg:w-full border-t border-emerald-500/20 min-[600px]:border-t-0 min-[600px]:border-l lg:border-l-0 lg:border-t pt-4 min-[600px]:pt-0 min-[600px]:pl-6 lg:pl-0 lg:pt-4">
+                        <div className="flex-grow min-[600px]:w-1/2 border-t border-emerald-500/20 min-[600px]:border-t-0 min-[600px]:border-l pt-4 min-[600px]:pt-0 min-[600px]:pl-6">
                             <p className="text-xs min-[600px]:text-sm font-bold mb-2 opacity-70 text-left" style={{ color: 'var(--text-auth-primary)' }}>Recommended Features:</p>
                             <ul className="text-left text-xs min-[600px]:text-sm space-y-2 opacity-90 mx-auto w-full" style={{ color: 'var(--text-auth-primary)' }}>
                                 <li className="flex items-start gap-2"><span className="text-brand-accent mt-0.5">•</span> Cashless hospitalization across major hospitals</li>
@@ -101,16 +101,16 @@ export default function Step05_Results({ result, formData, onNext }) {
                     whileHover={{ scale: 1.02 }}
                     className="bg-blue-500/10 p-4 min-[600px]:p-6 rounded-2xl border border-blue-500/20 backdrop-blur-sm relative overflow-hidden flex flex-col h-full"
                 >
-                    <div className="flex flex-col min-[600px]:flex-row lg:flex-col min-[600px]:items-center lg:items-stretch justify-between w-full h-full gap-4">
-                        <div className="flex flex-col items-center min-[600px]:items-center lg:items-center min-[600px]:w-1/2 lg:w-full">
-                            <div className="flex items-center justify-center min-[600px]:justify-start lg:justify-center gap-2 mb-2 min-[600px]:mb-3">
+                    <div className="flex flex-col min-[600px]:flex-row min-[600px]:items-center justify-between w-full h-full gap-4">
+                        <div className="flex flex-col items-center min-[600px]:items-start min-[600px]:w-1/2">
+                            <div className="flex items-center justify-center min-[600px]:justify-start gap-2 mb-2 min-[600px]:mb-3">
                                 <Heart className="w-6 h-6 min-[600px]:w-8 min-[600px]:h-8 text-blue-400" />
                                 <h3 className="text-sm min-[600px]:text-base uppercase tracking-widest text-blue-600 font-extrabold">Life Cover</h3>
                             </div>
-                            <p className="text-2xl min-[600px]:text-3xl font-black mb-2 min-[600px]:mb-0 lg:mb-4" style={{ color: 'var(--text-auth-primary)' }}>{lifeCover || "Calculated below"}</p>
+                            <p className="text-2xl min-[600px]:text-3xl font-black mb-2 min-[600px]:mb-0" style={{ color: 'var(--text-auth-primary)' }}>{lifeCover || "Calculated below"}</p>
                         </div>
 
-                        <div className="flex-grow min-[600px]:w-1/2 lg:w-full border-t border-blue-500/20 min-[600px]:border-t-0 min-[600px]:border-l lg:border-l-0 lg:border-t pt-4 min-[600px]:pt-0 min-[600px]:pl-6 lg:pl-0 lg:pt-4">
+                        <div className="flex-grow min-[600px]:w-1/2 border-t border-blue-500/20 min-[600px]:border-t-0 min-[600px]:border-l pt-4 min-[600px]:pt-0 min-[600px]:pl-6">
                             <p className="text-xs min-[600px]:text-sm font-bold mb-2 opacity-70 text-left" style={{ color: 'var(--text-auth-primary)' }}>Recommended Features:</p>
                             <ul className="text-left text-xs min-[600px]:text-sm space-y-2 opacity-90 mx-auto w-full" style={{ color: 'var(--text-auth-primary)' }}>
                                 <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Comprehensive life cover up to 99 years</li>
@@ -205,9 +205,9 @@ export default function Step05_Results({ result, formData, onNext }) {
             <div className="pt-2 pb-2">
                 <button
                     onClick={onNext}
-                    className="w-full sm:w-auto mx-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-base shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                    className="w-full bg-brand-accent sm:w-auto mx-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-base shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
                     style={{
-                        backgroundColor: 'var(--btn-primary-bg)',
+                        // backgroundColor: 'var(--btn-primary-bg)',
                         color: 'var(--btn-primary-text)'
                     }}
                 >
