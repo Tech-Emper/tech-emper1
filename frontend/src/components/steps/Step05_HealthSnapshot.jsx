@@ -187,7 +187,7 @@ export default function Step05_HealthSnapshot({ formData, updateField }) {
                                     <span>{opt.label}</span>
                                     <opt.Icon className={`w-4 h-4 ${formData.lifestyle === opt.value ? 'text-brand-accent' : 'opacity-40'}`} />
                                 </div>
-                                <div className="text-[10px] uppercase font-black tracking-widest" style={{ color: 'var(--text-auth-placeholder)' }}>
+                                <div className="text-[10px] font-black tracking-widest" style={{ color: 'var(--text-auth-placeholder)' }}>
                                     {opt.sub}
                                 </div>
                             </button>

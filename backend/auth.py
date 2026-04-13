@@ -152,6 +152,87 @@ def send_otp_email(email: str, otp: str):
 
     return False, f"Email delivery failed: {last_error}"
 
+def send_welcome_email(email: str, first_name: str, org_name: str):
+    """Send welcome email to newly imported users."""
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    
+    subject = f"Welcome to Emper AI via {org_name}!"
+    first_name_display = first_name if first_name else "Employee"
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <h2 style="color: #6366f1;">Welcome to Emper AI!</h2>
+            <p>Hello {first_name_display},</p>
+            <p>Your organization <strong>{org_name}</strong> has invited you to Emper AI.</p>
+            <p>Please explore our website for your health and life insurance needs:</p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Explore Emper AI</a>
+            </div>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 12px; color: #94a3b8;">This is an automated message. Please do not reply.</p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # --- PROD: USE RESEND API ---
+    if resend_api_key:
+        try:
+            import resend
+            resend.api_key = resend_api_key.strip()
+            params = {
+                "from": os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai"),
+                "to": [email],
+                "subject": subject,
+                "html": html_content
+            }
+            resend.Emails.send(params)
+            return True, "Sent"
+        except Exception as e:
+            error_msg = str(e)
+            log_now(f"CRITICAL: Resend API Error on Welcome: {error_msg}")
+            if not os.getenv("SMTP_HOST"):
+                return False, f"Resend API Error: {error_msg}."
+    
+    # --- LOCAL/FALLBACK: USE SMTP ---
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = int(os.getenv("SMTP_PORT", 587))
+    smtp_user = os.getenv("SMTP_USERNAME")
+    smtp_pass = os.getenv("SMTP_PASSWORD")
+    from_email = os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai")
+
+    if not all([smtp_host, smtp_user, smtp_pass]):
+        return False, "Email server not configured."
+
+    msg = MIMEMultipart()
+    msg['From'] = from_email
+    msg['To'] = email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(html_content, 'html'))
+
+    ports_to_try = [smtp_port]
+    if smtp_port != 465:
+        ports_to_try.append(465)
+
+    for port in ports_to_try:
+        try:
+            if port == 465:
+                server = smtplib.SMTP_SSL(smtp_host, port, timeout=10)
+            else:
+                server = smtplib.SMTP(smtp_host, port, timeout=10)
+                server.starttls()
+            
+            with server:
+                server.login(smtp_user, smtp_pass)
+                server.send_message(msg)
+            return True, "Sent"
+        except Exception as e:
+            if port == ports_to_try[-1]:
+                return False, f"Email delivery failed: {str(e)}"
+    
+    return False, "Failed"
+
 def store_otp(email: str, otp: str):
     """Store OTP with expiry timestamp."""
     expires_at = datetime.now() + timedelta(minutes=OTP_EXPIRY_MINUTES)

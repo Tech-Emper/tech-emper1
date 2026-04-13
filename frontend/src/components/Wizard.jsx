@@ -324,7 +324,7 @@ export default function Wizard({ onBack }) {
                 const ns = otpModalState.nextStep;
                 const mergedData = { ...formData, email: emailToVerify, ...(otpModalState.tempUpdates || {}) };
                 setFormData(mergedData);
-                
+
                 // Silently persist recommendation to DB now that user has an auth token
                 try {
                     const token = localStorage.getItem('auth_token');
@@ -333,7 +333,7 @@ export default function Wizard({ onBack }) {
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ ...mergedData, is_smoker: mergedData.smoking_status !== "No" })
                     });
-                } catch(e) {
+                } catch (e) {
                     console.error("Silent recommend fetch failed", e);
                 }
 
@@ -715,9 +715,9 @@ export default function Wizard({ onBack }) {
 
                                 <button
                                     onClick={handleEmailSubmit}
-                                    className="w-full relative overflow-hidden bg-white text-brand-dark px-5 py-4 rounded-xl font-bold flex justify-center items-center shadow-lg hover:shadow-white/20 transition-all text-base"
+                                    className="w-full relative overflow-hidden bg-brand-accent text-brand-dark px-5 py-4 rounded-xl font-bold flex justify-center items-center shadow-lg hover:shadow-white/20 transition-all text-base"
                                     style={{
-                                        backgroundColor: 'var(--btn-primary-bg)',
+                                        // backgroundColor: 'var(--btn-primary-bg)',
                                         color: 'var(--btn-primary-text)'
                                     }}
                                 >

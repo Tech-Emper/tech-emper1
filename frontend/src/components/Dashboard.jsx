@@ -449,7 +449,7 @@ export default function Dashboard({ userProfile, latestRecommendation, history, 
                 {isPhase2Incomplete && (
                     <button
                         onClick={onCompleteExistingDetails}
-                        className="flex-1 bg-brand-accent text-brand-dark px-4 py-3 md:px-6 md:py-3 rounded-xl font-bold text-sm md:text-base flex items-center justify-center shadow-xl hover:shadow-brand-accent/20 transition-all group active:scale-95 border-b-4 border-emerald-700"
+                        className="flex-1 bg-brand-accent text-brand-dark px-4 py-3 md:px-6 md:py-3 rounded-xl font-bold text-sm md:text-base flex items-center justify-center shadow-xl hover:shadow-brand-accent/20 transition-all group active:scale-95 border-b-4 border-emerald-700" style={{ color: 'white' }}
                     >
                         <Shield className="w-4 h-4 mr-2 animate-pulse" />
                         Identify Coverage Gap
