@@ -1,12 +1,12 @@
 import io
 import csv
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 
 from database import get_db, Organization, User
-from auth import get_current_user
+from auth import get_current_user, send_welcome_email
 from schemas import OrganizationResponse, OrganizationCreate
 
 router = APIRouter(prefix="/api/superadmin", tags=["superadmin"])
@@ -76,7 +76,7 @@ def update_organization(org_id: int, org_in: OrganizationCreate, db: Session = D
     )
 
 @router.post("/organizations/{org_id}/upload")
-async def upload_employees_csv(org_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), admin: User = Depends(verify_superadmin)):
+async def upload_employees_csv(org_id: int, background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db), admin: User = Depends(verify_superadmin)):
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="File must be a CSV")
         
@@ -107,12 +107,16 @@ async def upload_employees_csv(org_id: int, file: UploadFile = File(...), db: Se
         user = db.query(User).filter(User.email == email).first()
         if user:
             # Update existing user to belong to this org, and update details
+            is_new_org = user.organization_id != org.id
             user.organization_id = org.id
             if first_name and not user.first_name:
                 user.first_name = first_name
             if mobile and not user.mobile:
                 user.mobile = mobile
             updated_count += 1
+            
+            if is_new_org:
+                background_tasks.add_task(send_welcome_email, email, first_name, org.name)
         else:
             # Create new user
             new_user = User(
@@ -123,6 +127,7 @@ async def upload_employees_csv(org_id: int, file: UploadFile = File(...), db: Se
             )
             db.add(new_user)
             added_count += 1
+            background_tasks.add_task(send_welcome_email, email, first_name, org.name)
             
     try:
         db.commit()
