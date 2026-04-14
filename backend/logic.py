@@ -1,4 +1,4 @@
-﻿import os
+import os
 import json
 from datetime import datetime
 from dotenv import load_dotenv
@@ -166,7 +166,7 @@ def calculate_policy_recommendations_ai(data: dict) -> dict:
             raise ValueError("GEMINI_API_KEY not found in environment")
         
         client = Client(api_key=api_key)
-        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+        model_name = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
         
         # Format existing health features if possible
         existing_health_info = ""
@@ -297,7 +297,7 @@ def calculate_recommendation_ai(data: dict) -> dict:
             raise ValueError("GEMINI_API_KEY not found in environment")
         
         client = Client(api_key=api_key)
-        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+        model_name = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
         
         # Build prompt
         age = data.get('age') or calculate_age(data.get('dob', ''))
