@@ -1,4 +1,4 @@
-﻿fastapi==0.115.6
+fastapi==0.115.6
 email-validator==2.2.0
 httpx==0.25.2
 pytest==7.4.3
@@ -13,3 +13,4 @@ python-dotenv
 uvicorn
 pikepdf
 psycopg2-binary
+apscheduler

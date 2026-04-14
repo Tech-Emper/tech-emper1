@@ -113,17 +113,22 @@ async def upload_employees_csv(org_id: int, background_tasks: BackgroundTasks, f
                 user.first_name = first_name
             if mobile and not user.mobile:
                 user.mobile = mobile
-            updated_count += 1
             
             if is_new_org:
+                user.onboarding_started_at = datetime.utcnow()
+                user.reminder_1_sent = False
+                user.reminder_2_sent = False
                 background_tasks.add_task(send_welcome_email, email, first_name, org.name)
+            
+            updated_count += 1
         else:
             # Create new user
             new_user = User(
                 email=email,
                 first_name=first_name,
                 mobile=mobile,
-                organization_id=org.id
+                organization_id=org.id,
+                onboarding_started_at=datetime.utcnow()
             )
             db.add(new_user)
             added_count += 1
