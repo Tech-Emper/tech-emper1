@@ -91,6 +91,11 @@ class User(Base):
     is_smoker = Column(Boolean, default=False)
     current_step = Column(Integer, default=1)
 
+    # Tracking states
+    onboarding_started_at = Column(DateTime)
+    reminder_1_sent = Column(Boolean, default=False)
+    reminder_2_sent = Column(Boolean, default=False)
+
     organization = relationship("Organization", back_populates="users")
     recommendations = relationship("Recommendation", back_populates="user")
 
@@ -139,6 +144,8 @@ def init_db():
                                 default_clause = " DEFAULT FALSE"
                             elif "INTEGER" in str(col_type).upper():
                                 default_clause = " DEFAULT 0"
+                            elif "DATETIME" in str(col_type).upper():
+                                default_clause = ""  # Let it be null
                                 
                             alter_stmt = f'ALTER TABLE "{table_name}" ADD COLUMN "{column.name}" {col_type}{default_clause}'
                             print(f"[AUTO-MIGRATE] Running: {alter_stmt}")

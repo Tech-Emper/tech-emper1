@@ -60,6 +60,13 @@ async def lifespan(app: FastAPI):
         log_now("Initializing database...")
         init_db()
         log_now("Database initialized successfully.")
+        
+        try:
+            from scheduler import start_scheduler
+            start_scheduler()
+            log_now("Scheduler started successfully.")
+        except Exception as e:
+            log_now(f"WARNING: Scheduler failed to start: {str(e)}")
     except Exception as e:
         log_now(f"FATAL: Database initialization failed: {str(e)}")
         traceback.print_exc()

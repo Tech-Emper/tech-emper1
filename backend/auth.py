@@ -152,37 +152,17 @@ def send_otp_email(email: str, otp: str):
 
     return False, f"Email delivery failed: {last_error}"
 
-def send_welcome_email(email: str, first_name: str, org_name: str):
-    """Send welcome email to newly imported users."""
+def _send_email_base(email: str, subject: str, html_content: str):
     resend_api_key = os.getenv("RESEND_API_KEY")
-    
-    subject = f"Welcome to Emper AI via {org_name}!"
-    first_name_display = first_name if first_name else "Employee"
-    html_content = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-            <h2 style="color: #6366f1;">Welcome to Emper AI!</h2>
-            <p>Hello {first_name_display},</p>
-            <p>Your organization <strong>{org_name}</strong> has invited you to Emper AI.</p>
-            <p>Please explore our website for your health and life insurance needs:</p>
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Explore Emper AI</a>
-            </div>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-            <p style="font-size: 12px; color: #94a3b8;">This is an automated message. Please do not reply.</p>
-        </div>
-    </body>
-    </html>
-    """
-    
+    from_email = os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai")
+
     # --- PROD: USE RESEND API ---
     if resend_api_key:
         try:
             import resend
             resend.api_key = resend_api_key.strip()
             params = {
-                "from": os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai"),
+                "from": from_email,
                 "to": [email],
                 "subject": subject,
                 "html": html_content
@@ -191,16 +171,15 @@ def send_welcome_email(email: str, first_name: str, org_name: str):
             return True, "Sent"
         except Exception as e:
             error_msg = str(e)
-            log_now(f"CRITICAL: Resend API Error on Welcome: {error_msg}")
+            log_now(f"CRITICAL: Resend API Error: {error_msg}")
             if not os.getenv("SMTP_HOST"):
                 return False, f"Resend API Error: {error_msg}."
-    
+
     # --- LOCAL/FALLBACK: USE SMTP ---
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = int(os.getenv("SMTP_PORT", 587))
     smtp_user = os.getenv("SMTP_USERNAME")
     smtp_pass = os.getenv("SMTP_PASSWORD")
-    from_email = os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai")
 
     if not all([smtp_host, smtp_user, smtp_pass]):
         return False, "Email server not configured."
@@ -232,6 +211,87 @@ def send_welcome_email(email: str, first_name: str, org_name: str):
                 return False, f"Email delivery failed: {str(e)}"
     
     return False, "Failed"
+
+def send_welcome_email(email: str, first_name: str, org_name: str):
+    """Send welcome email to newly imported users."""
+    first_name_display = first_name if first_name else "Employee"
+    subject = f"{org_name} is introducing a new insurance offerings for employees"
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <p>Hello {first_name_display},</p>
+        <p>At <strong>{org_name}</strong>, we believe that when our people feel secure about their future, they can focus on doing their best work today.</p>
+        <p>Your health, your family’s wellbeing, and your financial protection matter to us. That’s why {org_name} has partnered with Emper to help you build complete insurance coverage for you and your family.</p>
+        <p>When your insurance needs are taken care of, you can stay focused on what really matters—growing in your career, achieving your goals, and building a bright future.</p>
+        <p><strong>What you can do with Emper</strong></p>
+        <p>To start with, the platform will help you:</p>
+        <ul>
+            <li>Port your existing health insurance to better plans while preserving benefits</li>
+            <li>Strengthen your health coverage with add-ons like super top-ups and riders</li>
+        </ul>
+        <p><em>Launching soon are more protection options, including life insurance, pet insurance, and other policies</em></p>
+        <div style="margin: 30px 0;">
+            <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
+        </div>
+        <p>It only takes a few minutes to get started.</p>
+        <p>Warm regards,<br/>Team {org_name}</p>
+    </body>
+    </html>
+    """
+    return _send_email_base(email, subject, html_content)
+
+def send_reminder_1_email(email: str, first_name: str, org_name: str):
+    """Send reminder 1 (3 days)"""
+    first_name_display = first_name if first_name else "Employee"
+    subject = "Reminder: Access personalized insurance advisory from Emper"
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <p>Hello {first_name_display},</p>
+        <p>Last week we shared that <strong>{org_name}</strong> has partnered with Emper to help employees build complete insurance coverage for themselves and their families.</p>
+        <p>If you haven’t had a chance yet, we encourage you to take a few minutes to explore it.</p>
+        <p>With Emper, you can:</p>
+        <ul>
+            <li>Port your existing health insurance to better plans while preserving benefits</li>
+            <li>Strengthen your health coverage with add-ons like super top-ups and riders</li>
+            <li>Soon access more protection options, including life insurance, pet insurance, and other policies</li>
+        </ul>
+        <p>It only takes a few minutes to understand your current coverage and see if there are any gaps.</p>
+        <div style="margin: 30px 0;">
+            <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
+        </div>
+        <p>Warm regards,<br/>Team {org_name}</p>
+    </body>
+    </html>
+    """
+    return _send_email_base(email, subject, html_content)
+
+def send_reminder_2_email(email: str, first_name: str, org_name: str):
+    """Send reminder 2 (6 days)"""
+    first_name_display = first_name if first_name else "Employee"
+    subject = "Don’t forget to check your insurance coverage"
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <p>Hello {first_name_display},</p>
+        <p>A quick reminder about the insurance platform that we introduced in partnership with Emper.</p>
+        <p>Many employees have already started using the platform to review their coverage and explore ways to strengthen protection for themselves and their families.</p>
+        <p>If you haven’t had the chance yet, we encourage you to take a few minutes to check your coverage.</p>
+        <p>With Emper, you can:</p>
+        <ul>
+            <li>Port your existing health insurance to better plans</li>
+            <li>Add important health riders and super top-ups</li>
+        </ul>
+        <p><em>Additional protection options like life insurance and pet insurance will also be launching soon.</em></p>
+        <div style="margin: 30px 0;">
+            <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
+        </div>
+        <p>The process takes just a few minutes.</p>
+        <p>Warm regards,<br/>Team {org_name}</p>
+    </body>
+    </html>
+    """
+    return _send_email_base(email, subject, html_content)
 
 def store_otp(email: str, otp: str):
     """Store OTP with expiry timestamp."""
