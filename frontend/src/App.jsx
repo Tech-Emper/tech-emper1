@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/common/Navbar';
 import Profile from './components/Profile';
 import SuperAdmin from './components/SuperAdmin';
+import Report from './components/Report';
+import DesignDetails from './components/DesignDetails';
 
 // Lazy load wallet components
 const WalletDashboard = lazy(() => import('./components/wallet/WalletDashboard'));
@@ -55,6 +57,8 @@ function MainApp() {
               <Wizard onBack={() => window.location.href = '/'} />
             </div>
           } />
+          <Route path="/report" element={<Report />} />
+          <Route path="/design-details" element={<DesignDetails />} />
 
           {/* Protected Routes */}
           {isAuthenticated && (

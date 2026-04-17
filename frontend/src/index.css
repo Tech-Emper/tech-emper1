@@ -198,3 +198,21 @@ option,
 [role="button"] {
   cursor: pointer !important;
 }
+
+@keyframes expandBar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.animate-bar {
+  transform-origin: left;
+  animation: expandBar 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes expandCircle {
+  from { stroke-dasharray: 0, 100; }
+}
+
+.animate-circle {
+  animation: expandCircle 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

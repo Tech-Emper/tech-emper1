@@ -231,7 +231,7 @@ def send_welcome_email(email: str, first_name: str, org_name: str):
         </ul>
         <p><em>Launching soon are more protection options, including life insurance, pet insurance, and other policies</em></p>
         <div style="margin: 30px 0;">
-            <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
+            <a href="https://demo.emper.ai/welcome" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
         </div>
         <p>It only takes a few minutes to get started.</p>
         <p>Warm regards,<br/>Team {org_name}</p>
@@ -258,7 +258,7 @@ def send_reminder_1_email(email: str, first_name: str, org_name: str):
         </ul>
         <p>It only takes a few minutes to understand your current coverage and see if there are any gaps.</p>
         <div style="margin: 30px 0;">
-            <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
+            <a href="https://demo.emper.ai/welcome" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
         </div>
         <p>Warm regards,<br/>Team {org_name}</p>
     </body>
@@ -284,7 +284,7 @@ def send_reminder_2_email(email: str, first_name: str, org_name: str):
         </ul>
         <p><em>Additional protection options like life insurance and pet insurance will also be launching soon.</em></p>
         <div style="margin: 30px 0;">
-            <a href="https://demo.emper.ai/welcome" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
+            <a href="https://demo.emper.ai/welcome" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">👉 Activate your personalized insurance experience</a>
         </div>
         <p>The process takes just a few minutes.</p>
         <p>Warm regards,<br/>Team {org_name}</p>
