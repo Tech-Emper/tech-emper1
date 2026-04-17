@@ -105,10 +105,10 @@ export default function Step09_ProductRecommendations({ formData, gapResult, onC
     return (
         <StepWrapper className="space-y-4 md:space-y-6">
             <div className="text-center">
-                <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full inline-flex items-center gap-2 backdrop-blur-md mb-2 md:mb-4">
+                {/* <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full inline-flex items-center gap-2 backdrop-blur-md mb-2 md:mb-4">
                     <Sparkles className="w-4 h-4 text-emerald-400" />
                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">AI Product Matching Engine</span>
-                </div>
+                </div> */}
                 <h2 className="text-2xl md:text-3xl font-black mb-2 italic" style={{ color: 'var(--text-auth-primary)' }}>"My Final Handpicked Selection"</h2>
 
                 <div
@@ -141,6 +141,164 @@ export default function Step09_ProductRecommendations({ formData, gapResult, onC
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* Health Insurance Recommendations */}
+                <div className="space-y-3">
+                    <div
+                        className="flex items-center justify-center md:justify-start gap-2 cursor-pointer group mb-2"
+                        onClick={() => setShowHealthResults(!showHealthResults)}
+                    >
+                        <h3 className="text-xl font-black italic group-hover:text-blue-400 transition-colors" style={{ color: 'var(--text-auth-primary)' }}>Health Insurance</h3>
+                        {showHealthResults ? <ChevronUp className="w-5 h-5 group-hover:text-blue-400" style={{ color: 'var(--text-auth-placeholder)' }} /> : <ChevronDown className="w-5 h-5 group-hover:text-blue-400" style={{ color: 'var(--text-auth-placeholder)' }} />}
+                    </div>
+
+                    <AnimatePresence>
+                        {showHealthResults && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="space-y-3 overflow-hidden"
+                            >
+                                {health_recommendations.length > 0 ? (
+                                    health_recommendations.map((rec, idx) => (
+                                        <motion.div
+                                            key={`health-${idx}`}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            className="rounded-2xl p-4 relative group overflow-hidden"
+                                            style={{
+                                                backgroundColor: 'var(--bg-auth-card)',
+                                                borderWidth: '1px',
+                                                borderStyle: 'solid',
+                                                borderColor: 'var(--border-auth-card)'
+                                            }}
+                                        >
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -z-10" />
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                                    <ShieldCheck className="w-6 h-6 text-blue-500" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-black text-lg" style={{ color: 'var(--text-auth-primary)' }}>
+                                                        {idx === 0 ? "Top Health Match" : `Health Option #${idx + 1}`}
+                                                    </h3>
+                                                    <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest">Optimizing your medical safety net</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-6">
+                                                <div className="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-1">Recommended Policy</div>
+                                                <h4 className="font-black text-xl mb-1" style={{ color: 'var(--text-auth-primary)' }}>{rec.product_name}</h4>
+                                                <p className="font-bold text-sm mb-4" style={{ color: 'var(--text-auth-muted)' }}>By {rec.provider}</p>
+
+                                                <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 mb-4">
+                                                    <div className="text-[10px] font-black uppercase text-blue-500 tracking-widest mb-1">Recommended Sum Insured</div>
+                                                    <div className="text-2xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{rec.recommended_cover}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div
+                                                    className="bg-brand-accent/5 rounded-2xl p-4 border border-brand-accent/10 cursor-pointer hover:bg-brand-accent/10 transition-colors"
+                                                    onClick={() => toggleHealth(idx)}
+                                                >
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
+                                                            <span className="text-[10px] font-black uppercase text-brand-accent tracking-widest">Gap & Feature Analysis</span>
+                                                        </div>
+                                                        {expandedHealth[idx] ? <ChevronUp className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} /> : <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} />}
+                                                    </div>
+
+                                                    <AnimatePresence initial={false}>
+                                                        {expandedHealth[idx] ? (
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: 'auto', opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                className="overflow-hidden"
+                                                            >
+                                                                <p className="text-xs font-medium leading-relaxed mb-3" style={{ color: 'var(--text-auth-muted)' }}>
+                                                                    {rec.gap_filled}
+                                                                </p>
+                                                                <p className="text-[11px] italic mb-4" style={{ color: 'var(--text-auth-muted)' }}>
+                                                                    {rec.feature_match_analysis}
+                                                                </p>
+
+                                                                <div className="rounded-xl p-3" style={{
+                                                                    backgroundColor: 'var(--bg-auth-input)',
+                                                                    borderWidth: '1px',
+                                                                    borderStyle: 'solid',
+                                                                    borderColor: 'var(--border-auth-card)'
+                                                                }}>
+                                                                    <div className="flex items-center gap-2 mb-2">
+                                                                        <Info className="w-3 h-3" style={{ color: 'var(--text-auth-placeholder)' }} />
+                                                                        <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-auth-placeholder)' }}>Strategic Reasoning</span>
+                                                                    </div>
+                                                                    <p className="text-[11px] italic leading-relaxed" style={{ color: 'var(--text-auth-muted)' }}>"{rec.why_this}"</p>
+                                                                </div>
+                                                            </motion.div>
+                                                        ) : (
+                                                            <p className="text-xs text-slate-500 truncate italic">
+                                                                {rec.why_this}
+                                                            </p>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+
+                                                <div className="space-y-2 mt-2">
+                                                    <div
+                                                        className="flex items-center justify-between cursor-pointer group"
+                                                        onClick={() => setExpandedBenefits(prev => ({ ...prev, [`health-${idx}`]: !prev[`health-${idx}`] }))}
+                                                    >
+                                                        <span className="text-[10px] font-black uppercase tracking-widest group-hover:text-slate-300" style={{ color: 'var(--text-auth-placeholder)' }}>Key Benefits</span>
+                                                        {expandedBenefits[`health-${idx}`] ? <ChevronUp className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} /> : <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} />}
+                                                    </div>
+
+                                                    <AnimatePresence>
+                                                        {expandedBenefits[`health-${idx}`] && (
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: 'auto', opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                className="overflow-hidden"
+                                                            >
+                                                                {(rec.key_benefits || []).map((benefit, i) => (
+                                                                    <div key={i} className="flex items-start gap-2 mb-2">
+                                                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5" />
+                                                                        <span className="text-xs font-medium" style={{ color: 'var(--text-auth-muted)' }}>{benefit}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                ) : (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="rounded-2xl p-6 flex flex-col items-center justify-center text-center opacity-60 h-full min-h-[200px]"
+                                        style={{
+                                            backgroundColor: 'var(--bg-auth-input)',
+                                            borderWidth: '1px',
+                                            borderStyle: 'dashed',
+                                            borderColor: 'var(--border-auth-card)'
+                                        }}
+                                    >
+                                        <CheckCircle2 className="w-12 h-12 mb-4" style={{ color: 'var(--text-auth-placeholder)' }} />
+                                        <h3 className="font-bold mb-2" style={{ color: 'var(--text-auth-primary)' }}>Health Cover is Robust</h3>
+                                        <p className="text-xs max-w-[200px]" style={{ color: 'var(--text-auth-muted)' }}>Your existing Health Insurance with {formData.health_provider} covers both amount and essential features. You are well projected.</p>
+                                    </motion.div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
                 {/* Life Insurance Recommendations */}
                 <div className="space-y-3">
                     <div
@@ -294,164 +452,6 @@ export default function Step09_ProductRecommendations({ formData, gapResult, onC
                                         <ShieldCheck className="w-12 h-12 mb-4" style={{ color: 'var(--text-auth-placeholder)' }} />
                                         <h3 className="font-bold mb-2" style={{ color: 'var(--text-auth-primary)' }}>Life Cover is Solid</h3>
                                         <p className="text-xs max-w-[200px]" style={{ color: 'var(--text-auth-muted)' }}>Your existing Life Insurance of {formData.existing_life_cover} meets your current needs. No new policy required.</p>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                {/* Health Insurance Recommendations */}
-                <div className="space-y-3">
-                    <div
-                        className="flex items-center justify-center md:justify-start gap-2 cursor-pointer group mb-2"
-                        onClick={() => setShowHealthResults(!showHealthResults)}
-                    >
-                        <h3 className="text-xl font-black italic group-hover:text-blue-400 transition-colors" style={{ color: 'var(--text-auth-primary)' }}>Health Insurance</h3>
-                        {showHealthResults ? <ChevronUp className="w-5 h-5 group-hover:text-blue-400" style={{ color: 'var(--text-auth-placeholder)' }} /> : <ChevronDown className="w-5 h-5 group-hover:text-blue-400" style={{ color: 'var(--text-auth-placeholder)' }} />}
-                    </div>
-
-                    <AnimatePresence>
-                        {showHealthResults && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="space-y-3 overflow-hidden"
-                            >
-                                {health_recommendations.length > 0 ? (
-                                    health_recommendations.map((rec, idx) => (
-                                        <motion.div
-                                            key={`health-${idx}`}
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: idx * 0.1 }}
-                                            className="rounded-2xl p-4 relative group overflow-hidden"
-                                            style={{
-                                                backgroundColor: 'var(--bg-auth-card)',
-                                                borderWidth: '1px',
-                                                borderStyle: 'solid',
-                                                borderColor: 'var(--border-auth-card)'
-                                            }}
-                                        >
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -z-10" />
-                                            <div className="flex items-center gap-3 mb-6">
-                                                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                                                    <ShieldCheck className="w-6 h-6 text-blue-500" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-black text-lg" style={{ color: 'var(--text-auth-primary)' }}>
-                                                        {idx === 0 ? "Top Health Match" : `Health Option #${idx + 1}`}
-                                                    </h3>
-                                                    <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest">Optimizing your medical safety net</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="mb-6">
-                                                <div className="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-1">Recommended Policy</div>
-                                                <h4 className="font-black text-xl mb-1" style={{ color: 'var(--text-auth-primary)' }}>{rec.product_name}</h4>
-                                                <p className="font-bold text-sm mb-4" style={{ color: 'var(--text-auth-muted)' }}>By {rec.provider}</p>
-
-                                                <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 mb-4">
-                                                    <div className="text-[10px] font-black uppercase text-blue-500 tracking-widest mb-1">Recommended Sum Insured</div>
-                                                    <div className="text-2xl font-black" style={{ color: 'var(--text-auth-primary)' }}>{rec.recommended_cover}</div>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                <div
-                                                    className="bg-brand-accent/5 rounded-2xl p-4 border border-brand-accent/10 cursor-pointer hover:bg-brand-accent/10 transition-colors"
-                                                    onClick={() => toggleHealth(idx)}
-                                                >
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
-                                                            <span className="text-[10px] font-black uppercase text-brand-accent tracking-widest">Gap & Feature Analysis</span>
-                                                        </div>
-                                                        {expandedHealth[idx] ? <ChevronUp className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} /> : <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} />}
-                                                    </div>
-
-                                                    <AnimatePresence initial={false}>
-                                                        {expandedHealth[idx] ? (
-                                                            <motion.div
-                                                                initial={{ height: 0, opacity: 0 }}
-                                                                animate={{ height: 'auto', opacity: 1 }}
-                                                                exit={{ height: 0, opacity: 0 }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                <p className="text-xs font-medium leading-relaxed mb-3" style={{ color: 'var(--text-auth-muted)' }}>
-                                                                    {rec.gap_filled}
-                                                                </p>
-                                                                <p className="text-[11px] italic mb-4" style={{ color: 'var(--text-auth-muted)' }}>
-                                                                    {rec.feature_match_analysis}
-                                                                </p>
-
-                                                                <div className="rounded-xl p-3" style={{
-                                                                    backgroundColor: 'var(--bg-auth-input)',
-                                                                    borderWidth: '1px',
-                                                                    borderStyle: 'solid',
-                                                                    borderColor: 'var(--border-auth-card)'
-                                                                }}>
-                                                                    <div className="flex items-center gap-2 mb-2">
-                                                                        <Info className="w-3 h-3" style={{ color: 'var(--text-auth-placeholder)' }} />
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-auth-placeholder)' }}>Strategic Reasoning</span>
-                                                                    </div>
-                                                                    <p className="text-[11px] italic leading-relaxed" style={{ color: 'var(--text-auth-muted)' }}>"{rec.why_this}"</p>
-                                                                </div>
-                                                            </motion.div>
-                                                        ) : (
-                                                            <p className="text-xs text-slate-500 truncate italic">
-                                                                {rec.why_this}
-                                                            </p>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </div>
-
-                                                <div className="space-y-2 mt-2">
-                                                    <div
-                                                        className="flex items-center justify-between cursor-pointer group"
-                                                        onClick={() => setExpandedBenefits(prev => ({ ...prev, [`health-${idx}`]: !prev[`health-${idx}`] }))}
-                                                    >
-                                                        <span className="text-[10px] font-black uppercase tracking-widest group-hover:text-slate-300" style={{ color: 'var(--text-auth-placeholder)' }}>Key Benefits</span>
-                                                        {expandedBenefits[`health-${idx}`] ? <ChevronUp className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} /> : <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--text-auth-placeholder)' }} />}
-                                                    </div>
-
-                                                    <AnimatePresence>
-                                                        {expandedBenefits[`health-${idx}`] && (
-                                                            <motion.div
-                                                                initial={{ height: 0, opacity: 0 }}
-                                                                animate={{ height: 'auto', opacity: 1 }}
-                                                                exit={{ height: 0, opacity: 0 }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                {(rec.key_benefits || []).map((benefit, i) => (
-                                                                    <div key={i} className="flex items-start gap-2 mb-2">
-                                                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5" />
-                                                                        <span className="text-xs font-medium" style={{ color: 'var(--text-auth-muted)' }}>{benefit}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))
-                                ) : (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="rounded-2xl p-6 flex flex-col items-center justify-center text-center opacity-60 h-full min-h-[200px]"
-                                        style={{
-                                            backgroundColor: 'var(--bg-auth-input)',
-                                            borderWidth: '1px',
-                                            borderStyle: 'dashed',
-                                            borderColor: 'var(--border-auth-card)'
-                                        }}
-                                    >
-                                        <CheckCircle2 className="w-12 h-12 mb-4" style={{ color: 'var(--text-auth-placeholder)' }} />
-                                        <h3 className="font-bold mb-2" style={{ color: 'var(--text-auth-primary)' }}>Health Cover is Robust</h3>
-                                        <p className="text-xs max-w-[200px]" style={{ color: 'var(--text-auth-muted)' }}>Your existing Health Insurance with {formData.health_provider} covers both amount and essential features. You are well projected.</p>
                                     </motion.div>
                                 )}
                             </motion.div>

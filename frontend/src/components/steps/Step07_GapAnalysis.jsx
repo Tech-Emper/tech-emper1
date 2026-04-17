@@ -68,48 +68,6 @@ export default function Step07_GapAnalysis({ formData, result, onNext }) {
                         </div>
                     </div>
 
-                    {/* Life Insurance Gap */}
-                    <div className="border rounded-3xl p-6 relative overflow-hidden group" style={{
-                        backgroundColor: 'var(--bg-auth-input)',
-                        borderColor: 'var(--border-auth-card)'
-                    }}>
-                        <div className="flex flex-col justify-between items-start mb-4 sm:flex-row">
-                            <div>
-                                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
-                                    <Heart className="w-5 h-5 text-orange-500" /> Life Insurance
-                                </h4>
-                                <p className="text-xs mt-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-muted)' }}>Additional protection Suggested</p>
-                            </div>
-                            <div className="text-right">
-                                <span className={`text-2xl font-black ${lifeGap > 0 ? 'text-orange-500' : 'text-emerald-500'}`}>
-                                    {lifeGap > 0 ? `+${formatLakhs(lifeGap)}` : 'Fully Protected'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <div className="h-3 rounded-full overflow-hidden flex border" style={{
-                                backgroundColor: 'var(--bg-auth-input)',
-                                borderColor: 'var(--border-auth-card)'
-                            }}>
-                                <div
-                                    className="h-full bg-orange-500 border-r border-orange-500/50 transition-all duration-1000"
-                                    style={{ width: `${Math.min(100, (existingLifeNum / Math.max(1, idealLife)) * 100)}%` }}
-                                />
-                                {lifeGap > 0 && (
-                                    <div
-                                        className="h-full bg-orange-500/20 animate-pulse transition-all duration-1000"
-                                        style={{ width: `${Math.min(100, (lifeGap / idealLife) * 100)}%` }}
-                                    />
-                                )}
-                            </div>
-                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                <span style={{ color: 'var(--text-auth-muted)' }}>Current: {existing_life_cover || "None"}</span>
-                                <span style={{ color: 'var(--text-auth-primary)' }}>AI Ideal: {life_cover}</span>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Health Insurance Gap */}
                     <div className="border rounded-3xl p-6 relative overflow-hidden group" style={{
                         backgroundColor: 'var(--bg-auth-input)',
@@ -148,6 +106,48 @@ export default function Step07_GapAnalysis({ formData, result, onNext }) {
                             <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
                                 <span style={{ color: 'var(--text-auth-muted)' }}>Current: {existing_health_cover || "None"}</span>
                                 <span style={{ color: 'var(--text-auth-primary)' }}>AI Ideal: {health_cover}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Life Insurance Gap */}
+                    <div className="border rounded-3xl p-6 relative overflow-hidden group" style={{
+                        backgroundColor: 'var(--bg-auth-input)',
+                        borderColor: 'var(--border-auth-card)'
+                    }}>
+                        <div className="flex flex-col justify-between items-start mb-4 sm:flex-row">
+                            <div>
+                                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
+                                    <Heart className="w-5 h-5 text-orange-500" /> Life Insurance
+                                </h4>
+                                <p className="text-xs mt-1 uppercase tracking-wider" style={{ color: 'var(--text-auth-muted)' }}>Additional protection Suggested</p>
+                            </div>
+                            <div className="text-right">
+                                <span className={`text-2xl font-black ${lifeGap > 0 ? 'text-orange-500' : 'text-emerald-500'}`}>
+                                    {lifeGap > 0 ? `+${formatLakhs(lifeGap)}` : 'Fully Protected'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="h-3 rounded-full overflow-hidden flex border" style={{
+                                backgroundColor: 'var(--bg-auth-input)',
+                                borderColor: 'var(--border-auth-card)'
+                            }}>
+                                <div
+                                    className="h-full bg-orange-500 border-r border-orange-500/50 transition-all duration-1000"
+                                    style={{ width: `${Math.min(100, (existingLifeNum / Math.max(1, idealLife)) * 100)}%` }}
+                                />
+                                {lifeGap > 0 && (
+                                    <div
+                                        className="h-full bg-orange-500/20 animate-pulse transition-all duration-1000"
+                                        style={{ width: `${Math.min(100, (lifeGap / idealLife) * 100)}%` }}
+                                    />
+                                )}
+                            </div>
+                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                <span style={{ color: 'var(--text-auth-muted)' }}>Current: {existing_life_cover || "None"}</span>
+                                <span style={{ color: 'var(--text-auth-primary)' }}>AI Ideal: {life_cover}</span>
                             </div>
                         </div>
                     </div>
