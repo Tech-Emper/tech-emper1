@@ -561,30 +561,34 @@ const Report = () => {
 
             <div className="space-y-6">
               {[
-                { label: 'Health Cover Sum Assured', targetLabel: 'Lower is worse', you: '₹5L', avg: '₹12L', top: '₹20L', youW: '25%', avgW: '60%', topW: '100%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
-                { label: 'Life Cover (× Income Multiple)', targetLabel: 'Recommended: 10×', you: '2×', avg: '7×', top: '12×', youW: '16%', avgW: '58%', topW: '100%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
-                { label: 'Critical Illness Cover', targetLabel: 'Often neglected', you: 'None', avg: '₹25L', top: '₹50L', youW: '0%', avgW: '50%', topW: '100%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
-                { label: 'No. of Active Policies', targetLabel: 'Breadth of coverage', you: '2', avg: '4', top: '6', youW: '33%', avgW: '66%', topW: '100%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
+                { label: 'Health Cover Sum Assured', targetLabel: 'Lower is worse', you: '₹5L', avg: '₹12L', top: '₹20L', youW: '25%', avgW: '60%', topW: '75%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
+                { label: 'Life Cover (× Income Multiple)', targetLabel: 'Recommended: 10×', you: '2×', avg: '7×', top: '12×', youW: '16%', avgW: '58%', topW: '75%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
+                { label: 'Critical Illness Cover', targetLabel: 'Often neglected', you: 'None', avg: '₹25L', top: '₹50L', youW: '0%', avgW: '50%', topW: '75%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
+                { label: 'No. of Active Policies', targetLabel: 'Breadth of coverage', you: '2', avg: '4', top: '6', youW: '33%', avgW: '66%', topW: '75%', colorClass: 'bg-orange-500', textClass: 'text-orange-500' },
               ].map((row, i) => (
                 <div key={i}>
                   <div className="flex justify-between text-xs font-bold mb-2">
                     <span className="text-gray-900">{row.label}</span>
                     <span className="text-gray-400">{row.targetLabel}</span>
                   </div>
-                  <div className="grid grid-cols-12 gap-4 text-xs items-center mb-1">
-                    <div className="col-span-2 md:col-span-1 text-gray-500">You</div>
-                    <div className="col-span-8 md:col-span-9 h-1.5 bg-gray-100 rounded-full"><div className={`${row.colorClass} h-full rounded-full transition-all duration-1000 ease-out`} style={{ width: animate ? row.youW : '0%' }}></div></div>
-                    <div className={`col-span-2 text-right font-bold ${row.textClass}`}>{row.you}</div>
-                  </div>
-                  <div className="grid grid-cols-12 gap-4 text-xs items-center mb-1">
-                    <div className="col-span-2 md:col-span-1 text-gray-500">Peers Avg</div>
-                    <div className="col-span-8 md:col-span-9 h-1.5 bg-gray-100 rounded-full"><div className="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: animate ? row.avgW : '0%' }}></div></div>
-                    <div className="col-span-2 text-right text-blue-500 font-medium">{row.avg}</div>
-                  </div>
-                  <div className="grid grid-cols-12 gap-4 text-xs items-center">
-                    <div className="col-span-2 md:col-span-1 text-gray-500">Top 25%</div>
-                    <div className="col-span-8 md:col-span-9 h-1.5 bg-gray-100 rounded-full"><div className="bg-emerald-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: animate ? row.topW : '0%' }}></div></div>
-                    <div className="col-span-2 text-right text-emerald-500 font-medium">{row.top}</div>
+                  <div className="relative pt-6 pb-6 px-2 mt-1">
+                    <div className="h-2 bg-stone-200 rounded-full w-full overflow-hidden flex relative">
+                      <div className={`${row.colorClass} h-full absolute z-10 rounded-full transition-all duration-1000 ease-out`} style={{ width: animate ? row.youW : '0%' }}></div>
+                    </div>
+
+                    <div className="absolute top-8 -translate-x-1/2 flex flex-col items-center transition-all duration-1000 ease-out" style={{ left: animate ? row.youW : '0%' }}>
+                      <div className={`text-[10px] font-bold mt-1 ${row.textClass}`}>You: {row.you}</div>
+                    </div>
+
+                    <div className="absolute top-[16px] -translate-x-1/2 flex flex-col items-center h-14 transition-all duration-1000 ease-out" style={{ left: animate ? row.avgW : '0%' }}>
+                      <div className="h-[8px] border-l-2 border-blue-500 w-px relative top-[8px]"></div>
+                      <div className="text-[10px] text-blue-500 font-bold whitespace-nowrap mt-2">Avg: {row.avg}</div>
+                    </div>
+
+                    <div className="absolute top-[16px] -translate-x-1/2 flex flex-col items-center h-14 transition-all duration-1000 ease-out" style={{ left: animate ? row.topW : '0%' }}>
+                      <div className="h-[8px] border-l-2 border-emerald-500 w-px relative top-[8px]"></div>
+                      <div className="text-[10px] text-emerald-500 font-bold whitespace-nowrap mt-2">Top 25%: {row.top}</div>
+                    </div>
                   </div>
                 </div>
               ))}
