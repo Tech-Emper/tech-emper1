@@ -8,7 +8,7 @@ from datetime import datetime
 
 from database import get_db, Organization, User
 from auth import get_current_user, send_welcome_email
-from schemas import OrganizationResponse, OrganizationCreate
+from schemas import OrganizationResponse, OrganizationCreate, OrganizationUpdate, AdminUserResponse
 
 router = APIRouter(prefix="/api/superadmin", tags=["superadmin"])
 
@@ -39,7 +39,7 @@ def get_organizations(db: Session = Depends(get_db), admin: User = Depends(verif
     return response
 
 @router.post("/organizations", response_model=OrganizationResponse)
-def create_organization(org_in: OrganizationCreate, db: Session = Depends(get_db), admin: User = Depends(verify_superadmin)):
+def create_organization(org_in: OrganizationCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db), admin: User = Depends(verify_superadmin)):
     existing = db.query(Organization).filter(func.lower(Organization.name) == org_in.name.lower()).first()
     if existing:
         raise HTTPException(status_code=400, detail="Organization with this name already exists.")
@@ -49,14 +49,54 @@ def create_organization(org_in: OrganizationCreate, db: Session = Depends(get_db
     db.commit()
     db.refresh(new_org)
     
+    # Process admins
+    if org_in.admins:
+        for admin_in in org_in.admins:
+            email = admin_in.email.strip().lower()
+            if not email:
+                continue
+                
+            user = db.query(User).filter(User.email == email).first()
+            if user:
+                user.organization_id = new_org.id
+                user.role = admin_in.role
+                user.designation = admin_in.designation
+                if admin_in.first_name and not user.first_name:
+                    user.first_name = admin_in.first_name
+                if admin_in.last_name and not user.last_name:
+                    user.last_name = admin_in.last_name
+                if admin_in.mobile and not user.mobile:
+                    user.mobile = admin_in.mobile
+            else:
+                new_user = User(
+                    email=email,
+                    first_name=admin_in.first_name,
+                    last_name=admin_in.last_name,
+                    mobile=admin_in.mobile,
+                    organization_id=new_org.id,
+                    role=admin_in.role,
+                    designation=admin_in.designation,
+                    onboarding_started_at=datetime.utcnow()
+                )
+                db.add(new_user)
+            background_tasks.add_task(send_welcome_email, email, admin_in.first_name, new_org.name)
+        db.commit()
+
+    employee_count = db.query(User).filter(User.organization_id == new_org.id).count()
+    
     return OrganizationResponse(
         id=new_org.id,
         name=new_org.name,
-        employees=0
+        employees=employee_count
     )
 
+@router.get("/organizations/{org_id}/admins", response_model=List[AdminUserResponse])
+def get_organization_admins(org_id: int, db: Session = Depends(get_db), admin: User = Depends(verify_superadmin)):
+    admins = db.query(User).filter(User.organization_id == org_id, User.role.in_(["Admin", "HR manager"])).all()
+    return admins
+
 @router.put("/organizations/{org_id}", response_model=OrganizationResponse)
-def update_organization(org_id: int, org_in: OrganizationCreate, db: Session = Depends(get_db), admin: User = Depends(verify_superadmin)):
+def update_organization(org_id: int, org_in: OrganizationUpdate, background_tasks: BackgroundTasks, db: Session = Depends(get_db), admin: User = Depends(verify_superadmin)):
     org = db.query(Organization).filter(Organization.id == org_id).first()
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
@@ -66,6 +106,46 @@ def update_organization(org_id: int, org_in: OrganizationCreate, db: Session = D
         raise HTTPException(status_code=400, detail="Name taken by another organization.")
     
     org.name = org_in.name
+    
+    # Process removed admins
+    if org_in.removed_admins:
+        for u_id in org_in.removed_admins:
+            user = db.query(User).filter(User.id == u_id, User.organization_id == org.id).first()
+            if user:
+                user.role = "user"
+    
+    # Process admins
+    if org_in.admins:
+        for admin_in in org_in.admins:
+            email = admin_in.email.strip().lower()
+            if not email:
+                continue
+                
+            user = db.query(User).filter(User.email == email).first()
+            if user:
+                user.organization_id = org.id
+                user.role = admin_in.role
+                user.designation = admin_in.designation
+                if admin_in.first_name and not user.first_name:
+                    user.first_name = admin_in.first_name
+                if admin_in.last_name and not user.last_name:
+                    user.last_name = admin_in.last_name
+                if admin_in.mobile and not user.mobile:
+                    user.mobile = admin_in.mobile
+            else:
+                new_user = User(
+                    email=email,
+                    first_name=admin_in.first_name,
+                    last_name=admin_in.last_name,
+                    mobile=admin_in.mobile,
+                    organization_id=org.id,
+                    role=admin_in.role,
+                    designation=admin_in.designation,
+                    onboarding_started_at=datetime.utcnow()
+                )
+                db.add(new_user)
+            background_tasks.add_task(send_welcome_email, email, admin_in.first_name, org.name)
+            
     db.commit()
     db.refresh(org)
     

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Building, Plus, Users, Upload, Edit, Save, X, Search, AlertCircle } from 'lucide-react';
+import { Building, Plus, Users, Upload, Edit, Save, X, Search, AlertCircle, UserPlus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../config';
 
@@ -15,14 +15,15 @@ export default function SuperAdmin() {
 
     const [organizations, setOrganizations] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [searchTerm, setSearchTerm] = useState('');
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [newOrgName, setNewOrgName] = useState('');
-    const [addError, setAddError] = useState('');
 
-    const [editingOrgId, setEditingOrgId] = useState(null);
-    const [editOrgName, setEditOrgName] = useState('');
+    // Unified Modal State for Add / Edit
+    const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'add', orgId: null });
+    const [orgFormName, setOrgFormName] = useState('');
+    const [orgKeyMembers, setOrgKeyMembers] = useState([]);
+    const [existingKeyMembers, setExistingKeyMembers] = useState([]);
+    const [removedAdmins, setRemovedAdmins] = useState([]);
+    const [formError, setFormError] = useState('');
 
     useEffect(() => {
         fetchOrganizations();
@@ -45,76 +46,118 @@ export default function SuperAdmin() {
         }
     };
 
-    const handleAddOrganization = async (e) => {
+    const openAddModal = () => {
+        setModalConfig({ isOpen: true, type: 'add', orgId: null });
+        setOrgFormName('');
+        setOrgKeyMembers([]);
+        setExistingKeyMembers([]);
+        setRemovedAdmins([]);
+        setFormError('');
+    };
+
+    const openEditModal = async (org) => {
+        setModalConfig({ isOpen: true, type: 'edit', orgId: org.id });
+        setOrgFormName(org.name);
+        setOrgKeyMembers([]);
+        setExistingKeyMembers([]);
+        setRemovedAdmins([]);
+        setFormError('');
+
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${API_BASE_URL}/api/superadmin/organizations/${org.id}/admins`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setExistingKeyMembers(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch existing admins", e);
+        }
+    };
+
+    const closeModal = () => {
+        setModalConfig({ isOpen: false, type: 'add', orgId: null });
+    };
+
+    const handleAddKeyMember = () => {
+        setOrgKeyMembers([...orgKeyMembers, {
+            first_name: '',
+            last_name: '',
+            email: '',
+            mobile: '',
+            designation: '',
+            role: 'Admin'
+        }]);
+    };
+
+    const updateKeyMember = (index, field, value) => {
+        const newMembers = [...orgKeyMembers];
+        newMembers[index][field] = value;
+        setOrgKeyMembers(newMembers);
+    };
+
+    const removeKeyMember = (index) => {
+        setOrgKeyMembers(orgKeyMembers.filter((_, i) => i !== index));
+    };
+
+    const removeExistingKeyMember = (index) => {
+        const member = existingKeyMembers[index];
+        setRemovedAdmins([...removedAdmins, member.id]);
+        setExistingKeyMembers(existingKeyMembers.filter((_, i) => i !== index));
+    };
+
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        const trimmedName = newOrgName.trim();
+        const trimmedName = orgFormName.trim();
         if (!trimmedName) {
-            setAddError("Organization name is required.");
+            setFormError("Organization name is required.");
             return;
+        }
+
+        // Validate key members
+        for (let i = 0; i < orgKeyMembers.length; i++) {
+            const m = orgKeyMembers[i];
+            if (!m.first_name || !m.email || !m.mobile) {
+                setFormError(`New Key Member ${i + 1} is missing required fields (First Name, Email, Phone Number).`);
+                return;
+            }
         }
 
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch(`${API_BASE_URL}/api/superadmin/organizations`, {
-                method: 'POST',
+            const url = modalConfig.type === 'add' 
+                ? `${API_BASE_URL}/api/superadmin/organizations`
+                : `${API_BASE_URL}/api/superadmin/organizations/${modalConfig.orgId}`;
+            
+            const method = modalConfig.type === 'add' ? 'POST' : 'PUT';
+
+            const payload = {
+                name: trimmedName,
+                admins: orgKeyMembers,
+                removed_admins: removedAdmins
+            };
+
+            const res = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name: trimmedName })
+                body: JSON.stringify(payload)
             });
 
             if (!res.ok) {
                 const err = await res.json();
-                setAddError(err.detail || "Failed to create organization");
+                setFormError(err.detail || `Failed to ${modalConfig.type} organization`);
                 return;
             }
 
-            const newOrg = await res.json();
-            setOrganizations([...organizations, newOrg]);
-            setNewOrgName('');
-            setIsAddModalOpen(false);
-            setAddError('');
+            await fetchOrganizations();
+            closeModal();
         } catch (err) {
-            setAddError("Network error. Please try again.");
-        }
-    };
-
-    const startEditing = (org) => {
-        setEditingOrgId(org.id);
-        setEditOrgName(org.name);
-    };
-
-    const saveEdit = async (id) => {
-        const trimmedName = editOrgName.trim();
-        if (!trimmedName) {
-            alert("Name cannot be empty.");
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('auth_token');
-            const res = await fetch(`${API_BASE_URL}/api/superadmin/organizations/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ name: trimmedName })
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                alert(err.detail || "Failed to edit");
-                return;
-            }
-            const updatedOrg = await res.json();
-            setOrganizations(organizations.map(org =>
-                org.id === id ? updatedOrg : org
-            ));
-            setEditingOrgId(null);
-        } catch (err) {
-            alert("Network error.");
+            setFormError("Network error. Please try again.");
         }
     };
 
@@ -167,7 +210,7 @@ export default function SuperAdmin() {
                     </p>
                 </div>
                 <button
-                    onClick={() => { setIsAddModalOpen(true); setAddError(''); setNewOrgName(''); }}
+                    onClick={openAddModal}
                     className="flex items-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold shadow-lg shadow-purple-500/20 transition-all"
                 >
                     <Plus className="w-5 h-5" />
@@ -225,18 +268,7 @@ export default function SuperAdmin() {
                                             style={{ borderColor: 'var(--border-auth-card)' }}
                                         >
                                             <td className="py-4 px-4">
-                                                {editingOrgId === org.id ? (
-                                                    <input
-                                                        type="text"
-                                                        value={editOrgName}
-                                                        onChange={(e) => setEditOrgName(e.target.value)}
-                                                        className="w-full px-3 py-1.5 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none"
-                                                        style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }}
-                                                        autoFocus
-                                                    />
-                                                ) : (
-                                                    <span className="font-bold" style={{ color: 'var(--text-auth-primary)' }}>{org.name}</span>
-                                                )}
+                                                <span className="font-bold" style={{ color: 'var(--text-auth-primary)' }}>{org.name}</span>
                                             </td>
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-2" style={{ color: 'var(--text-auth-muted)' }}>
@@ -246,48 +278,27 @@ export default function SuperAdmin() {
                                             </td>
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center justify-end gap-3">
-                                                    {editingOrgId === org.id ? (
-                                                        <>
-                                                            <button
-                                                                onClick={() => saveEdit(org.id)}
-                                                                className="p-2 bg-emerald-500/20 text-emerald-500 rounded-lg hover:bg-emerald-500/30 transition-colors"
-                                                                title="Save"
-                                                            >
-                                                                <Save className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setEditingOrgId(null)}
-                                                                className="p-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors"
-                                                                title="Cancel"
-                                                            >
-                                                                <X className="w-4 h-4" />
-                                                            </button>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <button
-                                                                onClick={() => startEditing(org)}
-                                                                className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                                                                style={{ color: 'var(--text-auth-muted)' }}
-                                                                title="Edit Organization Details"
-                                                            >
-                                                                <Edit className="w-4 h-4" />
-                                                            </button>
-                                                            <label
-                                                                className="flex items-center gap-2 p-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors cursor-pointer"
-                                                                title="Upload Employees CSV"
-                                                            >
-                                                                <Upload className="w-4 h-4" />
-                                                                <span className="text-xs font-bold hidden xl:inline">Upload CSV</span>
-                                                                <input
-                                                                    type="file"
-                                                                    accept=".csv"
-                                                                    className="hidden"
-                                                                    onChange={(e) => handleCsvUpload(e, org.id, org.name)}
-                                                                />
-                                                            </label>
-                                                        </>
-                                                    )}
+                                                    <button
+                                                        onClick={() => openEditModal(org)}
+                                                        className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                                                        style={{ color: 'var(--text-auth-muted)' }}
+                                                        title="Edit Organization Details"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <label
+                                                        className="flex items-center gap-2 p-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors cursor-pointer"
+                                                        title="Upload Employees CSV"
+                                                    >
+                                                        <Upload className="w-4 h-4" />
+                                                        <span className="text-xs font-bold hidden xl:inline">Upload CSV</span>
+                                                        <input
+                                                            type="file"
+                                                            accept=".csv"
+                                                            className="hidden"
+                                                            onChange={(e) => handleCsvUpload(e, org.id, org.name)}
+                                                        />
+                                                    </label>
                                                 </div>
                                             </td>
                                         </motion.tr>
@@ -299,61 +310,164 @@ export default function SuperAdmin() {
                 </div>
             </div>
 
-            {/* Add Modal */}
+            {/* Form Modal */}
             <AnimatePresence>
-                {isAddModalOpen && (
+                {modalConfig.isOpen && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full max-w-md rounded-3xl p-6 md:p-8 shadow-2xl relative border"
+                            className="w-full max-w-2xl rounded-3xl p-6 md:p-8 shadow-2xl relative border my-8"
                             style={{ backgroundColor: 'var(--bg-auth-main)', borderColor: 'var(--border-auth-card)' }}
                         >
                             <button
-                                onClick={() => setIsAddModalOpen(false)}
+                                type="button"
+                                onClick={closeModal}
                                 className="absolute top-6 right-6 p-2 rounded-full transition-colors bg-white/5 hover:bg-white/10"
                                 style={{ color: 'var(--text-auth-muted)' }}
                             >
                                 <X className="w-5 h-5" />
                             </button>
 
-                            <h2 className="text-2xl font-black mb-6" style={{ color: 'var(--text-auth-primary)' }}>Create Organization</h2>
+                            <h2 className="text-2xl font-black mb-6" style={{ color: 'var(--text-auth-primary)' }}>
+                                {modalConfig.type === 'add' ? 'Create Organization' : 'Edit Organization'}
+                            </h2>
 
-                            <form onSubmit={handleAddOrganization}>
+                            <form onSubmit={handleFormSubmit}>
                                 <div className="mb-6">
                                     <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-auth-label)' }}>
                                         Organization Name
                                     </label>
                                     <input
                                         type="text"
-                                        value={newOrgName}
-                                        onChange={(e) => { setNewOrgName(e.target.value); setAddError(''); }}
+                                        value={orgFormName}
+                                        onChange={(e) => { setOrgFormName(e.target.value); setFormError(''); }}
                                         placeholder="E.g. Apple Inc."
                                         autoFocus
-                                        className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all ${addError ? 'border-red-500 focus:ring-red-500' : 'focus:ring-purple-500'}`}
-                                        style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: addError ? 'rgb(239 68 68)' : 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }}
+                                        className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all ${formError ? 'border-red-500 focus:ring-red-500' : 'focus:ring-purple-500'}`}
+                                        style={{ backgroundColor: 'var(--bg-auth-input)', borderColor: formError ? 'rgb(239 68 68)' : 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }}
                                     />
-                                    {addError && (
-                                        <p className="mt-2 text-sm text-red-500 font-medium flex items-center gap-1">
-                                            <AlertCircle className="w-4 h-4" />
-                                            {addError}
-                                        </p>
+                                </div>
+
+                                <div className="mb-6">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <label className="block text-sm font-bold" style={{ color: 'var(--text-auth-label)' }}>
+                                            Key Members
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={handleAddKeyMember}
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-500 rounded-lg text-sm font-bold hover:bg-blue-500/30 transition-colors"
+                                        >
+                                            <UserPlus className="w-4 h-4" />
+                                            Add Key Member
+                                        </button>
+                                    </div>
+
+                                    {orgKeyMembers.length === 0 && existingKeyMembers.length === 0 ? (
+                                        <div className="text-sm p-4 rounded-xl border border-dashed text-center" style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' }}>
+                                            No key members added yet. Click above to add an Admin or HR manager.
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                                            {/* Existing Key Members (Read-only, can only remove) */}
+                                            {existingKeyMembers.length > 0 && (
+                                                <div>
+                                                    <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-auth-muted)' }}>Existing Members</h3>
+                                                    <div className="overflow-x-auto border rounded-xl" style={{ borderColor: 'var(--border-auth-card)' }}>
+                                                        <table className="w-full text-left text-sm">
+                                                            <thead>
+                                                                <tr className="border-b bg-white/5" style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' }}>
+                                                                    <th className="p-3 font-semibold">Name</th>
+                                                                    <th className="p-3 font-semibold">Role</th>
+                                                                    <th className="p-3 font-semibold text-center w-16">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {existingKeyMembers.map((member, index) => (
+                                                                    <tr key={`existing-${member.id}`} className="border-b last:border-b-0 transition-colors hover:bg-white/5" style={{ borderColor: 'var(--border-auth-card)' }}>
+                                                                        <td className="p-3 font-medium" style={{ color: 'var(--text-auth-primary)' }}>
+                                                                            {member.first_name} {member.last_name}
+                                                                        </td>
+                                                                        <td className="p-3" style={{ color: 'var(--text-auth-muted)' }}>
+                                                                            {member.role}
+                                                                        </td>
+                                                                        <td className="p-3 text-center">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => removeExistingKeyMember(index)}
+                                                                                className="p-1.5 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors inline-block"
+                                                                                title="Remove Member"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* New Key Members (Editable) */}
+                                            {orgKeyMembers.length > 0 && (
+                                                <div className="space-y-4">
+                                                    {existingKeyMembers.length > 0 && (
+                                                        <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-auth-muted)' }}>New Members to Add</h3>
+                                                    )}
+                                                    {orgKeyMembers.map((member, index) => (
+                                                        <div key={`new-${index}`} className="p-4 rounded-xl border" style={{ borderColor: 'var(--border-auth-card)', backgroundColor: 'var(--bg-auth-input)' }}>
+                                                            <div className="flex justify-between items-center mb-3">
+                                                                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-auth-muted)' }}>New Member {index + 1}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeKeyMember(index)}
+                                                                    className="p-1.5 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors"
+                                                                    title="Remove Member"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                <input type="text" placeholder="First Name *" value={member.first_name} onChange={(e) => updateKeyMember(index, 'first_name', e.target.value)} className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none text-sm" style={{ backgroundColor: 'var(--bg-auth-main)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} required />
+                                                                <input type="text" placeholder="Last Name" value={member.last_name} onChange={(e) => updateKeyMember(index, 'last_name', e.target.value)} className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none text-sm" style={{ backgroundColor: 'var(--bg-auth-main)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} />
+                                                                <input type="email" placeholder="Email ID *" value={member.email} onChange={(e) => updateKeyMember(index, 'email', e.target.value)} className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none text-sm" style={{ backgroundColor: 'var(--bg-auth-main)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} required />
+                                                                <input type="text" placeholder="Phone Number *" value={member.mobile} onChange={(e) => updateKeyMember(index, 'mobile', e.target.value)} className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none text-sm" style={{ backgroundColor: 'var(--bg-auth-main)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} required />
+                                                                <input type="text" placeholder="Designation" value={member.designation} onChange={(e) => updateKeyMember(index, 'designation', e.target.value)} className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none text-sm" style={{ backgroundColor: 'var(--bg-auth-main)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }} />
+                                                                <select value={member.role} onChange={(e) => updateKeyMember(index, 'role', e.target.value)} className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none text-sm" style={{ backgroundColor: 'var(--bg-auth-main)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' }}>
+                                                                    <option value="Admin">Admin</option>
+                                                                    <option value="HR manager">HR Manager</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
+
+                                {formError && (
+                                    <p className="mb-4 text-sm text-red-500 font-medium flex items-center gap-1">
+                                        <AlertCircle className="w-4 h-4" />
+                                        {formError}
+                                    </p>
+                                )}
 
                                 <button
                                     type="submit"
                                     className="w-full py-3.5 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 transition-all flex justify-center items-center gap-2"
                                 >
                                     <Building className="w-5 h-5" />
-                                    Confirm Creation
+                                    {modalConfig.type === 'add' ? 'Confirm Creation' : 'Save Changes'}
                                 </button>
                             </form>
                         </motion.div>

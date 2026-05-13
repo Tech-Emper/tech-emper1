@@ -65,6 +65,7 @@ class User(Base):
     family_health_history = Column(JSON) # List of conditions
     company_name = Column(String)
     industry_type = Column(String)
+    designation = Column(String)
     # Gap Analysis fields (Phase 2)
     has_life_insurance = Column(Boolean, default=False)
     existing_life_cover = Column(String) # Stored as string like "₹50 Lakhs"

@@ -1,15 +1,40 @@
 from pydantic import BaseModel
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 class OrganizationBase(BaseModel):
     name: str
 
+class AdminUserCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    mobile: str
+    designation: Optional[str] = ""
+    role: str = "Admin"
+
 class OrganizationCreate(OrganizationBase):
-    pass
+    admins: Optional[List[AdminUserCreate]] = []
+
+class OrganizationUpdate(BaseModel):
+    name: str
+    admins: Optional[List[AdminUserCreate]] = []
+    removed_admins: Optional[List[int]] = []
 
 class OrganizationResponse(OrganizationBase):
     id: int
     employees: int
     
+    class Config:
+        from_attributes = True
+
+class AdminUserResponse(BaseModel):
+    id: int
+    first_name: Optional[str] = ""
+    last_name: Optional[str] = ""
+    email: str
+    mobile: Optional[str] = ""
+    designation: Optional[str] = ""
+    role: str
+
     class Config:
         from_attributes = True
 
