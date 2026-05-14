@@ -123,6 +123,14 @@ class Recommendation(Base):
 
     user = relationship("User", back_populates="recommendations")
 
+class WhatsAppSession(Base):
+    __tablename__ = "whatsapp_sessions"
+
+    phone_number = Column(String, primary_key=True, index=True)
+    current_question_id = Column(String, default="START")
+    collected_data = Column(JSON, default=dict)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 from sqlalchemy import text, inspect
 
 # Create tables and auto-migrate missing columns
