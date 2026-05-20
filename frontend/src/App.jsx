@@ -14,6 +14,9 @@ import Profile from './components/Profile';
 import SuperAdmin from './components/SuperAdmin';
 import Report from './components/Report';
 import DesignDetails from './components/DesignDetails';
+import PortabilityLanding from './components/portability/PortabilityLanding';
+import PortabilityDashboard from './components/portability/PortabilityDashboard';
+import PortabilityDisclaimer from './components/portability/PortabilityDisclaimer';
 
 // Lazy load wallet components
 const WalletDashboard = lazy(() => import('./components/wallet/WalletDashboard'));
@@ -51,7 +54,7 @@ function MainApp() {
         <Routes>
           {/* Public / Semi-Public Routes */}
           <Route path="/" element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={new URLSearchParams(window.location.search).get('redirect') === 'portability' ? '/portability/dashboard' : '/dashboard'} replace />} />
           <Route path="/details" element={
             <div className="w-full flex justify-center">
               <Wizard onBack={() => window.location.href = '/'} />
@@ -59,6 +62,8 @@ function MainApp() {
           } />
           <Route path="/report" element={<Report />} />
           <Route path="/design-details" element={<DesignDetails />} />
+          <Route path="/portability" element={!isAuthenticated ? <PortabilityLanding /> : <Navigate to="/portability/dashboard" replace />} />
+          <Route path="/portability/disclaimer" element={<PortabilityDisclaimer />} />
 
           {/* Protected Routes */}
           {isAuthenticated && (
@@ -69,6 +74,7 @@ function MainApp() {
 
               <Route path="/profile" element={<Profile />} />
               <Route path="/superadmin" element={<SuperAdmin />} />
+              <Route path="/portability/dashboard" element={<PortabilityDashboard />} />
 
               <Route path="/wallet" element={
                 <Suspense fallback={<div className="text-white">Loading Wallet...</div>}>

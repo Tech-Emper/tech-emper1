@@ -123,6 +123,16 @@ class Recommendation(Base):
 
     user = relationship("User", back_populates="recommendations")
 
+class PortabilityUser(Base):
+    __tablename__ = "portability_users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, index=True)
+    disclaimer_accepted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", backref="portability_profile")
+
 from sqlalchemy import text, inspect
 
 # Create tables and auto-migrate missing columns
