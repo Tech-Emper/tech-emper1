@@ -15,60 +15,70 @@ import Step09_ProductRecommendations from './steps/Step09_ProductRecommendations
 import OTPModal from './OTPModal';
 import Dashboard from './Dashboard';
 
+import { useSearchParams } from 'react-router-dom';
+
+const initialFormData = {
+    first_name: "",
+    last_name: "",
+    city: "",
+    mobile: "",
+    email: "",
+    marital_status: "Single",
+    num_children: 0,
+    support_parents: false,
+    dob: "",
+    career_stage: "",
+    income_level: "",
+    employment_type: "",
+    company_name: "",
+    industry_type: "",
+    smoking_status: "",
+    family_health_history: [],
+    lifestyle: "",
+    gender: "",
+    insured_members: {
+        self: { selected: true, age: '' },
+        spouse: { selected: false, age: '' },
+        son: { count: 0 },
+        daughter: { count: 0 },
+        father: { selected: false, age: '' },
+        mother: { selected: false, age: '' }
+    },
+    has_life_insurance: false,
+    existing_life_cover: "",
+    existing_life_cover_val: 0,
+    has_health_insurance: false,
+    existing_health_cover: "",
+    existing_health_cover_val: 0,
+    health_source: "Employer",
+    parents_covered: false,
+    dependents: {},
+    life_provider: "",
+    life_policy_name: "",
+    life_provider_custom: "",
+    life_policy_name_custom: "",
+    health_provider: "",
+    health_policy_name: "",
+    health_provider_custom: "",
+    health_policy_name_custom: "",
+    secondary_email: "",
+    aadhar_number: ""
+};
+
 export default function Wizard({ onBack }) {
     const themeStyles = useThemeStyles();
     const { profile, recommendations, refreshProfile, loading: authLoading, isAuthenticated, login: sendOtp, verify } = useAuth();
-    const [step, setStep] = useState(1);
+    const [searchParams, setSearchParams] = useSearchParams();
+    
+    const [step, _setStep] = useState(() => parseInt(searchParams.get('step')) || 1);
+    
+    const setStep = (newStep) => {
+        setSearchParams({ step: newStep });
+        _setStep(newStep);
+    };
+
     const hasInitialized = useRef(false);
-    const [formData, setFormData] = useState({
-        first_name: "",
-        last_name: "",
-        city: "",
-        mobile: "",
-        email: "",
-        marital_status: "Single",
-        num_children: 0,
-        support_parents: false,
-        dob: "",
-        career_stage: "",
-        income_level: "",
-        employment_type: "",
-        company_name: "",
-        industry_type: "",
-        smoking_status: "",
-        family_health_history: [],
-        lifestyle: "",
-        gender: "", // Default
-        insured_members: {
-            self: { selected: true, age: '' },
-            spouse: { selected: false, age: '' },
-            son: { count: 0 },
-            daughter: { count: 0 },
-            father: { selected: false, age: '' },
-            mother: { selected: false, age: '' }
-        },
-        // Phase 2 Fields
-        has_life_insurance: false,
-        existing_life_cover: "",
-        existing_life_cover_val: 0,
-        has_health_insurance: false,
-        existing_health_cover: "",
-        existing_health_cover_val: 0,
-        health_source: "Employer",
-        parents_covered: false,
-        dependents: {},
-        // Phase 3 Fields
-        life_provider: "",
-        life_policy_name: "",
-        life_provider_custom: "",
-        life_policy_name_custom: "",
-        health_provider: "",
-        health_policy_name: "",
-        health_provider_custom: "",
-        health_policy_name_custom: "",
-        secondary_email: "",
-        aadhar_number: ""
-    });
+    const [formData, setFormData] = useState(initialFormData);
     const [result, setResult] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -82,7 +92,15 @@ export default function Wizard({ onBack }) {
 
     const [otpModalState, setOtpModalState] = useState({ show: false, loading: false, error: null });
 
-    // Initial sync from global profile
+    // Sync from URL changes (like browser back button)
+    useEffect(() => {
+        const urlStep = parseInt(searchParams.get('step'));
+        if (urlStep && urlStep !== step) {
+            _setStep(urlStep);
+        }
+    }, [searchParams]);
+
+    // Initial sync from global profile or local storage
     useEffect(() => {
         if (!authLoading && profile) {
             setFormData(prev => {
@@ -128,14 +146,40 @@ export default function Wizard({ onBack }) {
                 }
                 hasInitialized.current = true;
             }
+        } else if (!authLoading && !isAuthenticated && !hasInitialized.current) {
+            // Check local storage for unauthenticated users
+            const saved = localStorage.getItem('wizard_progress');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.formData && parsed.formData.first_name) {
+                        setResumeData(parsed);
+                        setShowResumePrompt(true);
+                    } else {
+                        setStep(1); // fallback if corrupt
+                    }
+                } catch (e) {
+                    console.error("Failed to parse saved progress", e);
+                }
+            } else {
+                setStep(1);
+            }
+            hasInitialized.current = true;
         }
-    }, [profile, recommendations, authLoading]);
+    }, [profile, recommendations, authLoading, isAuthenticated]);
 
     useEffect(() => {
         if (!authLoading) {
             setInitialLoading(false);
         }
     }, [authLoading]);
+
+    // Save to local storage for unauthenticated users
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated && hasInitialized.current && !showResumePrompt) {
+            localStorage.setItem('wizard_progress', JSON.stringify({ formData, step }));
+        }
+    }, [formData, step, isAuthenticated, authLoading, showResumePrompt]);
 
     const saveProgress = async (nextStep, currentFormData = formData) => {
         try {
@@ -178,15 +222,17 @@ export default function Wizard({ onBack }) {
     };
 
     const handleResume = () => {
-        setStep(resumeData.step);
+        setStep(resumeData.step || 1);
         setFormData(prev => ({ ...prev, ...resumeData.formData }));
         setShowResumePrompt(false);
     };
 
     const handleStartOver = () => {
-        hasInitialized.current = true; // Stay in wizard
+        hasInitialized.current = true;
         setStep(1);
-        saveProgress(1); // Reset step in DB
+        setFormData(initialFormData);
+        localStorage.removeItem('wizard_progress');
+        saveProgress(1, initialFormData); // reset in db if needed
         setShowResumePrompt(false);
     };
 
@@ -324,6 +370,9 @@ export default function Wizard({ onBack }) {
                 const ns = otpModalState.nextStep;
                 const mergedData = { ...formData, email: emailToVerify, ...(otpModalState.tempUpdates || {}) };
                 setFormData(mergedData);
+                
+                // Clear local storage since progress is now in the backend
+                localStorage.removeItem('wizard_progress');
 
                 // Silently persist recommendation to DB now that user has an auth token
                 try {

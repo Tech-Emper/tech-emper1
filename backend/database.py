@@ -1,7 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, JSON, ForeignKey, DateTime
+from sqlalchemy import create_engine, text, inspect
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-from datetime import datetime
 import os
 
 # Database Configuration
@@ -11,7 +10,7 @@ if SQLALCHEMY_DATABASE_URL:
     # Render provides postgres://, but SQLAlchemy requires postgresql://
     if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
         SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    
+
     engine = create_engine(SQLALCHEMY_DATABASE_URL)
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,101 +27,20 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-class Organization(Base):
-    __tablename__ = "organizations"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    users = relationship("User", back_populates="organization")
+# ORM models live in models.py (kept separate from this engine/session config).
+# Importing them here registers them on Base.metadata and re-exports them, so
+# existing imports such as `from database import User` keep working unchanged.
+# NOTE: models.py does `from database import Base`, so this import MUST come after
+# `Base` is defined above (intentional late import to resolve the mutual reference).
+from models import (  # noqa: E402
+    Organization, User, Recommendation, PortabilityUser, Lead, CorporateLead,
+    PRODUCT_MAP, PRODUCT_SUBCATEGORIES,
+    CALL_CENTER_STATUSES, DOCUMENT_STATUSES, INSURER_STATUSES, CASE_STATUSES,
+    CORPORATE_LEAD_STATUSES, PREFERRED_CONTACT_METHODS,
+    PLANNING_FOR_OPTIONS, PLANNING_PRIORITY_OPTIONS, EMPLOYMENT_STATUSES,
+    CURRENT_COVER_AMOUNTS, PORTABILITY_REASONS, DEFAULT_STATUSES,
+)
 
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
-    email = Column(String, unique=True, index=True)
-    role = Column(String, default="user") # 'user', 'superadmin'
-    password_hash = Column(String, nullable=True) # For future use
-    is_otp_verified = Column(Boolean, default=False)
-    first_name = Column(String)
-    last_name = Column(String) # Keeping in DB for now to avoid migration issues, but will remove from UI
-    dob = Column(String)
-    mobile = Column(String)
-    secondary_phone = Column(String)
-    secondary_email = Column(String)
-    aadhar_number = Column(String)
-    income_level = Column(String)
-    city = Column(String)
-    gender = Column(String)
-    marital_status = Column(String)
-    support_parents = Column(Boolean, default=False)
-    career_stage = Column(String)
-    employment_type = Column(String)
-    lifestyle = Column(String)
-    smoking_status = Column(String) # Never, Occasionally, Regularly
-    family_health_history = Column(JSON) # List of conditions
-    company_name = Column(String)
-    industry_type = Column(String)
-    # Gap Analysis fields (Phase 2)
-    has_life_insurance = Column(Boolean, default=False)
-    existing_life_cover = Column(String) # Stored as string like "₹50 Lakhs"
-    existing_life_cover_val = Column(Integer, default=0)
-    has_health_insurance = Column(Boolean, default=False)
-    existing_health_cover = Column(String)
-    existing_health_cover_val = Column(Integer, default=0)
-    health_source = Column(String) # Employer, Personal, Both
-    parents_covered = Column(Boolean, default=False)
-    parents_health_cover = Column(String) # For parents' specific health cover
-    parents_health_cover_val = Column(Integer, default=0)
-    # Existing Policy Details
-    life_provider = Column(String)
-    life_policy_name = Column(String)
-    health_provider = Column(String)
-    health_policy_name = Column(String)
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # JSON field for dependents structure
-    dependents_data = Column(JSON)
-    insured_members = Column(JSON, default=dict)
-    num_children = Column(Integer, default=0)
-    is_smoker = Column(Boolean, default=False)
-    current_step = Column(Integer, default=1)
-
-    # Tracking states
-    onboarding_started_at = Column(DateTime)
-    reminder_1_sent = Column(Boolean, default=False)
-    reminder_2_sent = Column(Boolean, default=False)
-
-    organization = relationship("Organization", back_populates="users")
-    recommendations = relationship("Recommendation", back_populates="user")
-
-class Recommendation(Base):
-    __tablename__ = "recommendations"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    life_cover = Column(String)
-    life_cover_val = Column(Integer, default=0)
-    health_cover = Column(String)
-    health_cover_val = Column(Integer, default=0)
-    persona_name = Column(String)
-    tagline = Column(String)
-    details = Column(String)
-    reasoning = Column(String)
-    features = Column(JSON)
-    icon = Column(String)
-    prompt_sent = Column(String) # Store the prompt for debugging
-    mode = Column(String) # AI or RULE
-    life_recommendations = Column(JSON) # Array of specific life plans (Phase 2)
-    health_recommendations = Column(JSON) # Array of specific health plans (Phase 2)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    user = relationship("User", back_populates="recommendations")
-
-from sqlalchemy import text, inspect
 
 # Create tables and auto-migrate missing columns
 def init_db():
@@ -146,7 +64,7 @@ def init_db():
                                 default_clause = " DEFAULT 0"
                             elif "DATETIME" in str(col_type).upper():
                                 default_clause = ""  # Let it be null
-                                
+
                             alter_stmt = f'ALTER TABLE "{table_name}" ADD COLUMN "{column.name}" {col_type}{default_clause}'
                             print(f"[AUTO-MIGRATE] Running: {alter_stmt}")
                             try:

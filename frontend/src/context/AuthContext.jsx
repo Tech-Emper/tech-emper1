@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, isSuperadminEmail } from '../config';
 
 const AuthContext = createContext();
 
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             if (token && email) {
-                const role = email === 'tech@emper.ai' ? 'superadmin' : 'user';
+                const role = isSuperadminEmail(email) ? 'superadmin' : 'user';
                 setUser({ token, email, role });
                 await fetchProfile(token);
             }
@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         localStorage.setItem('auth_token', data.access_token);
         localStorage.setItem('auth_email', email);
-        const role = email === 'tech@emper.ai' ? 'superadmin' : 'user';
+        const role = isSuperadminEmail(email) ? 'superadmin' : 'user';
         setUser({ token: data.access_token, email, role });
         await fetchProfile(data.access_token);
         return true;
