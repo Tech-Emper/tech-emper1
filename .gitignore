@@ -31,3 +31,7 @@ antigravity/
 !requirements.txt
 *.log
 !README.md
+
+# Internal planning / prompt docs (not for the repo)
+docs/LEADS_PLAN.md
+docs/lovable-lead-modal-prompt.md

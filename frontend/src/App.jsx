@@ -29,6 +29,7 @@ const PolicyDetailView = lazy(() => import('./components/wallet/PolicyDetailView
 
 function MainApp() {
   const { isAuthenticated, loading, user } = useAuth();
+  const isSuperadmin = user?.role === 'superadmin';
 
   if (loading) {
     return (
@@ -52,9 +53,17 @@ function MainApp() {
 
       <div className="z-10 w-full max-w-7xl flex-1 flex flex-col items-center">
         <Routes>
+          {isSuperadmin ? (
+            <>
+              {/* Superadmin is restricted to the admin dashboard only */}
+              <Route path="/superadmin" element={<SuperAdmin />} />
+              <Route path="*" element={<Navigate to="/superadmin" replace />} />
+            </>
+          ) : (
+          <>
           {/* Public / Semi-Public Routes */}
-          <Route path="/" element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={new URLSearchParams(window.location.search).get('redirect') === 'portability' ? '/portability/dashboard' : '/dashboard'} replace />} />
+          <Route path="/" element={!isAuthenticated ? <LandingPage /> : <Navigate to={isSuperadmin ? '/superadmin' : '/dashboard'} replace />} />
+          <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={isSuperadmin ? '/superadmin' : (new URLSearchParams(window.location.search).get('redirect') === 'portability' ? '/portability/dashboard' : '/dashboard')} replace />} />
           <Route path="/details" element={
             <div className="w-full flex justify-center">
               <Wizard onBack={() => window.location.href = '/'} />
@@ -69,7 +78,7 @@ function MainApp() {
           {isAuthenticated && (
             <>
               <Route path="/dashboard" element={
-                (user && user.current_step < 9) ? <Navigate to="/details" replace /> : <DashboardWrapped />
+                isSuperadmin ? <Navigate to="/superadmin" replace /> : ((user && user.current_step < 9) ? <Navigate to="/details" replace /> : <DashboardWrapped />)
               } />
 
               <Route path="/profile" element={<Profile />} />
@@ -118,6 +127,8 @@ function MainApp() {
 
           {/* Catch-all Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+          )}
         </Routes>
       </div>
     </div>

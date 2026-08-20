@@ -20,6 +20,17 @@ ALGORITHM = "HS256"
 OTP_EXPIRY_MINUTES = 5
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
+# Emails granted the superadmin role on login. Override via the SUPERADMIN_EMAILS
+# env var (comma-separated); defaults include the known admins.
+SUPERADMIN_EMAILS = {
+    e.strip().lower()
+    for e in os.getenv("SUPERADMIN_EMAILS", "tech@emper.ai,shivansh.joshi@scalevista.com").split(",")
+    if e.strip()
+}
+
+def is_superadmin_email(email: str) -> bool:
+    return (email or "").strip().lower() in SUPERADMIN_EMAILS
+
 # In-memory OTP storage: { email: { "otp": "123456", "expires_at": datetime } }
 otp_store = {}
 

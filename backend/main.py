@@ -33,6 +33,7 @@ try:
     from fastapi import FastAPI, HTTPException, Request
     from fastapi.exceptions import RequestValidationError
     from fastapi.responses import JSONResponse
+    from fastapi.encoders import jsonable_encoder
     from fastapi.middleware.cors import CORSMiddleware
     
     from database import init_db
@@ -44,7 +45,9 @@ try:
     from routers.recommendations import router as recommendations_router
     from routers.superadmin import router as superadmin_router
     from routers.portability import router as portability_router
-    
+    from routers.leads import router as leads_router
+    from routers.admin_leads import router as admin_leads_router
+
     log_now("Modules imported successfully.")
 except Exception as e:
     log_now(f"FATAL: Module import failed: {str(e)}")
@@ -115,17 +118,31 @@ app.include_router(users_router)
 app.include_router(recommendations_router)
 app.include_router(superadmin_router)
 app.include_router(portability_router)
+app.include_router(leads_router)
+app.include_router(admin_leads_router)
 
 log_now(f"CORS configured with origins: {origins}")
 log_now("CORS configuration complete.")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    log_now(f"VALIDATION ERROR: {exc.errors()}")
-    log_now(f"BODY: {await request.body()}")
+    # Pydantic v2 puts the raising exception object in ctx["error"], which is not
+    # JSON-serializable — stringify any such values so we return 422 (not a 500).
+    safe_errors = []
+    for err in exc.errors():
+        err = dict(err)
+        ctx = err.get("ctx")
+        if isinstance(ctx, dict):
+            err["ctx"] = {k: (str(v) if isinstance(v, Exception) else v) for k, v in ctx.items()}
+        safe_errors.append(err)
+    try:
+        body = (await request.body()).decode("utf-8", errors="ignore")
+    except Exception:
+        body = ""
+    log_now(f"VALIDATION ERROR: {safe_errors}")
     return JSONResponse(
         status_code=422,
-        content={"detail": exc.errors(), "body": str(await request.body())},
+        content=jsonable_encoder({"detail": safe_errors, "body": body}),
     )
 
 @app.get("/")
