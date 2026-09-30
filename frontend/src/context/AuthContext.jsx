@@ -1,6 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_BASE_URL, isSuperadminEmail } from '../config';
 
+// Global 401 handler: install a one-time fetch interceptor so any authenticated API
+// call that comes back 401 (expired/invalid token) clears the session and redirects
+// to login — instead of silently failing while the UI still looks logged in.
+if (typeof window !== 'undefined' && !window.__authInterceptorInstalled) {
+    window.__authInterceptorInstalled = true;
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+        try {
+            const input = args[0];
+            const url = typeof input === 'string' ? input : (input && input.url) || '';
+            // Only react to 401s from our own API, and only if we thought we were logged in
+            if (response.status === 401 && url.startsWith(API_BASE_URL) && localStorage.getItem('auth_token')) {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('auth_email');
+                if (!window.location.pathname.startsWith('/login')) {
+                    window.location.assign('/login?expired=1');
+                }
+            }
+        } catch (e) {
+            /* never let the interceptor break a request */
+        }
+        return response;
+    };
+}
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {

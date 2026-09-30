@@ -173,6 +173,7 @@ class Lead(Base):
     case_status = Column(String, nullable=True, index=True)          # Portability
     case_owner = Column(String, nullable=True)                       # assigned advisor
     internal_notes = Column(JSON, default=list)                      # append-only log: [{ts, by, note}]
+    change_log = Column(JSON, default=list)                          # audit log: [{ts, by, changes:[{field,from,to}], note?}]
 
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -205,6 +206,7 @@ class CorporateLead(Base):
     status = Column(String, nullable=True, index=True)
     assigned_advisor = Column(String, nullable=True)
     note = Column(String, nullable=True)
+    change_log = Column(JSON, default=list)                # audit log of field changes
 
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -223,7 +225,10 @@ PRODUCT_MAP = {
 PRODUCT_SUBCATEGORIES = list(PRODUCT_MAP.keys())
 
 # Workflow status enums (ordered pipelines)
-CALL_CENTER_STATUSES = ["pending", "pushed", "contacted", "converted", "closed"]
+# Common lead status pipeline — single source of truth, used for ALL products.
+# Change these values here to update the whole app.
+LEAD_STATUSES = ["pending", "pushed", "contacted", "in_progress", "converted", "closed"]
+CALL_CENTER_STATUSES = LEAD_STATUSES   # backward-compatible alias (the common status)
 DOCUMENT_STATUSES    = ["not_requested", "requested", "received", "incomplete", "complete"]
 INSURER_STATUSES     = ["not_submitted", "submitted", "under_review", "query_raised", "terms_received", "declined", "issued"]
 CASE_STATUSES        = ["lead_received", "advisor_assigned", "documents_requested", "submitted_to_insurer", "payment_pending", "policy_issued", "closed"]
@@ -242,8 +247,8 @@ DEFAULT_STATUSES = {
     "super_top_up": {"call_center_status": "pending"},
     "general":      {"call_center_status": "pending"},
     "portability":  {
-        "document_status": "not_requested",
-        "insurer_status":  "not_submitted",
-        "case_status":     "lead_received",
+        "call_center_status": "pending",          # common primary status
+        "document_status": "not_requested",       # optional portability sub-status
+        "insurer_status":  "not_submitted",       # optional portability sub-status
     },
 }
