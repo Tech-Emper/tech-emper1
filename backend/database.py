@@ -74,6 +74,26 @@ def init_db():
     except Exception as e:
         print(f"[AUTO-MIGRATE] Auto-migration failed: {e}")
 
+    # Backfill: ensure every lead has the common `call_center_status` (unified status).
+    # Existing portability leads only had `case_status`, so map it onto the common pipeline.
+    try:
+        _CASE_TO_COMMON = {
+            "lead_received": "pending", "advisor_assigned": "contacted",
+            "documents_requested": "in_progress", "submitted_to_insurer": "in_progress",
+            "payment_pending": "in_progress", "policy_issued": "converted", "closed": "closed",
+        }
+        session = SessionLocal()
+        try:
+            missing = session.query(Lead).filter(Lead.call_center_status.is_(None)).all()
+            for lead in missing:
+                lead.call_center_status = _CASE_TO_COMMON.get(lead.case_status, "pending")
+            if missing:
+                session.commit()
+        finally:
+            session.close()
+    except Exception as e:
+        print(f"[BACKFILL] status backfill failed: {e}")
+
 # Dependency to get db session
 def get_db():
     db = SessionLocal()

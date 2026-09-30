@@ -180,6 +180,12 @@ input[type="range"]::-moz-range-thumb {
   --breakpoint-nav: 1000px;
 }
 
+/* Always reserve the vertical scrollbar gutter so pages with/without a scrollbar
+   don't shift content left/right when switching (e.g. Institutes <-> Leads). */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   @apply antialiased font-sans selection:bg-brand-accent selection:text-brand-dark overflow-x-hidden;
   background-color: var(--bg-auth-main);
@@ -241,4 +247,18 @@ option,
 }
 .custom-scrollbar::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* Consistent keyboard-focus ring (brand green) for controls that lack one */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #14BA80;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* Tabular figures so numeric columns align in data tables */
+table {
+  font-variant-numeric: tabular-nums;
 }

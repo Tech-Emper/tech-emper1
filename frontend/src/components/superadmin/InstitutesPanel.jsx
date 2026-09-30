@@ -234,7 +234,7 @@ export default function InstitutesPanel() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b" style={{ borderColor: 'var(--border-auth-card)' }}>
+                            <tr className="border-b [&>th]:text-[11px] [&>th]:uppercase [&>th]:tracking-wider" style={{ borderColor: 'var(--border-auth-card)' }}>
                                 <th className="py-4 px-4 font-semibold text-sm" style={{ color: 'var(--text-auth-muted)' }}>Organization Name</th>
                                 <th className="py-4 px-4 font-semibold text-sm" style={{ color: 'var(--text-auth-muted)' }}>Employees</th>
                                 <th className="py-4 px-4 font-semibold text-sm text-right" style={{ color: 'var(--text-auth-muted)' }}>Actions</th>
@@ -242,10 +242,24 @@ export default function InstitutesPanel() {
                         </thead>
                         <tbody>
                             <AnimatePresence>
-                                {filteredOrganizations.length === 0 ? (
+                                {loading ? (
+                                    [...Array(4)].map((_, i) => (
+                                        <tr key={`sk-${i}`} className="border-b" style={{ borderColor: 'var(--border-auth-card)' }}>
+                                            <td className="py-4 px-4"><div className="h-4 w-40 rounded bg-slate-100 animate-pulse" /></td>
+                                            <td className="py-4 px-4"><div className="h-6 w-14 rounded-full bg-slate-100 animate-pulse" /></td>
+                                            <td className="py-4 px-4"><div className="h-8 w-28 ml-auto rounded-lg bg-slate-100 animate-pulse" /></td>
+                                        </tr>
+                                    ))
+                                ) : filteredOrganizations.length === 0 ? (
                                     <tr>
-                                        <td colSpan="3" className="py-8 text-center" style={{ color: 'var(--text-auth-muted)' }}>
-                                            No organizations found.
+                                        <td colSpan="3" className="py-14">
+                                            <div className="flex flex-col items-center gap-2 text-center">
+                                                <span className="grid place-items-center w-12 h-12 rounded-2xl bg-slate-100">
+                                                    <Building className="w-6 h-6 text-slate-400" />
+                                                </span>
+                                                <p className="font-semibold" style={{ color: 'var(--text-auth-primary)' }}>No organizations yet</p>
+                                                <p className="text-sm" style={{ color: 'var(--text-auth-muted)' }}>Create your first organization to start onboarding employees.</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
@@ -255,23 +269,23 @@ export default function InstitutesPanel() {
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0 }}
-                                            className="border-b transition-colors group hover:bg-white/5"
+                                            className="border-b transition-colors group hover:bg-slate-100"
                                             style={{ borderColor: 'var(--border-auth-card)' }}
                                         >
                                             <td className="py-4 px-4">
                                                 <span className="font-bold" style={{ color: 'var(--text-auth-primary)' }}>{org.name}</span>
                                             </td>
                                             <td className="py-4 px-4">
-                                                <div className="flex items-center gap-2" style={{ color: 'var(--text-auth-muted)' }}>
-                                                    <Users className="w-4 h-4 text-[#14BA80]" />
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#14BA80]/10 text-[#0E8F63] ring-1 ring-[#14BA80]/20">
+                                                    <Users className="w-3.5 h-3.5" />
                                                     {org.employees}
-                                                </div>
+                                                </span>
                                             </td>
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center justify-end gap-3">
                                                     <button
                                                         onClick={() => openEditModal(org)}
-                                                        className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                                                        className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
                                                         style={{ color: 'var(--text-auth-muted)' }}
                                                         title="Edit Organization Details"
                                                     >
@@ -321,7 +335,7 @@ export default function InstitutesPanel() {
                             <button
                                 type="button"
                                 onClick={closeModal}
-                                className="absolute top-6 right-6 p-2 rounded-full transition-colors bg-white/5 hover:bg-white/10"
+                                className="absolute top-6 right-6 p-2 rounded-full transition-colors bg-slate-100 hover:bg-slate-100"
                                 style={{ color: 'var(--text-auth-muted)' }}
                             >
                                 <X className="w-5 h-5" />
@@ -375,7 +389,7 @@ export default function InstitutesPanel() {
                                                     <div className="overflow-x-auto border rounded-xl" style={{ borderColor: 'var(--border-auth-card)' }}>
                                                         <table className="w-full text-left text-sm">
                                                             <thead>
-                                                                <tr className="border-b bg-white/5" style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' }}>
+                                                                <tr className="border-b bg-slate-100" style={{ borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-muted)' }}>
                                                                     <th className="p-3 font-semibold">Name</th>
                                                                     <th className="p-3 font-semibold">Role</th>
                                                                     <th className="p-3 font-semibold text-center w-16">Action</th>
@@ -383,7 +397,7 @@ export default function InstitutesPanel() {
                                                             </thead>
                                                             <tbody>
                                                                 {existingKeyMembers.map((member, index) => (
-                                                                    <tr key={`existing-${member.id}`} className="border-b last:border-b-0 transition-colors hover:bg-white/5" style={{ borderColor: 'var(--border-auth-card)' }}>
+                                                                    <tr key={`existing-${member.id}`} className="border-b last:border-b-0 transition-colors hover:bg-slate-100" style={{ borderColor: 'var(--border-auth-card)' }}>
                                                                         <td className="p-3 font-medium" style={{ color: 'var(--text-auth-primary)' }}>
                                                                             {member.first_name} {member.last_name}
                                                                         </td>

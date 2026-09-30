@@ -75,6 +75,7 @@ def _serialize_lead(l: Lead) -> dict:
         "case_status": l.case_status,
         "case_owner": l.case_owner,
         "internal_notes": l.internal_notes or [],
+        "change_log": l.change_log or [],
         "created_at": _iso(l.created_at),
         "updated_at": _iso(l.updated_at),
     }
@@ -89,6 +90,7 @@ def _serialize_corporate(c: CorporateLead) -> dict:
         "consent": c.consent, "consent_timestamp": _iso(c.consent_timestamp),
         "source": c.source, "source_page_url": c.source_page_url,
         "status": c.status, "assigned_advisor": c.assigned_advisor, "note": c.note,
+        "change_log": c.change_log or [],
         "created_at": _iso(c.created_at), "updated_at": _iso(c.updated_at),
     }
 
@@ -102,8 +104,18 @@ def _parse_iso(s: Optional[str]):
         return None
 
 
-def _apply_lead_filters(query, *, date_from, date_to, product_category, product_subcategory,
-                        call_center_status, case_status, city, q):
+def _parse_date(s: Optional[str]):
+    if not s:
+        return None
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        return None
+
+
+def _apply_lead_filters(query, *, date_from=None, date_to=None, callback_from=None, callback_to=None,
+                        product_category=None, product_subcategory=None,
+                        call_center_status=None, case_status=None, city=None, q=None):
     cf = _parse_iso(date_from)
     if cf:
         query = query.filter(Lead.created_at >= cf)
@@ -113,6 +125,13 @@ def _apply_lead_filters(query, *, date_from, date_to, product_category, product_
             query = query.filter(Lead.created_at < ct + timedelta(days=1))
         else:
             query = query.filter(Lead.created_at <= ct)
+    # Callback date range (Lead.callback_date is a plain date)
+    cbf = _parse_date(callback_from)
+    if cbf:
+        query = query.filter(Lead.callback_date >= cbf)
+    cbt = _parse_date(callback_to)
+    if cbt:
+        query = query.filter(Lead.callback_date <= cbt)
     if product_category:
         query = query.filter(Lead.product_category == product_category)
     if product_subcategory:
@@ -125,7 +144,8 @@ def _apply_lead_filters(query, *, date_from, date_to, product_category, product_
         query = query.filter(Lead.city.ilike(f"%{city}%"))
     if q:
         like = f"%{q}%"
-        query = query.filter(or_(Lead.full_name.ilike(like), Lead.mobile.ilike(like), Lead.email.ilike(like)))
+        query = query.filter(or_(Lead.full_name.ilike(like), Lead.mobile.ilike(like),
+                                 Lead.email.ilike(like), Lead.employer.ilike(like)))
     return query
 
 
@@ -149,6 +169,8 @@ def _csv_response(header, data_rows, filename):
 def list_leads(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
+    callback_from: Optional[str] = None,
+    callback_to: Optional[str] = None,
     product_category: Optional[str] = None,
     product_subcategory: Optional[str] = None,
     call_center_status: Optional[str] = None,
@@ -163,6 +185,7 @@ def list_leads(
 ):
     query = _apply_lead_filters(
         db.query(Lead), date_from=date_from, date_to=date_to,
+        callback_from=callback_from, callback_to=callback_to,
         product_category=product_category, product_subcategory=product_subcategory,
         call_center_status=call_center_status, case_status=case_status, city=city, q=q,
     )
@@ -182,6 +205,8 @@ def list_leads(
 def export_leads(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
+    callback_from: Optional[str] = None,
+    callback_to: Optional[str] = None,
     product_category: Optional[str] = None,
     product_subcategory: Optional[str] = None,
     call_center_status: Optional[str] = None,
@@ -193,6 +218,7 @@ def export_leads(
 ):
     query = _apply_lead_filters(
         db.query(Lead), date_from=date_from, date_to=date_to,
+        callback_from=callback_from, callback_to=callback_to,
         product_category=product_category, product_subcategory=product_subcategory,
         call_center_status=call_center_status, case_status=case_status, city=city, q=q,
     ).order_by(Lead.created_at.desc())
@@ -213,7 +239,7 @@ def export_leads(
         base.append(json.dumps(l.internal_notes or [], ensure_ascii=False))
         data_rows.append(base)
 
-    fname = f"leads_{date_from or 'all'}_{date_to or 'all'}.csv"
+    fname = f"leads_{callback_from or date_from or 'all'}_{callback_to or date_to or 'all'}.csv"
     return _csv_response(header, data_rows, fname)
 
 
@@ -231,19 +257,27 @@ def update_lead(lead_id: str, payload: LeadUpdate, admin: User = Depends(verify_
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
 
+    changes = []
     for field in ("call_center_status", "document_status", "insurer_status", "case_status", "case_owner"):
         val = getattr(payload, field)
-        if val is not None:
+        if val is not None and val != getattr(lead, field):
+            changes.append({"field": field, "from": getattr(lead, field), "to": val})
             setattr(lead, field, val)
 
+    note_text = payload.internal_note.strip() if payload.internal_note and payload.internal_note.strip() else None
+    who = payload.note_author or admin.email
+    now_iso = datetime.utcnow().isoformat()
+
     # Append-only internal note log
-    if payload.internal_note and payload.internal_note.strip():
-        entry = {
-            "ts": datetime.utcnow().isoformat(),
-            "by": payload.note_author or admin.email,
-            "note": payload.internal_note.strip(),
-        }
-        lead.internal_notes = (lead.internal_notes or []) + [entry]  # reassign so SQLAlchemy tracks the change
+    if note_text:
+        lead.internal_notes = (lead.internal_notes or []) + [{"ts": now_iso, "by": who, "note": note_text}]
+
+    # Modification log (audit of field changes + optional note)
+    if changes or note_text:
+        entry = {"ts": now_iso, "by": who, "changes": changes}
+        if note_text:
+            entry["note"] = note_text
+        lead.change_log = (lead.change_log or []) + [entry]
 
     db.commit()
     db.refresh(lead)
@@ -329,10 +363,16 @@ def update_corporate_lead(lead_id: str, payload: CorporateLeadUpdate, admin: Use
     lead = db.query(CorporateLead).filter(CorporateLead.id == lead_id).first()
     if not lead:
         raise HTTPException(status_code=404, detail="Corporate lead not found")
+    changes = []
     for field in ("status", "assigned_advisor", "note"):
         val = getattr(payload, field)
-        if val is not None:
+        if val is not None and val != getattr(lead, field):
+            changes.append({"field": field, "from": getattr(lead, field), "to": val})
             setattr(lead, field, val)
+    if changes:
+        lead.change_log = (lead.change_log or []) + [{
+            "ts": datetime.utcnow().isoformat(), "by": admin.email, "changes": changes,
+        }]
     db.commit()
     db.refresh(lead)
     return _serialize_corporate(lead)
