@@ -7,9 +7,14 @@ import os
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
 if SQLALCHEMY_DATABASE_URL:
-    # Render provides postgres://, but SQLAlchemy requires postgresql://
+    # Pin the psycopg2 driver explicitly. Render provides `postgres://`, and newer
+    # SQLAlchemy versions default the bare `postgresql://` dialect to psycopg (v3) —
+    # which we don't ship. Forcing `+psycopg2` keeps us aligned with psycopg2-binary
+    # in requirements.txt regardless of the SQLAlchemy version installed.
     if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
-        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
     engine = create_engine(SQLALCHEMY_DATABASE_URL)
 else:
