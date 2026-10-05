@@ -262,3 +262,12 @@ a:focus-visible,
 table {
   font-variant-numeric: tabular-nums;
 }
+
+/* Modal panel entrance — quick, GPU-friendly, no exit (avoids ghost/flicker on close) */
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-modal-in {
+  animation: modalIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}

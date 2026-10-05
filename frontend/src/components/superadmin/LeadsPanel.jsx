@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Inbox, Search, Download, X, ChevronLeft, ChevronRight, ChevronDown, RefreshCw, Building2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../../config';
 
 // Mirror of backend enum value sets (backend/models.py is the source of truth)
@@ -243,7 +243,7 @@ export default function LeadsPanel() {
             </form>
 
             {/* Table */}
-            <div className="rounded-3xl p-4 md:p-6 border backdrop-blur-xl" style={{ backgroundColor: 'var(--bg-auth-card)', borderColor: 'var(--border-auth-card)' }}>
+            <div className="rounded-3xl p-4 md:p-6 border" style={{ backgroundColor: 'var(--bg-auth-card)', borderColor: 'var(--border-auth-card)' }}>
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold" style={{ color: 'var(--text-auth-muted)' }}>
@@ -363,16 +363,14 @@ export default function LeadsPanel() {
                 </div>
             </div>
 
-            <AnimatePresence>
-                {selected && (
-                    <LeadDrawer
-                        tab={tab}
-                        lead={selected}
-                        onClose={() => setSelected(null)}
-                        onSaved={() => { setSelected(null); fetchLeads(); }}
-                    />
-                )}
-            </AnimatePresence>
+            {selected && (
+                <LeadDrawer
+                    tab={tab}
+                    lead={selected}
+                    onClose={() => setSelected(null)}
+                    onSaved={() => { setSelected(null); fetchLeads(); }}
+                />
+            )}
         </div>
     );
 }
@@ -435,12 +433,10 @@ function LeadDrawer({ tab, lead, onClose, onSaved }) {
     const selectStyle = { backgroundColor: 'var(--bg-auth-input)', borderColor: 'var(--border-auth-card)', color: 'var(--text-auth-primary)' };
 
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+        <div className="fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
             onClick={onClose}>
-            <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-3xl rounded-3xl p-6 md:p-8 relative border max-h-[75vh] overflow-y-auto custom-scrollbar"
+            <div onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-3xl rounded-3xl p-6 md:p-8 relative border max-h-[75vh] overflow-y-auto custom-scrollbar animate-modal-in"
                 style={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', boxShadow: '0 10px 20px -6px rgba(15,23,42,0.15), 0 28px 60px -12px rgba(15,23,42,0.42)' }}>
                 <button onClick={onClose} className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 hover:bg-slate-200" style={{ color: 'var(--text-auth-muted)' }}>
                     <X className="w-5 h-5" />
@@ -583,7 +579,7 @@ function LeadDrawer({ tab, lead, onClose, onSaved }) {
                     className="w-full py-3 bg-[#14BA80] hover:bg-[#0E8F63] disabled:opacity-60 text-white font-bold rounded-xl transition-all">
                     {saving ? 'Saving…' : 'Save changes'}
                 </button>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 }

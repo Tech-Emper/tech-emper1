@@ -209,7 +209,7 @@ export default function InstitutesPanel() {
                 </button>
             </div>
 
-            <div className="rounded-3xl p-6 md:p-8 border backdrop-blur-xl" style={{ backgroundColor: 'var(--bg-auth-card)', borderColor: 'var(--border-auth-card)' }}>
+            <div className="rounded-3xl p-6 md:p-8 border" style={{ backgroundColor: 'var(--bg-auth-card)', borderColor: 'var(--border-auth-card)' }}>
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                     <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--text-auth-primary)' }}>
                         Registered Organizations
@@ -316,20 +316,11 @@ export default function InstitutesPanel() {
             </div>
 
             {/* Form Modal */}
-            <AnimatePresence>
-                {modalConfig.isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
+            {modalConfig.isOpen && (
+                    <div className="fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                        <div
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full max-w-3xl rounded-3xl p-6 md:p-8 relative border max-h-[85vh] overflow-y-auto custom-scrollbar"
+                            className="w-full max-w-3xl rounded-3xl p-6 md:p-8 relative border max-h-[85vh] overflow-y-auto custom-scrollbar animate-modal-in"
                             style={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', boxShadow: '0 10px 20px -6px rgba(15,23,42,0.15), 0 28px 60px -12px rgba(15,23,42,0.42)' }}
                         >
                             <button
@@ -475,10 +466,9 @@ export default function InstitutesPanel() {
                                     {modalConfig.type === 'add' ? 'Confirm Creation' : 'Save Changes'}
                                 </button>
                             </form>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        </div>
+                    </div>
+            )}
         </div>
     );
 }
