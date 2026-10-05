@@ -71,7 +71,9 @@ def create_lead(payload: LeadCreate, request: Request, background_tasks: Backgro
     details_model = DETAILS_MODEL_BY_SUBCATEGORY[payload.product_subcategory]
     try:
         details_obj = details_model(**(payload.details or {}))
-        details = details_obj.model_dump(mode="json", exclude_none=True)
+        # Product detail fields are optional in the current design — keep only non-blank values
+        details = {k: v for k, v in details_obj.model_dump(mode="json", exclude_none=True).items()
+                   if v not in ("", [], {})}
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Invalid details for {payload.product_subcategory}: {e}")
 

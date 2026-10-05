@@ -171,62 +171,60 @@ def _normalize_mobile(v: str) -> str:
 # ---- Product-specific `details` models ----
 
 class SuperTopUpDetails(BaseModel):
-    planning_for: str
-    planning_priority: str
+    # Optional in the current design (the modal asks only the general questions);
+    # still validated against the allowed set IF a value is provided.
+    planning_for: Optional[str] = None
+    planning_priority: Optional[str] = None
 
     @field_validator("planning_for")
     @classmethod
     def _pf(cls, v):
-        if v not in PLANNING_FOR_OPTIONS:
+        if v and v not in PLANNING_FOR_OPTIONS:
             raise ValueError(f"planning_for must be one of {PLANNING_FOR_OPTIONS}")
         return v
 
     @field_validator("planning_priority")
     @classmethod
     def _pp(cls, v):
-        if v not in PLANNING_PRIORITY_OPTIONS:
+        if v and v not in PLANNING_PRIORITY_OPTIONS:
             raise ValueError(f"planning_priority must be one of {PLANNING_PRIORITY_OPTIONS}")
         return v
 
 
 class PortabilityDetails(BaseModel):
-    employment_status: str
+    # All optional in the current design (the modal asks only the general questions);
+    # each value is still validated against its allowed set IF provided.
+    employment_status: Optional[str] = None
     last_working_date: Optional[date] = None
     current_group_insurer: Optional[str] = None
-    current_cover_amount: str
-    covered_members: List[str]
-    portability_reason: str
+    current_cover_amount: Optional[str] = None
+    covered_members: Optional[List[str]] = None
+    portability_reason: Optional[str] = None
 
     @field_validator("employment_status")
     @classmethod
     def _es(cls, v):
-        if v not in EMPLOYMENT_STATUSES:
+        if v and v not in EMPLOYMENT_STATUSES:
             raise ValueError(f"employment_status must be one of {EMPLOYMENT_STATUSES}")
         return v
 
     @field_validator("current_cover_amount")
     @classmethod
     def _cca(cls, v):
-        if v not in CURRENT_COVER_AMOUNTS:
+        if v and v not in CURRENT_COVER_AMOUNTS:
             raise ValueError(f"current_cover_amount must be one of {CURRENT_COVER_AMOUNTS}")
         return v
 
     @field_validator("portability_reason")
     @classmethod
     def _pr(cls, v):
-        if v not in PORTABILITY_REASONS:
+        if v and v not in PORTABILITY_REASONS:
             raise ValueError(f"portability_reason must be one of {PORTABILITY_REASONS}")
-        return v
-
-    @field_validator("covered_members")
-    @classmethod
-    def _cm(cls, v):
-        if not v:
-            raise ValueError("covered_members cannot be empty")
         return v
 
     @model_validator(mode="after")
     def _conditional_last_working_date(self):
+        # Only enforced when an employment_status that needs it is actually provided
         if self.employment_status in {"in_notice_period", "already_exited", "retiring"} and not self.last_working_date:
             raise ValueError("last_working_date is required when employment_status is in_notice_period, already_exited, or retiring")
         return self
