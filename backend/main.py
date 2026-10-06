@@ -47,6 +47,7 @@ try:
     from routers.portability import router as portability_router
     from routers.leads import router as leads_router
     from routers.admin_leads import router as admin_leads_router
+    from routers.cron import router as cron_router
 
     log_now("Modules imported successfully.")
 except Exception as e:
@@ -123,6 +124,7 @@ app.include_router(superadmin_router)
 app.include_router(portability_router)
 app.include_router(leads_router)
 app.include_router(admin_leads_router)
+app.include_router(cron_router)
 
 log_now(f"CORS configured with origins: {origins}")
 log_now("CORS configuration complete.")
