@@ -3,6 +3,8 @@ import secrets
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+import base64
 from datetime import datetime, timedelta
 import jwt
 from dotenv import load_dotenv
@@ -222,6 +224,69 @@ def _send_email_base(email: str, subject: str, html_content: str):
                 return False, f"Email delivery failed: {str(e)}"
     
     return False, "Failed"
+
+def send_email_with_attachment(email: str, subject: str, html_content: str, filename: str, content_bytes: bytes):
+    """Send an email with a single file attachment (Resend in prod, SMTP fallback)."""
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    from_email = os.getenv("SMTP_FROM_EMAIL", "tech@emper.ai")
+
+    # --- PROD: Resend API ---
+    if resend_api_key:
+        try:
+            import resend
+            resend.api_key = resend_api_key.strip()
+            resend.Emails.send({
+                "from": from_email,
+                "to": [email],
+                "subject": subject,
+                "html": html_content,
+                "attachments": [{
+                    "filename": filename,
+                    "content": base64.b64encode(content_bytes).decode("ascii"),
+                }],
+            })
+            return True, "Sent"
+        except Exception as e:
+            log_now(f"CRITICAL: Resend attachment error: {e}")
+            if not os.getenv("SMTP_HOST"):
+                return False, f"Resend API Error: {e}."
+
+    # --- LOCAL/FALLBACK: SMTP ---
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = int(os.getenv("SMTP_PORT", 587))
+    smtp_user = os.getenv("SMTP_USERNAME")
+    smtp_pass = os.getenv("SMTP_PASSWORD")
+    if not all([smtp_host, smtp_user, smtp_pass]):
+        return False, "Email server not configured."
+
+    msg = MIMEMultipart()
+    msg['From'] = from_email
+    msg['To'] = email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(html_content, 'html'))
+    part = MIMEApplication(content_bytes, Name=filename)
+    part['Content-Disposition'] = f'attachment; filename="{filename}"'
+    msg.attach(part)
+
+    ports_to_try = [smtp_port]
+    if smtp_port != 465:
+        ports_to_try.append(465)
+    for port in ports_to_try:
+        try:
+            if port == 465:
+                server = smtplib.SMTP_SSL(smtp_host, port, timeout=10)
+            else:
+                server = smtplib.SMTP(smtp_host, port, timeout=10)
+                server.starttls()
+            with server:
+                server.login(smtp_user, smtp_pass)
+                server.send_message(msg)
+            return True, "Sent"
+        except Exception as e:
+            if port == ports_to_try[-1]:
+                return False, f"Email delivery failed: {e}"
+    return False, "Failed"
+
 
 def send_welcome_email(email: str, first_name: str, org_name: str):
     """Send welcome email to newly imported users."""
