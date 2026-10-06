@@ -64,4 +64,4 @@ services:
 
 databases:
   - name: insurance-wizard-db
-    plan: free
+    plan: basic-256mb
