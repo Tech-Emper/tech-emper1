@@ -90,6 +90,7 @@ origins = [
     "https://insurance.emper.ai",
     "https://insurance-api.emper.ai",
     "https://demo.emper.ai",
+    "https://emper.ai",
 ]
 raw_frontend_url = os.getenv("FRONTEND_URL", "").strip()
 if raw_frontend_url:
