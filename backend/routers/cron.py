@@ -9,7 +9,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from database import get_db, Lead
-from auth import SUPERADMIN_EMAILS, send_email_with_attachment
+from auth import SUPERADMIN_EMAILS, send_email_with_attachment, _send_email_base
 
 router = APIRouter(prefix="/api/cron", tags=["cron"])
 
@@ -26,7 +26,8 @@ def log_now(msg):
 @router.post("/callback-digest")
 def callback_digest(x_cron_secret: str = Header(None), db: Session = Depends(get_db)):
     """Email superadmins today's (IST) employee-lead callback list as a CSV attachment.
-    Protected by the CRON_SECRET header. Sends nothing when there are no callbacks."""
+    Protected by the CRON_SECRET header. Always emails daily; when there are no
+    callbacks the email says so and carries no attachment."""
     expected = os.getenv("CRON_SECRET")
     if not expected or x_cron_secret != expected:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -42,18 +43,34 @@ def callback_digest(x_cron_secret: str = Header(None), db: Session = Depends(get
         .all()
     )
 
+    recipients = sorted(SUPERADMIN_EMAILS)
+    sent_to, failed = [], []
+
+    # No callbacks today: still email, stating the reason, without a CSV attachment
     if not leads:
-        log_now(f"No callbacks for {today} — no email sent.")
-        return {"sent": False, "count": 0, "date": today.isoformat()}
+        subject = f"Callback schedule for {today.isoformat()}: no callbacks today"
+        html = (
+            f"<p>Hello,</p>"
+            f"<p>There are <b>no callbacks</b> scheduled for today (<b>{today.isoformat()}</b>, IST). "
+            f"No leads have today's date as their preferred callback date, "
+            f"other than any already marked converted or closed.</p>"
+            f"<p>— Insurance Wizard</p>"
+        )
+        for em in recipients:
+            ok, _ = _send_email_base(em, subject, html)
+            (sent_to if ok else failed).append(em)
+        log_now(f"Callback digest for {today}: 0 leads; sent={sent_to}; failed={failed}")
+        return {"sent": bool(sent_to), "count": 0, "date": today.isoformat(),
+                "recipients": sent_to, "failed": failed}
 
     # Build CSV in memory (utf-8-sig so Excel opens it cleanly)
     buf = io.StringIO()
     writer = csv.writer(buf)
-    writer.writerow(["Name", "Mobile", "Email", "Employer", "City", "Product",
+    writer.writerow(["Name", "Mobile", "Email", "Employer", "Product",
                      "Callback date", "Time slot", "Preferred contact", "Status", "Designation"])
     for l in leads:
         writer.writerow([
-            l.full_name, l.mobile, l.email, l.employer, l.city, l.product_name,
+            l.full_name, l.mobile, l.email, l.employer, l.product_name,
             l.callback_date.isoformat() if l.callback_date else "",
             l.callback_time_slot, l.preferred_contact_method, l.call_center_status, l.designation,
         ])
@@ -69,8 +86,6 @@ def callback_digest(x_cron_secret: str = Header(None), db: Session = Depends(get
         f"<p>— Insurance Wizard</p>"
     )
 
-    recipients = sorted(SUPERADMIN_EMAILS)
-    sent_to, failed = [], []
     for em in recipients:
         ok, _ = send_email_with_attachment(em, subject, html, filename, csv_bytes)
         (sent_to if ok else failed).append(em)
