@@ -29,7 +29,22 @@ const DEFAULT_PRODUCT = ENABLED_PRODUCTS.length === 1 ? ENABLED_PRODUCTS[0] : ''
 const PAGE_SIZE = 25;
 const authHeaders = () => ({ 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` });
 const prettify = (s) => (s ? String(s).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—');
-const fmtDate = (s) => (s ? new Date(s).toLocaleString() : '—');
+// The API stores UTC and sends timestamps without a zone (e.g. "2026-10-08T04:46:22").
+// Browsers read zone-less date-times as local time, so mark them as UTC, then show in IST.
+const parseUtc = (s) => {
+    const str = String(s);
+    const hasZone = /(Z|[+-]\d{2}:?\d{2})$/i.test(str);
+    return new Date(str.includes('T') && !hasZone ? `${str}Z` : str);
+};
+const fmtDate = (s) => {
+    if (!s) return '—';
+    const d = parseUtc(s);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: true,
+    });
+};
 
 // State-aware badge styling — green for in-flight/success, neutral for early/terminal (stays on-theme)
 const STATUS_STYLES = {
@@ -464,7 +479,6 @@ function LeadDrawer({ tab, lead, onClose, onSaved }) {
                         <>
                             <Field label="Mobile" value={lead.mobile} />
                             <Field label="Email" value={lead.email} />
-                            <Field label="City" value={lead.city} />
                             <Field label="Employer" value={lead.employer} />
                             <Field label="Designation" value={lead.designation} />
                             <Field label="Preferred contact" value={prettify(lead.preferred_contact_method)} />
